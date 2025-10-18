@@ -1,3 +1,22 @@
+import TopBar from "@/components/topBar";
+import LandingSection from "@/components/landingSection";
+import Footer from "@/components/footer";
+
 export default function Home() {
-  return <></>;
+  return (
+    <>
+      <TopBar />
+      <LandingSection />
+      <h1 className="flex items-center justify-center h-[80vh] bg-red-500 text-center text-5xl">
+        section 1
+      </h1>
+      <h1 className="flex items-center justify-center h-[80vh] bg-indigo-900 text-center text-5xl">
+        section 2
+      </h1>
+      <h1 className="flex items-center justify-center h-[80vh] bg-amber-500 text-center text-5xl">
+        section 3
+      </h1>
+      <Footer />
+    </>
+  );
 }
