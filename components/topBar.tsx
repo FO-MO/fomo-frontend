@@ -3,9 +3,10 @@ import React, { useState, useEffect } from "react";
 
 type Props = {
   title?: string;
+  theme?: "white" | "black";
 };
 
-export default function TopBar({ title = "Fomo" }: Props) {
+export default function TopBar({ title = "Fomo", theme = "white" }: Props) {
   const [open, setOpen] = useState(false);
 
   // prevent background scroll when mobile menu is open
@@ -18,11 +19,11 @@ export default function TopBar({ title = "Fomo" }: Props) {
   }, [open]);
 
   return (
-    <header
+    <div
       role="banner"
       className="fixed inset-x-0 top-0 z-50 backdrop-blur-md"
       style={{
-        background: "linear-gradient(rgba(15,79,74,0.75), rgba(15,79,74,0.75))",
+        // background: "linear-gradient(rgba(15,79,74,0.75), rgba(15,79,74,0.75))",
         borderBottom: "1px solid rgba(255,255,255,0.05)",
         // backgroundImage:
         //   "repeating-linear-gradient(135deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 10px, transparent 10px, transparent 20px)",
@@ -33,22 +34,37 @@ export default function TopBar({ title = "Fomo" }: Props) {
           <div className="w-13 h-13 rounded-lg bg-[#d6ff3a] text-[#082926] flex items-center justify-center font-extrabold text-xl shadow-[0_3px_0_rgba(0,0,0,0.12)]">
             F
           </div>
-          <div className="text-white font-semibold text-3xl">{title}</div>
+          <div
+            className={`${
+              theme === "black" ? "text-black" : "text-white"
+            } font-semibold text-3xl`}
+          >
+            {title}
+          </div>
         </div>
         <nav className="flex items-center gap-4" aria-label="Primary">
           {/* Desktop links */}
           <div className="hidden sm:flex items-center gap-7">
-            <a className="text-white/95 font-semibold" href="#">
+            <a
+              className={`${
+                theme === "black" ? "text-black" : "text-white/95"
+              } font-semibold`}
+              href="/students"
+            >
               For Students
             </a>
             <a
-              className="text-white/95 font-semibold hidden md:inline-block"
+              className={`${
+                theme === "black" ? "text-black" : "text-white/95"
+              } font-semibold hidden md:inline-block`}
               href="#"
             >
               For Employers
             </a>
             <a
-              className="text-white/95 font-semibold hidden lg:inline-block"
+              className={`${
+                theme === "black" ? "text-black" : "text-white/95"
+              } font-semibold hidden lg:inline-block`}
               href="#"
             >
               For Colleges
@@ -65,7 +81,9 @@ export default function TopBar({ title = "Fomo" }: Props) {
 
           {/* Mobile hamburger */}
           <button
-            className="sm:hidden ml-2 p-2 rounded-md inline-flex items-center justify-center text-white/90 hover:bg-white/6"
+            className={`sm:hidden ml-2 p-2 rounded-md inline-flex items-center justify-center ${
+              theme === "black" ? "text-black" : "text-white/90"
+            } hover:bg-white/6`}
             aria-label="Toggle menu"
             aria-expanded={open}
             aria-controls="mobile-menu"
@@ -117,18 +135,33 @@ export default function TopBar({ title = "Fomo" }: Props) {
       >
         <div className="bg-[#0f4f4a]/95 backdrop-blur-md border-t border-white/5 px-6 py-4">
           <div className="flex flex-col gap-3">
-            <a className="text-white/95 font-semibold py-2" href="#">
+            <a
+              className={`${
+                theme === "black" ? "text-black" : "text-white/95"
+              } font-semibold py-2`}
+              href="#"
+            >
               For Students
             </a>
-            <a className="text-white/95 font-semibold py-2" href="#">
+            <a
+              className={`${
+                theme === "black" ? "text-black" : "text-white/95"
+              } font-semibold py-2`}
+              href="#"
+            >
               For Employers
             </a>
-            <a className="text-white/95 font-semibold py-2" href="#">
+            <a
+              className={`${
+                theme === "black" ? "text-black" : "text-white/95"
+              } font-semibold py-2`}
+              href="#"
+            >
               For Colleges
             </a>
           </div>
         </div>
       </div>
-    </header>
+    </div>
   );
 }
