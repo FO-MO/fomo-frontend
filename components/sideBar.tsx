@@ -19,7 +19,7 @@ const items: Item[] = [
   { key: "projects", label: "Projects", href: "/students/projects" },
   { key: "clubs", label: "Clubs", href: "/students/clubs" },
   { key: "startups", label: "Startups", href: "/students/startups" },
-  { key: "profile", label: "Profile", href: "#" },
+  { key: "profile", label: "Profile", href: "/students/profile" },
   { key: "messages", label: "Messages", href: "#" },
   { key: "search", label: "Search", href: "/students/search" },
   { key: "copilot", label: "FOMO AI Copilot", href: "#" },

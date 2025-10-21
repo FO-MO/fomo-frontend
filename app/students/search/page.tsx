@@ -89,7 +89,7 @@ export default function SearchPage() {
         </div>
 
         {/* grid */}
-        <div className="mt-8 flex flex-row justify-center flex-wrap w-[105%] gap-6">
+        <div className="mt-8 flex flex-row flex-wrap w-[105%] gap-6">
           {mockProfiles.map((profile) => (
             <a
               href="backendpeep"
