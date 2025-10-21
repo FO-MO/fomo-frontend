@@ -23,10 +23,9 @@ export default function TopBar({ title = "Fomo", theme = "white" }: Props) {
       role="banner"
       className="fixed inset-x-0 top-0 z-50 backdrop-blur-md"
       style={{
-        // background: "linear-gradient(rgba(15,79,74,0.75), rgba(15,79,74,0.75))",
+        background:
+          "linear-gradient(rgba(255,255,255,0.50), rgba(255,255,255,0.50))",
         borderBottom: "1px solid rgba(255,255,255,0.05)",
-        // backgroundImage:
-        //   "repeating-linear-gradient(135deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 10px, transparent 10px, transparent 20px)",
       }}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 sm:px-8 h-20">

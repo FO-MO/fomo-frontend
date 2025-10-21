@@ -68,7 +68,7 @@ const mockProfiles: Profile[] = [
 
 export default function SearchPage() {
   return (
-    <main className="w-full px-6 sm:px-8 pt-24 pb-16">
+    <main className="w-full px-6 sm:px-8 pt-10 pb-16">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-start justify-between gap-6">
           <div>
@@ -77,7 +77,7 @@ export default function SearchPage() {
         </div>
 
         {/* search & filters */}
-        <div className="mt-6 flex flex-col sm:flex-row gap-4">
+        <div className="mt-6 flex justify-center sm:justify-normal flex-col sm:flex-row gap-4">
           <div className="flex-1">
             <div className="relative">
               <input
