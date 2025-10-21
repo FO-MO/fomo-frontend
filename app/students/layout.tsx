@@ -31,7 +31,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {/* Top bar + page layout live inside the body to avoid hydration errors */}
-        <TopBar theme="white" />
+        <TopBar theme="black" />
 
         <div className="flex">
           {/* Sidebar fixed on left */}
