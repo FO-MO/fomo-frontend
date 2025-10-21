@@ -21,7 +21,7 @@ const items: Item[] = [
   { key: "startups", label: "Startups", href: "/students/startups" },
   { key: "profile", label: "Profile", href: "#" },
   { key: "messages", label: "Messages", href: "#" },
-  { key: "search", label: "Search", href: "#" },
+  { key: "search", label: "Search", href: "/students/search" },
   { key: "copilot", label: "FOMO AI Copilot", href: "#" },
 ];
 
