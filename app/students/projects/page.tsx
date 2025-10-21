@@ -35,7 +35,7 @@ const mockProjects: Project[] = [
   },
 ];
 
-export default function StudentsPage() {
+export default function ProjectsPage() {
   return (
     <main className="w-full px-6 sm:px-8 pt-8 pb-16">
       <div className="flex items-start justify-between gap-6">

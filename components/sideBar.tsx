@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
@@ -21,7 +21,7 @@ const items: Item[] = [
   { key: "startups", label: "Startups", href: "/students/startups" },
   { key: "profile", label: "Profile", href: "#" },
   { key: "messages", label: "Messages", href: "#" },
-  { key: "search", label: "Search", href: "#" },
+  { key: "search", label: "Search", href: "/students/search" },
   { key: "copilot", label: "FOMO AI Copilot", href: "#" },
 ];
 
@@ -176,25 +176,28 @@ function Icon({ name }: { name: string }) {
 export default function SideBar({ active = "home", className = "" }: Props) {
   const pathname = usePathname();
 
-  const getKeyFromPath = (p: string) => {
-    if (!p) return active;
+  const getKeyFromPath = useCallback(
+    (p: string) => {
+      if (!p) return active;
 
-    // Handle root path
-    if (p === "/" || p === "") return "home";
+      // Handle root path
+      if (p === "/" || p === "") return "home";
 
-    // Try to match routes - check if path starts with or matches the href
-    const match = items.find((it) => {
-      if (!it.href || it.href === "#") return false;
-      // Exact match
-      if (p === it.href) return true;
-      // Path starts with the href (for nested routes)
-      if (p.startsWith(it.href + "/")) return true;
-      return false;
-    });
+      // Try to match routes - check if path starts with or matches the href
+      const match = items.find((it) => {
+        if (!it.href || it.href === "#") return false;
+        // Exact match
+        if (p === it.href) return true;
+        // Path starts with the href (for nested routes)
+        if (p.startsWith(it.href + "/")) return true;
+        return false;
+      });
 
-    if (match) return match.key;
-    return active;
-  };
+      if (match) return match.key;
+      return active;
+    },
+    [active]
+  );
 
   const [current, setCurrent] = useState<string>(() =>
     getKeyFromPath(pathname)
@@ -202,9 +205,8 @@ export default function SideBar({ active = "home", className = "" }: Props) {
 
   // Update the active item when the pathname changes
   useEffect(() => {
-    const newKey = getKeyFromPath(pathname);
-    setCurrent(newKey);
-  }, [pathname]);
+    setCurrent(getKeyFromPath(pathname));
+  }, [pathname, getKeyFromPath]);
 
   return (
     <aside
