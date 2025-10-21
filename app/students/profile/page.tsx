@@ -1,4 +1,3 @@
-
 const userProfile = {
   name: "Simon Mattekkatt",
   email: "robertcresol@gmail.com",
@@ -10,23 +9,25 @@ const userProfile = {
   tabs: [
     { key: "projects", label: "Projects" },
     { key: "clubs", label: "Clubs" },
-    { key: "internships", label: "Internships" }
+    { key: "internships", label: "Internships" },
   ],
   activeTab: "projects",
   projects: [
     {
       title: "EcoTrack Mobile App",
-      description: "Building an app that helps users track and reduce their carbon footprint",
+      description:
+        "Building an app that helps users track and reduce their carbon footprint",
       status: "Active",
-      tags: ["React Native", "UI/UX Design"]
+      tags: ["React Native", "UI/UX Design"],
     },
     {
       title: "College Resource Finder",
-      description: "Web app that aggregates and organizes university resources for students",
+      description:
+        "Web app that aggregates and organizes university resources for students",
       status: "Completed",
-      tags: ["React", "Firebase", "Tailwind CSS"]
-    }
-  ]
+      tags: ["React", "Firebase", "Tailwind CSS"],
+    },
+  ],
 };
 
 export default function ProfilePage() {
@@ -41,7 +42,9 @@ export default function ProfilePage() {
               {userProfile.initials}
             </div>
             <div>
-              <h1 className="text-3xl font-extrabold mb-1">{userProfile.name}</h1>
+              <h1 className="text-3xl font-extrabold mb-1">
+                {userProfile.name}
+              </h1>
               <div className="text-gray-500 text-lg">@{userProfile.email}</div>
             </div>
           </div>
@@ -49,10 +52,14 @@ export default function ProfilePage() {
           {/* Tabs */}
           <div className="mt-10">
             <div className="flex gap-2 bg-gray-100 rounded-xl p-2 w-full max-w-xl">
-              {userProfile.tabs.map(tab => (
+              {userProfile.tabs.map((tab) => (
                 <button
                   key={tab.key}
-                  className={`px-5 py-2 rounded-lg font-medium text-base transition-all duration-100 ${userProfile.activeTab === tab.key ? 'bg-white shadow text-black' : 'text-gray-500'}`}
+                  className={`px-5 py-2 rounded-lg font-medium text-base transition-all duration-100 ${
+                    userProfile.activeTab === tab.key
+                      ? "bg-white shadow text-black"
+                      : "text-gray-500"
+                  }`}
                 >
                   {tab.label}
                 </button>
@@ -64,15 +71,31 @@ export default function ProfilePage() {
           {userProfile.activeTab === "projects" && (
             <div className="mt-6 flex flex-col gap-6">
               {userProfile.projects.map((proj, idx) => (
-                <div key={proj.title + idx} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+                <div
+                  key={proj.title + idx}
+                  className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6"
+                >
                   <div className="flex items-center justify-between mb-1">
                     <h2 className="text-xl font-semibold">{proj.title}</h2>
-                    <span className={`px-4 py-1 rounded-full font-semibold text-sm ${proj.status === 'Active' ? 'bg-[#185c5a] text-white' : 'bg-gray-100 text-gray-700'}`}>{proj.status}</span>
+                    <span
+                      className={`px-4 py-1 rounded-full font-semibold text-sm ${
+                        proj.status === "Active"
+                          ? "bg-[#185c5a] text-white"
+                          : "bg-gray-100 text-gray-700"
+                      }`}
+                    >
+                      {proj.status}
+                    </span>
                   </div>
                   <div className="text-gray-700 mb-3">{proj.description}</div>
                   <div className="flex gap-2 flex-wrap">
-                    {proj.tags.map(tag => (
-                      <span key={tag} className="bg-gray-100 text-gray-700 rounded-full px-3 py-1 text-xs font-medium">{tag}</span>
+                    {proj.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="bg-gray-100 text-gray-700 rounded-full px-3 py-1 text-xs font-medium"
+                      >
+                        {tag}
+                      </span>
                     ))}
                   </div>
                 </div>
