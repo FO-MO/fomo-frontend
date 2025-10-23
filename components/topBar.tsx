@@ -74,7 +74,7 @@ export default function TopBar({ title = "Fomo", theme = "white" }: Props) {
               className={`${
                 theme === "black" ? "text-black" : "text-white/95"
               } font-semibold hidden lg:inline-block`}
-              href="#"
+              href="/colleges/dashboard"
             >
               For Colleges
             </a>
