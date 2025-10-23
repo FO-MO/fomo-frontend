@@ -15,12 +15,12 @@ type Props = {
 };
 
 const items: Item[] = [
-  { key: "home", label: "Home", href: "#" },
+  { key: "home", label: "Home", href: "/students" },
   { key: "projects", label: "Projects", href: "/students/projects" },
   { key: "clubs", label: "Clubs", href: "/students/clubs" },
   { key: "startups", label: "Startups", href: "/students/startups" },
   { key: "profile", label: "Profile", href: "/students/profile" },
-  { key: "messages", label: "Messages", href: "#" },
+  { key: "messages", label: "Messages", href: "/students/messages" },
   { key: "search", label: "Search", href: "/students/search" },
   { key: "copilot", label: "FOMO AI Copilot", href: "#" },
 ];
@@ -177,13 +177,20 @@ export default function SideBar({ active = "home", className = "" }: Props) {
   const pathname = usePathname();
 
   const getKeyFromPath = (p: string) => {
-    if (!p) return active;
+    if (!p) return "home";
 
     // Handle root path
     if (p === "/" || p === "") return "home";
 
+    // Sort items by href length (descending) to match more specific routes first
+    const sortedItems = [...items].sort((a, b) => {
+      const lenA = a.href && a.href !== "#" ? a.href.length : 0;
+      const lenB = b.href && b.href !== "#" ? b.href.length : 0;
+      return lenB - lenA;
+    });
+
     // Try to match routes - check if path starts with or matches the href
-    const match = items.find((it) => {
+    const match = sortedItems.find((it) => {
       if (!it.href || it.href === "#") return false;
       // Exact match
       if (p === it.href) return true;
@@ -193,7 +200,7 @@ export default function SideBar({ active = "home", className = "" }: Props) {
     });
 
     if (match) return match.key;
-    return active;
+    return "home";
   };
 
   const [current, setCurrent] = useState<string>(() =>

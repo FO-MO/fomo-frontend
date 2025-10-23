@@ -78,10 +78,10 @@ export default function SearchPage() {
 
         {/* search & filters */}
         <div className="mt-6 flex justify-center sm:justify-normal flex-col sm:flex-row gap-4">
-          <div className="flex-1">
+          <div className="flex-1 max-w-2xl">
             <div className="relative">
               <input
-                className="w-[70%] border-2 rounded-xl focus:border-blue-400 px-2 py-3 pl-4"
+                className="w-full border-2 rounded-xl focus:border-blue-400 px-2 py-3 pl-4"
                 placeholder="Search by name,username or bio..."
               />
             </div>
@@ -89,7 +89,7 @@ export default function SearchPage() {
         </div>
 
         {/* grid */}
-        <div className="mt-8 flex flex-row flex-wrap w-[105%] gap-6">
+        <div className="mt-8 flex flex-row flex-wrap w-full gap-6">
           {mockProfiles.map((profile) => (
             <a
               href="backendpeep"
