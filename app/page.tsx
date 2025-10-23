@@ -6,7 +6,7 @@ import FomoAIpopup from "@/components/FomoAIpopup";
 export default function Home() {
   return (
     <>
-      <TopBar theme="black" />
+      <TopBar theme="home" />
       <LandingSection />
       <h1 className="flex items-center justify-center h-[80vh] bg-red-500 text-center text-5xl">
         section 1

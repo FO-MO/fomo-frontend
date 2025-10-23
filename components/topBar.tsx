@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 
 type Props = {
   title?: string;
-  theme?: "white" | "black";
+  theme?: "white" | "black" | "home";
 };
 
 export default function TopBar({ title = "Fomo", theme = "white" }: Props) {
@@ -18,15 +18,25 @@ export default function TopBar({ title = "Fomo", theme = "white" }: Props) {
     };
   }, [open]);
 
-  return (
-    <div
-      role="banner"
-      className="fixed inset-x-0 top-0 z-50 backdrop-blur-md"
-      style={{
+  // Determine styling based on theme
+  const isHomeTheme = theme === "home";
+  const navbarClasses = isHomeTheme ? "" : "backdrop-blur-md";
+  const backgroundStyle = isHomeTheme
+    ? {
+        backgroundColor: "#0F4F4A",
+        borderBottom: "1px solid rgba(255,255,255,0.1)",
+      }
+    : {
         background:
           "linear-gradient(rgba(255,255,255,0.50), rgba(255,255,255,0.50))",
         borderBottom: "1px solid rgba(255,255,255,0.05)",
-      }}
+      };
+
+  return (
+    <div
+      role="banner"
+      className={`fixed inset-x-0 top-0 z-50 ${navbarClasses}`}
+      style={backgroundStyle}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 sm:px-8 h-20">
         <div className="flex items-center gap-3">
