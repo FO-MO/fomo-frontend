@@ -34,7 +34,7 @@ export default function SearchCard({ profile, onFollowToggle }: Props) {
   };
 
   return (
-    <article className="w-96 bg-white rounded-2xl overflow-hidden shadow-md p-6 flex flex-col h-96 relative">
+    <article className="w-full bg-white rounded-2xl overflow-hidden shadow-md p-6 flex flex-col h-96 relative">
       {/* Follow Button - Absolutely positioned */}
       <button
         onClick={handleFollowClick}
