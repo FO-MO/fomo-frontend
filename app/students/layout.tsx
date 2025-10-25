@@ -25,25 +25,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {/* Inline top bar for students area */}
+    <div className="flex">
+      {/* Sidebar fixed on left */}
+      <div className="hidden md:block">
+        <SideBar />
+      </div>
+      <Navbar />
 
-        <div className="flex">
-          {/* Sidebar fixed on left */}
-          <div className="hidden md:block">
-            <SideBar />
-          </div>
-          <Navbar />
-
-          {/* Main content area. Add left margin equal to sidebar width on md+ and top padding for the fixed TopBar */}
-          <main className="md:ml-56 w-full">
-            <div className="pt-20">{children}</div>
-          </main>
-        </div>
-      </body>
-    </html>
+      {/* Main content area. Add left margin equal to sidebar width on md+ and top padding for the fixed TopBar */}
+      <main className="md:ml-56 w-full">
+        <div className="pt-20">{children}</div>
+      </main>
+    </div>
   );
 }

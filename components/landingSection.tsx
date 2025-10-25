@@ -3,6 +3,7 @@
 import { Typewriter } from "react-simple-typewriter";
 import React, { useEffect, useRef } from "react";
 import gsap from "gsap";
+import Link from "next/link";
 
 function Writer() {
   return (
@@ -77,9 +78,11 @@ export default function LandingSection() {
               className="flex-1 bg-white rounded-lg px-4 py-3 text-gray-700 placeholder-gray-400 outline-none"
               placeholder="Type school or personal email here"
             />
-            <button className="bg-[#d6ff3a] text-[#082926] font-extrabold px-6 py-3 rounded-lg shadow-[0_6px_0_rgba(0,0,0,0.12)]">
-              Sign up
-            </button>
+            <Link href="/auth/signup">
+              <button className="bg-[#d6ff3a] cursor-pointer text-[#082926] font-extrabold px-6 py-3 rounded-lg shadow-[0_6px_0_rgba(0,0,0,0.12)]">
+                Sign up
+              </button>
+            </Link>
           </div>
         </div>
       </div>
