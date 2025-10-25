@@ -1,7 +1,7 @@
 import TopBar from "@/components/topBar";
 import LandingSection from "@/components/landingSection";
 import Footer from "@/components/footer";
-import FomoAIpopup from "@/components/FomoAIpopup";
+
 import Link from "next/link";
 
 export default function Home() {
