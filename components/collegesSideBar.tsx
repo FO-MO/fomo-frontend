@@ -213,7 +213,7 @@ export default function CollegesSideBar({
 
   return (
     <aside
-      className={`hidden md:block fixed left-0 z-40 w-56 h-[calc(100vh-5rem)] ${className}`}
+      className={`fixed left-0 z-40 w-56 h-[calc(100vh-5rem)] ${className}`}
       aria-label="Colleges Sidebar"
     >
       <div className="h-full bg-white border-r border-gray-200 text-gray-900 min-h-screen p-6">

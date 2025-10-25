@@ -1,6 +1,46 @@
-import React from "react";
+"use client";
+
+import { Typewriter } from "react-simple-typewriter";
+import React, { useEffect, useRef } from "react";
+import gsap from "gsap";
+
+function Writer() {
+  return (
+    <h1 className="mt-12 text-center text-[#d6ff3a] font-extrabold leading-none tracking-tight text-7xl sm:text-8xl md:text-9xl">
+      <Typewriter
+        words={["NEVER FEAR\nMISSING OUT"]}
+        loop={1}
+        cursor
+        cursorStyle="|"
+        typeSpeed={80}
+        delaySpeed={1000}
+      />
+    </h1>
+  );
+}
 
 export default function LandingSection() {
+  //ANIMATE INFO BAR
+  const entrydiv = useRef(null);
+  useEffect(() => {
+    const tl = gsap.timeline();
+    tl.to(
+      entrydiv.current,
+      {
+        y: 100,
+        opacity: 0,
+        scale: 0.8,
+      },
+      "+=2.0"
+    ).to(entrydiv.current, {
+      y: 0,
+      opacity: 1,
+      scale: 1,
+      duration: 0.8,
+    });
+  }, []);
+  //
+
   return (
     <section
       className="w-full bg-[#0f4f4a] text-white"
@@ -19,11 +59,7 @@ export default function LandingSection() {
           </div>
         </div>
 
-        <h1 className="mt-12 text-center text-[#d6ff3a] font-extrabold leading-none tracking-tight text-7xl sm:text-8xl md:text-9xl">
-          NEVER FEAR
-          <br />
-          MISSING OUT
-        </h1>
+        <Writer />
 
         <p className="mt-8 text-center text-white/90 text-lg max-w-2xl mx-auto">
           Join the network built for automating your upskilling and networking
@@ -31,7 +67,11 @@ export default function LandingSection() {
         </p>
 
         <div className="mt-10 max-w-3xl mx-auto">
-          <div className="flex gap-4 items-center bg-white rounded-xl p-2 shadow-md">
+          <div
+            className="flex gap-4 items-center bg-white rounded-xl p-2 shadow-md"
+            ref={entrydiv}
+            style={{ opacity: 0 }}
+          >
             <input
               aria-label="Email"
               className="flex-1 bg-white rounded-lg px-4 py-3 text-gray-700 placeholder-gray-400 outline-none"

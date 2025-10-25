@@ -3,6 +3,41 @@
 import React, { useState } from "react";
 import CollegesSideBar from "@/components/collegesSideBar";
 import Navbar from "@/components/Navbar";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+
+const chartData = [
+  { month: "Jan", applications: 450, hires: 32 },
+  { month: "Feb", applications: 520, hires: 40 },
+  { month: "Mar", applications: 380, hires: 28 },
+  { month: "Apr", applications: 680, hires: 48 },
+  { month: "May", applications: 720, hires: 52 },
+  { month: "Jun", applications: 590, hires: 44 },
+];
+
+const chartConfig = {
+  applications: {
+    label: "Applications",
+    color: "#0ea5e9",
+  },
+  hires: {
+    label: "Hires",
+    color: "#0d9488",
+  },
+} satisfies ChartConfig;
 
 export default function CollegeDashboard() {
   const [activeTab, setActiveTab] = useState("Overview");
@@ -12,31 +47,28 @@ export default function CollegeDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* NAVBAR */}
       <Navbar />
 
-      {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 md:hidden"
+          className="fixed inset-0 z-40 sm:hidden"
           onClick={() => setSidebarOpen(false)}
-        >
-          <div className="fixed inset-0 bg-black bg-opacity-50" />
-        </div>
+        ></div>
       )}
 
-      {/* Sidebar */}
+      {/* SIDEBAR */}
       <div
         className={`
-        fixed left-0 top-0 z-50 w-56 h-full transform transition-transform duration-300 ease-in-out md:translate-x-0
-        ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+        fixed left-0 top-0 z-50 w-56 h-full transform transition-transform duration-300 ease-in-out sm:translate-x-0
+        ${sidebarOpen ? "translate-x-0" : "-translate-x-full sm:translate-x-0"}
       `}
       >
         <CollegesSideBar active="dashboard" />
       </div>
 
-      {/* Hamburger menu button for mobile */}
       <button
-        className="fixed top-6 left-6 z-50 p-2 rounded-md bg-white shadow-lg md:hidden"
+        className="fixed top-12 left-0 z-[1001] p-2 pt-[3px] rounded-md bg-white/70 backdrop-blur-2xl  sm:hidden"
         onClick={() => setSidebarOpen(!sidebarOpen)}
         aria-label="Toggle sidebar"
       >
@@ -64,8 +96,7 @@ export default function CollegeDashboard() {
         </svg>
       </button>
 
-      <main className="md:ml-56 pt-20 p-8">
-        {/* Dashboard Header */}
+      <main className="sm:ml-56 pt-20 p-8">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-teal-600 rounded-lg flex items-center justify-center">
@@ -92,7 +123,7 @@ export default function CollegeDashboard() {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm">
+            <div className="flex items-center gap-2 bg-blue-50 text-emerald-700 px-3 py-1 rounded-full text-sm">
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -122,7 +153,6 @@ export default function CollegeDashboard() {
           </div>
         </div>
 
-        {/* Navigation Tabs */}
         <div className="flex gap-2 mb-8">
           {tabs.map((tab) => (
             <button
@@ -139,9 +169,7 @@ export default function CollegeDashboard() {
           ))}
         </div>
 
-        {/* Dashboard Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* Total Students */}
           <div className="bg-white p-6 rounded-xl border border-gray-200">
             <div className="flex items-center justify-between mb-4">
               <p className="text-gray-600 text-sm">Total Students</p>
@@ -168,7 +196,6 @@ export default function CollegeDashboard() {
             </p>
           </div>
 
-          {/* Active Jobs */}
           <div className="bg-white p-6 rounded-xl border border-gray-200">
             <div className="flex items-center justify-between mb-4">
               <p className="text-gray-600 text-sm">Active Jobs</p>
@@ -200,7 +227,6 @@ export default function CollegeDashboard() {
             </p>
           </div>
 
-          {/* Students Hired */}
           <div className="bg-white p-6 rounded-xl border border-gray-200">
             <div className="flex items-center justify-between mb-4">
               <p className="text-gray-600 text-sm">Students Hired</p>
@@ -231,7 +257,6 @@ export default function CollegeDashboard() {
             </p>
           </div>
 
-          {/* Upcoming Events */}
           <div className="bg-white p-6 rounded-xl border border-gray-200">
             <div className="flex items-center justify-between mb-4">
               <p className="text-gray-600 text-sm">Upcoming Events</p>
@@ -263,9 +288,7 @@ export default function CollegeDashboard() {
           </div>
         </div>
 
-        {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Applications vs Hires Chart */}
           <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-gray-200">
             <div className="flex items-center gap-2 mb-6">
               <svg
@@ -275,41 +298,54 @@ export default function CollegeDashboard() {
               >
                 <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
               </svg>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-xl font-semibold text-gray-900">
                 Applications vs Hires
               </h3>
             </div>
-            <div className="h-64 flex items-end justify-center space-x-4">
-              <div className="text-center">
-                <div className="w-12 h-32 bg-teal-600 rounded-t mb-2"></div>
-                <p className="text-xs text-gray-600">Jan</p>
-              </div>
-              <div className="text-center">
-                <div className="w-12 h-40 bg-teal-600 rounded-t mb-2"></div>
-                <p className="text-xs text-gray-600">Feb</p>
-              </div>
-              <div className="text-center">
-                <div className="w-12 h-28 bg-teal-600 rounded-t mb-2"></div>
-                <p className="text-xs text-gray-600">Mar</p>
-              </div>
-              <div className="text-center">
-                <div className="w-12 h-48 bg-teal-600 rounded-t mb-2"></div>
-                <p className="text-xs text-gray-600">Apr</p>
-              </div>
-              <div className="text-center">
-                <div className="w-12 h-52 bg-teal-600 rounded-t mb-2"></div>
-                <p className="text-xs text-gray-600">May</p>
-              </div>
-              <div className="text-center">
-                <div className="w-12 h-44 bg-teal-600 rounded-t mb-2"></div>
-                <p className="text-xs text-gray-600">Jun</p>
-              </div>
-            </div>
+            <ChartContainer config={chartConfig} className="h-64 w-full">
+              <BarChart
+                accessibilityLayer
+                data={chartData}
+                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis
+                  dataKey="month"
+                  tickLine={false}
+                  axisLine={false}
+                  className="text-base font-medium"
+                  tick={{ fontSize: 14 }}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  className="text-base font-medium"
+                  tick={{ fontSize: 14 }}
+                />
+                <ChartTooltip
+                  cursor={{ fill: "rgba(0, 0, 0, 0.05)" }}
+                  content={
+                    <ChartTooltipContent className="text-base font-medium bg-white border border-gray-200 shadow-lg rounded-lg p-3" />
+                  }
+                />
+                <Bar
+                  dataKey="applications"
+                  fill="var(--color-applications)"
+                  radius={[4, 4, 0, 0]}
+                  name="Applications"
+                />
+                <Bar
+                  dataKey="hires"
+                  fill="var(--color-hires)"
+                  radius={[4, 4, 0, 0]}
+                  name="Hires"
+                />
+              </BarChart>
+            </ChartContainer>
           </div>
 
-          {/* Top Employers */}
           <div className="bg-white p-6 rounded-xl border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">
+            <h3 className="text-xl font-semibold text-gray-900 mb-6">
               Top Employers
             </h3>
             <div className="space-y-4">
