@@ -69,7 +69,7 @@ export default function TopBar({ title = "FOMO", theme = "white" }: Props) {
               className={`${
                 theme === "black" ? "text-black" : "text-white/95"
               } font-semibold hidden md:inline-block`}
-              href="#"
+              href="/employees/overview"
             >
               For Employers
             </a>
