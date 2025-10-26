@@ -8,7 +8,7 @@ export default function Navbar() {
         role="banner"
       >
         <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-6 sm:px-8">
-          <Link href="/" className="text-2xl font-semibold text-gray-900">
+          <Link href="/" className="text-3xl font-semibold text-gray-900">
             FOMO
           </Link>
 

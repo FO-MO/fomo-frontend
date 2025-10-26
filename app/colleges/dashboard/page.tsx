@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import CollegesSideBar from "@/components/collegesSideBar";
-import Navbar from "@/components/Navbar";
+import CollegesSideBar from "@/components/bars/collegesSideBar";
+import Navbar from "@/components/bars/Navbar";
 import {
   Bar,
   BarChart,
@@ -119,13 +119,13 @@ export default function CollegeDashboard() {
   const tabs = ["Overview", "Students", "Jobs", "Events", "Analytics"];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       {/* NAVBAR */}
       <Navbar />
 
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 sm:hidden"
+          className="fixed inset-0 z-40 bg-black/20 sm:hidden"
           onClick={() => setSidebarOpen(false)}
         ></div>
       )}
@@ -142,39 +142,38 @@ export default function CollegeDashboard() {
 
       {/* HAMBURGER */}
       <button
-        className="fixed top-12 left-0 z-[1001] p-2 pb-[6px] pt-[1px] mt-1 rounded-t-lg cursor-pointer bg-gray-50 backdrop-blur-2xl  sm:hidden"
+        className="fixed top-20 left-0 px-3 scale-110 z-[60] py-[3px] border-1 border-black/30 cursor-pointer rounded-br-2xl  bg-white shadow-lg  sm:hidden hover:bg-gray-50 transition-colors"
         onClick={() => setSidebarOpen(!sidebarOpen)}
         aria-label="Toggle sidebar"
       >
         <svg
-          className="w-6 h-6 text-gray-700"
+          className="w-5 h-5 text-black object-cover"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
+          strokeWidth={2}
         >
           {sidebarOpen ? (
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeWidth={2}
               d="M6 18L18 6M6 6l12 12"
             />
           ) : (
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeWidth={2}
               d="M4 6h16M4 12h16M4 18h16"
             />
           )}
         </svg>
       </button>
 
-      <main className="sm:ml-56 pt-20 p-8">
+      <main className="sm:ml-56 pt-20 p-4 sm:p-6 lg:p-8">
         {/* HEADER */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-teal-600 rounded-lg flex items-center justify-center">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-teal-600 rounded-lg flex items-center justify-center flex-shrink-0">
               <svg
                 className="w-6 h-6 text-white"
                 fill="none"
@@ -190,15 +189,15 @@ export default function CollegeDashboard() {
               </svg>
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
                 FOMO College Dashboard
               </h1>
-              <p className="text-gray-600">College Name</p>
+              <p className="text-sm sm:text-base text-gray-600">College Name</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-blue-50 text-emerald-700 px-3 py-1 rounded-full text-sm">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-2 bg-blue-50 text-emerald-700 px-2.5 sm:px-3 py-1 rounded-full text-xs sm:text-sm">
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -229,12 +228,12 @@ export default function CollegeDashboard() {
         </div>
 
         {/* TABS */}
-        <div className="flex flex-wrap gap-2 mb-8">
+        <div className="flex overflow-x-auto gap-2 mb-8 pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
           {tabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-6 py-3 rounded-lg scale-100 cursor-pointer font-small md:font-medium transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-md ${
+              className={`px-4 sm:px-6 py-2 sm:py-3 rounded-lg whitespace-nowrap text-sm sm:text-base font-medium transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-md flex-shrink-0 ${
                 activeTab === tab
                   ? "bg-teal-600 text-white shadow-lg -translate-y-0.5"
                   : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"

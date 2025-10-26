@@ -1,5 +1,5 @@
 import React from "react";
-import ClubCard, { Club } from "@/components/ClubCard";
+import ClubCard, { Club } from "@/components/student-section/ClubCard";
 
 const mockClubs: Club[] = [
   {

@@ -48,7 +48,7 @@ export default function TopBar({ title = "FOMO", theme = "white" }: Props) {
             <div
               className={`${
                 theme === "black" ? "text-black" : "text-white"
-              } font-semibold text-3xl`}
+              } font-semibold text-xl sm:text-3xl`}
             >
               {title}
             </div>
@@ -85,7 +85,7 @@ export default function TopBar({ title = "FOMO", theme = "white" }: Props) {
 
           {/* Dashboard button with hover animation */}
           <a
-            className="bg-[#d6ff3a] text-[#082926] px-4 py-2 rounded-2xl font-extrabold shadow-[0_6px_0_rgba(0,0,0,0.12)] transform transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_10px_0_rgba(0,0,0,0.12)]"
+            className="bg-[#d6ff3a] text-[#082926] px-4 py-2 scale-80 sm:scale-100 rounded-2xl font-extrabold shadow-[0_6px_0_rgba(0,0,0,0.12)] transform transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_10px_0_rgba(0,0,0,0.12)]"
             href="#"
           >
             Dashboard
@@ -151,7 +151,7 @@ export default function TopBar({ title = "FOMO", theme = "white" }: Props) {
               className={`${
                 theme === "black" ? "text-black" : "text-white/95"
               } font-semibold py-2`}
-              href="#"
+              href="/students"
             >
               For Students
             </a>
@@ -159,7 +159,7 @@ export default function TopBar({ title = "FOMO", theme = "white" }: Props) {
               className={`${
                 theme === "black" ? "text-black" : "text-white/95"
               } font-semibold py-2`}
-              href="#"
+              href="/employees/overview"
             >
               For Employers
             </a>
@@ -167,7 +167,7 @@ export default function TopBar({ title = "FOMO", theme = "white" }: Props) {
               className={`${
                 theme === "black" ? "text-black" : "text-white/95"
               } font-semibold py-2`}
-              href="#"
+              href="/colleges/dashboard"
             >
               For Colleges
             </a>

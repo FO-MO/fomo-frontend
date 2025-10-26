@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import ProfileProjectCard from "@/components/ProfileProjectCard";
-import ProfileClubCard from "@/components/ProfileClubCard";
+import ProfileProjectCard from "@/components/student-section/ProfileProjectCard";
+import ProfileClubCard from "@/components/student-section/ProfileClubCard";
 import ProfileInternshipCard from "@/components/ProfileInternshipCard";
 
 type TabKey = "projects" | "clubs" | "internships";

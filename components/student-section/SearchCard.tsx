@@ -34,11 +34,11 @@ export default function SearchCard({ profile, onFollowToggle }: Props) {
   };
 
   return (
-    <article className="w-full bg-white rounded-2xl overflow-hidden shadow-md p-6 flex flex-col h-96 relative">
+    <article className="w-full bg-white rounded-2xl rounded-tr-[0px] overflow-hidden shadow-md p-6 flex flex-col h-96 relative">
       {/* Follow Button - Absolutely positioned */}
       <button
         onClick={handleFollowClick}
-        className="absolute cursor-pointer top-8 right-5 bg-teal-700 text-white px-1 py-1.5 rounded-md text-[10px] font-medium hover:bg-teal-800 transition-colors flex items-center gap-1 z-10"
+        className="absolute cursor-pointer top-0 right-0 bg-teal-700 text-white px-1 py-1.5 rounded-sm text-[11px] font-medium hover:bg-teal-800 transition-colors flex items-center gap-1 z-10"
       >
         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
           <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />

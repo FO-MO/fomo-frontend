@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import SearchCard, { Profile } from "@/components/SearchCard";
+import SearchCard, { Profile } from "@/components/student-section/SearchCard";
 
 const mockProfiles: Profile[] = [
   {

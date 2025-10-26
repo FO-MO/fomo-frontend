@@ -1,5 +1,5 @@
 import React from "react";
-import ProjectCard, { Project } from "@/components/ProjectCard";
+import ProjectCard, { Project } from "@/components/student-section/ProjectCard";
 
 const mockProjects: Project[] = [
   {
