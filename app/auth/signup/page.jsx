@@ -4,13 +4,14 @@ import Link from "next/link";
 export default function Signup() {
   return (
     <div className="min-h-screen w-screen flex flex-col">
-      {/* Full-width header */}
-      <div className="w-full border-b border-gray-300 bg-teal-900 py-4 px-8">
-        <h1 className="text-white text-xl font-bold">ConnectEd</h1>
-      </div>
+      <Link href="/">
+        <div className="w-full border-b border-gray-300 py-4 px-12">
+          <h1 className="text-black text-3xl font-bold">FOMO</h1>
+        </div>
+      </Link>
 
       {/* Centered login form */}
-      <div className="flex flex-1 justify-center items-center ">
+      <div className="flex scale-90 sm:scale-100 flex-1 justify-center items-center ">
         <div className="w-full max-w-sm bg-white border border-gray-200 rounded-lg shadow-md p-6">
           <h2 className="text-center text-3xl font-bold tracking-tight text-gray-900 mb-6">
             Sign Up

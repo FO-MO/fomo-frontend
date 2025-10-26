@@ -6,9 +6,13 @@ import Navbar from "@/components/Navbar";
 export default function Login() {
   return (
     <div className="min-h-screen w-screen flex flex-col">
-      <TopBar theme="black" />
+      <Link href="/">
+        <div className="w-full border-b border-gray-300 py-4 px-12">
+          <h1 className="text-black text-3xl font-bold">FOMO</h1>
+        </div>
+      </Link>
       {/* Centered login form */}
-      <div className="flex flex-1 justify-center items-center ">
+      <div className="flex flex-1 scale-90 sm:scale-100 justify-center items-center ">
         <div className="w-full max-w-sm bg-white border border-gray-200 rounded-lg shadow-md p-6">
           <h2 className="text-center text-3xl font-bold tracking-tight text-gray-900 mb-6">
             Login
