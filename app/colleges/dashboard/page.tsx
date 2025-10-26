@@ -118,8 +118,20 @@ export default function CollegeDashboard() {
 
   const tabs = ["Overview", "Students", "Jobs", "Events", "Analytics"];
 
+  // Prevent background scroll when sidebar is open on mobile
+  React.useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [sidebarOpen]);
+
   return (
-    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
+    <div className="min-h-screen mt-16 bg-gray-50 overflow-x-hidden">
       {/* NAVBAR */}
       <Navbar />
 
@@ -228,14 +240,14 @@ export default function CollegeDashboard() {
         </div>
 
         {/* TABS */}
-        <div className="flex overflow-x-auto gap-2 mb-8 pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
+        <div className="flex bg-white border-1 border-black/5 rounded-full overflow-x-auto gap-2 mb-8 py-1 -mx-4 px-4 sm:mx-0 sm:px-2 scrollbar-hide">
           {tabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 sm:px-6 py-2 sm:py-3 rounded-lg whitespace-nowrap text-sm sm:text-base font-medium transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-md flex-shrink-0 ${
+              className={`px-1 sm:px-2 py-1 flex-1 sm:py-2 cursor-pointer rounded-lg whitespace-nowrap text-sm sm:text-base font-medium transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-md flex-shrink-0 scale-95 ${
                 activeTab === tab
-                  ? "bg-teal-600 text-white shadow-lg -translate-y-0.5"
+                  ? "bg-teal-800 text-white shadow-lg -translate-y-0.5"
                   : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
               }`}
             >
