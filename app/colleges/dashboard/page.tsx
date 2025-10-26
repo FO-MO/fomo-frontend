@@ -131,7 +131,7 @@ export default function CollegeDashboard() {
   }, [sidebarOpen]);
 
   return (
-    <div className="min-h-screen mt-16 bg-gray-50 overflow-x-hidden">
+    <div className="min-h-screen mt-6 sm:mt-16 bg-gray-50 overflow-x-hidden">
       {/* NAVBAR */}
       <Navbar />
 
@@ -248,7 +248,7 @@ export default function CollegeDashboard() {
               className={`px-1 sm:px-2 py-1 flex-1 sm:py-2 cursor-pointer rounded-lg whitespace-nowrap text-sm sm:text-base font-medium transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-md flex-shrink-0 scale-95 ${
                 activeTab === tab
                   ? "bg-teal-800 text-white shadow-lg -translate-y-0.5"
-                  : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                  : "bg-white text-gray-600 hover:bg-gray-100"
               }`}
             >
               {tab}
