@@ -1,4 +1,4 @@
-import PostCard, { Post } from "@/components/PostCard";
+import PostCard, { Post } from "@/components/student-section/PostCard";
 
 export type HomePageData = {
   user: {

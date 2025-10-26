@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import ProfileProjectCard from "@/components/student-section/ProfileProjectCard";
 import ProfileClubCard from "@/components/student-section/ProfileClubCard";
-import ProfileInternshipCard from "@/components/ProfileInternshipCard";
+import ProfileInternshipCard from "@/components/student-section/ProfileInternshipCard";
 
 type TabKey = "projects" | "clubs" | "internships";
 

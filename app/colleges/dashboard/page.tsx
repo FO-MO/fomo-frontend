@@ -3,14 +3,13 @@
 import React, { useState } from "react";
 import CollegesSideBar from "@/components/bars/collegesSideBar";
 import Navbar from "@/components/bars/Navbar";
+import Link from "next/link";
 import {
   Bar,
   BarChart,
   CartesianGrid,
   XAxis,
   YAxis,
-  Tooltip,
-  ResponsiveContainer,
 } from "recharts";
 import {
   ChartConfig,
@@ -113,10 +112,16 @@ const actionCards = [
 ];
 
 export default function CollegeDashboard() {
-  const [activeTab, setActiveTab] = useState("Overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = "/colleges/dashboard";
 
-  const tabs = ["Overview", "Students", "Jobs", "Events", "Analytics"];
+  const tabs = [
+    { label: "Overview", href: "/colleges/dashboard" },
+    { label: "Students", href: "/colleges/students" },
+    { label: "Jobs", href: "/colleges/jobs" },
+    { label: "Events", href: "/colleges/events" },
+    { label: "Analytics", href: "/colleges/analytics" },
+  ];
 
   // Prevent background scroll when sidebar is open on mobile
   React.useEffect(() => {
@@ -241,19 +246,22 @@ export default function CollegeDashboard() {
 
         {/* TABS */}
         <div className="flex bg-white border-1 border-black/5 rounded-full overflow-x-auto gap-2 mb-8 py-1 -mx-4 px-4 sm:mx-0 sm:px-2 scrollbar-hide">
-          {tabs.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-1 sm:px-2 py-1 flex-1 sm:py-2 cursor-pointer rounded-lg whitespace-nowrap text-sm sm:text-base font-medium transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-md flex-shrink-0 scale-95 ${
-                activeTab === tab
-                  ? "bg-teal-800 text-white shadow-lg -translate-y-0.5"
-                  : "bg-white text-gray-600 hover:bg-gray-100"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
+          {tabs.map((tab) => {
+            const isActive = pathname === tab.href;
+            return (
+              <Link
+                key={tab.href}
+                href={tab.href}
+                className={`px-1 sm:px-2 py-1 flex-1 sm:py-2 cursor-pointer rounded-lg whitespace-nowrap text-sm sm:text-base font-medium transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-md flex-shrink-0 scale-95 text-center ${
+                  isActive
+                    ? "bg-teal-800 text-white shadow-lg -translate-y-0.5"
+                    : "bg-white text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                {tab.label}
+              </Link>
+            );
+          })}
         </div>
 
         {/* CARDS + ITS CONTAINER */}
