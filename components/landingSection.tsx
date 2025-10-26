@@ -79,7 +79,7 @@ export default function LandingSection() {
               placeholder="Type school or personal email here"
             />
             <Link href="/auth/signup">
-              <button className="bg-[#d6ff3a] cursor-pointer text-[#082926] font-extrabold px-6 py-3 rounded-lg shadow-[0_6px_0_rgba(0,0,0,0.12)]">
+              <button className="bg-[#d6ff3a] cursor-pointer text-[#082926] font-extrabold px-6 py-3 hover:-translate-y-1 rounded-lg shadow-[0_4px_0_rgba(0,0,0,0.3)] hover:shadow-[0_8px_0_rgba(0,0,0,0.3)]">
                 Sign up
               </button>
             </Link>

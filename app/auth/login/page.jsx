@@ -1,14 +1,12 @@
 import React from "react";
 import Link from "next/link";
+import TopBar from "@/components/topBar";
+import Navbar from "@/components/Navbar";
 
 export default function Login() {
   return (
     <div className="min-h-screen w-screen flex flex-col">
-      {/* Full-width header */}
-      <div className="w-full border-b border-gray-300 bg-teal-900 py-4 px-8">
-        <h1 className="text-white text-xl font-bold">ConnectEd</h1>
-      </div>
-
+      <TopBar theme="black" />
       {/* Centered login form */}
       <div className="flex flex-1 justify-center items-center ">
         <div className="w-full max-w-sm bg-white border border-gray-200 rounded-lg shadow-md p-6">
@@ -77,7 +75,10 @@ export default function Login() {
             <div className="flex-grow border-t border-gray-300"></div>
           </div>
 
-          <Link href="/Signup" className="mt-4 w-full inline-block text-center border border-teal-900 text-teal-700 bg-white py-2 rounded-md hover:bg-teal-900 hover:text-white transition-colors duration-200">
+          <Link
+            href="/auth/signup"
+            className="mt-4 w-full inline-block text-center border border-teal-900 text-teal-700 bg-white py-2 rounded-md hover:bg-teal-900 hover:text-white transition-colors duration-200"
+          >
             Sign Up
           </Link>
         </div>

@@ -1,12 +1,13 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 
 type Props = {
   title?: string;
   theme?: "white" | "black" | "home";
 };
 
-export default function TopBar({ title = "Fomo", theme = "white" }: Props) {
+export default function TopBar({ title = "FOMO", theme = "white" }: Props) {
   const [open, setOpen] = useState(false);
 
   // prevent background scroll when mobile menu is open
@@ -43,13 +44,15 @@ export default function TopBar({ title = "Fomo", theme = "white" }: Props) {
           <div className="w-13 h-13 rounded-lg bg-[#d6ff3a] text-[#082926] flex items-center justify-center font-extrabold text-xl shadow-[0_3px_0_rgba(0,0,0,0.12)]">
             F
           </div>
-          <div
-            className={`${
-              theme === "black" ? "text-black" : "text-white"
-            } font-semibold text-3xl`}
-          >
-            {title}
-          </div>
+          <Link href="/">
+            <div
+              className={`${
+                theme === "black" ? "text-black" : "text-white"
+              } font-semibold text-3xl`}
+            >
+              {title}
+            </div>
+          </Link>
         </div>
         <nav className="flex items-center gap-4" aria-label="Primary">
           {/* Desktop links */}

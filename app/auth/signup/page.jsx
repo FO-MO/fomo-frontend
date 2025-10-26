@@ -95,8 +95,8 @@ export default function Signup() {
           </div>
 
           <button className="mt-4 w-full border-1 border-teal-900 text-teal-700 bg-white py-2 rounded-md hover:bg-teal-900 hover:text-white transition-colors duration-200">
-            <Link href="/Login" className="w-full block text-center">
-                Login
+            <Link href="/auth/login" className="w-full block text-center">
+              Login
             </Link>
           </button>
         </div>
