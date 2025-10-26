@@ -85,7 +85,11 @@ export default function CollegeJobs() {
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
-                <path fillRule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clipRule="evenodd" />
+                <path
+                  fillRule="evenodd"
+                  d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z"
+                  clipRule="evenodd"
+                />
                 <path d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z" />
               </svg>
             </div>
@@ -93,7 +97,9 @@ export default function CollegeJobs() {
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
                 Job Postings
               </h1>
-              <p className="text-sm sm:text-base text-gray-600">Manage Job Opportunities</p>
+              <p className="text-sm sm:text-base text-gray-600">
+                Manage Job Opportunities
+              </p>
             </div>
           </div>
 
@@ -133,20 +139,28 @@ export default function CollegeJobs() {
                   <span className="text-white font-bold text-xl">G</span>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Software Engineer</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Software Engineer
+                  </h3>
                   <p className="text-sm text-gray-600">Google</p>
                 </div>
               </div>
-              <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">Active</span>
+              <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                Active
+              </span>
             </div>
-            <p className="text-gray-600 mb-4">Looking for talented software engineers to join our team...</p>
+            <p className="text-gray-600 mb-4">
+              Looking for talented software engineers to join our team...
+            </p>
             <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
               <span>📍 Mountain View, CA</span>
               <span>💰 $120K - $180K</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">42 applications</span>
-              <button className="text-teal-600 hover:text-teal-700 font-medium">View Details →</button>
+              <button className="text-teal-600 hover:text-teal-700 font-medium">
+                View Details →
+              </button>
             </div>
           </div>
 
@@ -157,20 +171,28 @@ export default function CollegeJobs() {
                   <span className="text-white font-bold text-xl">M</span>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Product Manager</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Product Manager
+                  </h3>
                   <p className="text-sm text-gray-600">Microsoft</p>
                 </div>
               </div>
-              <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">Active</span>
+              <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                Active
+              </span>
             </div>
-            <p className="text-gray-600 mb-4">Join our product team to build innovative solutions...</p>
+            <p className="text-gray-600 mb-4">
+              Join our product team to build innovative solutions...
+            </p>
             <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
               <span>📍 Seattle, WA</span>
               <span>💰 $130K - $160K</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">28 applications</span>
-              <button className="text-teal-600 hover:text-teal-700 font-medium">View Details →</button>
+              <button className="text-teal-600 hover:text-teal-700 font-medium">
+                View Details →
+              </button>
             </div>
           </div>
         </div>

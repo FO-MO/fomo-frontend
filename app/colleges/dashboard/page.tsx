@@ -4,13 +4,7 @@ import React, { useState } from "react";
 import CollegesSideBar from "@/components/bars/collegesSideBar";
 import Navbar from "@/components/bars/Navbar";
 import Link from "next/link";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
   ChartConfig,
   ChartContainer,

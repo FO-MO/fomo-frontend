@@ -85,14 +85,20 @@ export default function CollegeEvents() {
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
-                <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                <path
+                  fillRule="evenodd"
+                  d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                  clipRule="evenodd"
+                />
               </svg>
             </div>
             <div>
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
                 Events & Career Fairs
               </h1>
-              <p className="text-sm sm:text-base text-gray-600">Manage College Events</p>
+              <p className="text-sm sm:text-base text-gray-600">
+                Manage College Events
+              </p>
             </div>
           </div>
 
@@ -128,26 +134,52 @@ export default function CollegeEvents() {
           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">Spring Career Fair 2025</h3>
-                <p className="text-sm text-gray-600">Annual career fair with 50+ companies</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                  Spring Career Fair 2025
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Annual career fair with 50+ companies
+                </p>
               </div>
-              <span className="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full">Upcoming</span>
+              <span className="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full">
+                Upcoming
+              </span>
             </div>
             <div className="space-y-2 mb-4">
               <div className="flex items-center gap-2 text-sm text-gray-600">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                <svg
+                  className="w-4 h-4"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                    clipRule="evenodd"
+                  />
                 </svg>
                 March 15, 2025
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                <svg
+                  className="w-4 h-4"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                    clipRule="evenodd"
+                  />
                 </svg>
                 Main Campus Auditorium
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <svg
+                  className="w-4 h-4"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
                   <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
                 </svg>
                 245 Students Registered
@@ -161,26 +193,52 @@ export default function CollegeEvents() {
           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">Tech Industry Workshop</h3>
-                <p className="text-sm text-gray-600">Resume building and interview prep</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                  Tech Industry Workshop
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Resume building and interview prep
+                </p>
               </div>
-              <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">Active</span>
+              <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                Active
+              </span>
             </div>
             <div className="space-y-2 mb-4">
               <div className="flex items-center gap-2 text-sm text-gray-600">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                <svg
+                  className="w-4 h-4"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                    clipRule="evenodd"
+                  />
                 </svg>
                 February 28, 2025
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                <svg
+                  className="w-4 h-4"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                    clipRule="evenodd"
+                  />
                 </svg>
                 Room 201, Building A
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <svg
+                  className="w-4 h-4"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
                   <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
                 </svg>
                 87 Students Registered
