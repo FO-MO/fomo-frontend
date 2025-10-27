@@ -6,10 +6,17 @@ import Hero4 from "@/components/hero/Hero4";
 import Hero5 from "@/components/hero/Hero5";
 import Footer from "@/components/bars/footer";
 
+const user = {
+  name: "Simon Johnson",
+  abbreviation: "SJ",
+  userType: "employer" as const,
+  loggedIn: true,
+};
+
 export default function Home() {
   return (
     <>
-      <TopBar theme="home" />
+      <TopBar theme="home" user={user} />
       <Hero1 />
       <Hero2 />
       <Hero3 />

@@ -1,16 +1,40 @@
 "use client";
-import React, { useState, useEffect } from "react";
+
 import Link from "next/link";
+import React, { useEffect, useState } from "react";
 
 type Props = {
   title?: string;
   theme?: "white" | "black" | "home";
+  user?: User | null;
 };
 
-export default function TopBar({ title = "FOMO", theme = "white" }: Props) {
+type User = {
+  name: string;
+  abbreviation: string;
+  userType: "student" | "college" | "employer";
+  loggedIn: boolean;
+};
+
+const DASHBOARD_ROUTES: Record<User["userType"], string> = {
+  student: "/students",
+  college: "/colleges/dashboard",
+  employer: "/employees",
+};
+
+export default function TopBar({
+  title = "Fomo",
+  theme = "white",
+  user = null,
+}: Props) {
   const [open, setOpen] = useState(false);
 
-  // prevent background scroll when mobile menu is open
+  // TODO: replace with real auth context/state
+  const mockUser = user;
+  const isAuthenticated = Boolean(mockUser?.loggedIn);
+  const authenticatedUser: User | null =
+    isAuthenticated && mockUser ? mockUser : null;
+
   useEffect(() => {
     if (typeof document === "undefined") return;
     document.body.style.overflow = open ? "hidden" : "";
@@ -19,7 +43,6 @@ export default function TopBar({ title = "FOMO", theme = "white" }: Props) {
     };
   }, [open]);
 
-  // Determine styling based on theme
   const isHomeTheme = theme === "home";
   const navbarClasses = isHomeTheme ? "" : "backdrop-blur-md";
   const backgroundStyle = isHomeTheme
@@ -33,147 +56,174 @@ export default function TopBar({ title = "FOMO", theme = "white" }: Props) {
         borderBottom: "1px solid rgba(255,255,255,0.05)",
       };
 
+  const navLinkBase = "font-semibold transition-all duration-200";
+  const navLinkColor =
+    theme === "black"
+      ? "text-black hover:text-[#0f4f4a] hover:-translate-y-0.5"
+      : "text-white/95 hover:text-[#d6ff3a] hover:-translate-y-0.5";
+  const greetingColor = theme === "black" ? "text-gray-900" : "text-white";
+
   return (
     <div
       role="banner"
       className={`fixed inset-x-0 top-0 z-50 ${navbarClasses}`}
       style={backgroundStyle}
     >
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 sm:px-8 h-20">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 sm:px-8">
         <div className="flex items-center gap-3">
-          <div className="w-13 h-13 rounded-lg bg-[#d6ff3a] text-[#082926] flex items-center justify-center font-extrabold text-xl shadow-[0_3px_0_rgba(0,0,0,0.12)]">
+          <div className="flex h-13 w-13 items-center justify-center rounded-lg bg-[#d6ff3a] text-xl font-extrabold text-[#082926] shadow-[0_3px_0_rgba(0,0,0,0.12)]">
             F
           </div>
           <Link href="/">
-            <div
+            <span
               className={`${
                 theme === "black" ? "text-black" : "text-white"
-              } font-semibold text-xl sm:text-3xl`}
+              } text-3xl font-semibold`}
             >
               {title}
-            </div>
+            </span>
           </Link>
         </div>
+
         <nav className="flex items-center gap-4" aria-label="Primary">
-          {/* Desktop links */}
-          <div className="hidden sm:flex items-center gap-7">
-            <a
-              className={`${
-                theme === "black" ? "text-black" : "text-white/95"
-              } font-semibold`}
-              href="/students"
-            >
-              For Students
-            </a>
-            <a
-              className={`${
-                theme === "black" ? "text-black" : "text-white/95"
-              } font-semibold hidden md:inline-block`}
-              href="/employees/overview"
-            >
-              For Employers
-            </a>
-            <a
-              className={`${
-                theme === "black" ? "text-black" : "text-white/95"
-              } font-semibold hidden lg:inline-block`}
-              href="/colleges/dashboard"
-            >
-              For Colleges
-            </a>
-          </div>
+          {!authenticatedUser ? (
+            <>
+              <div className="hidden items-center gap-7 sm:flex">
+                <a
+                  className={`${navLinkBase} ${navLinkColor}`}
+                  href="/students"
+                >
+                  For Students
+                </a>
+                <a
+                  className={`hidden md:inline-block ${navLinkBase} ${navLinkColor}`}
+                  href="#"
+                >
+                  For Employers
+                </a>
+                <a
+                  className={`hidden lg:inline-block ${navLinkBase} ${navLinkColor}`}
+                  href="/colleges/dashboard"
+                >
+                  For Colleges
+                </a>
+              </div>
 
-          {/* Dashboard button with hover animation */}
-          <a
-            className="bg-[#d6ff3a] text-[#082926] px-4 py-2 scale-80 sm:scale-100 rounded-2xl font-extrabold shadow-[0_6px_0_rgba(0,0,0,0.12)] transform transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_10px_0_rgba(0,0,0,0.12)]"
-            href="#"
-          >
-            Dashboard
-          </a>
+              <a
+                className="transform rounded-2xl bg-[#d6ff3a] px-4 py-2 font-extrabold text-[#082926] shadow-[0_6px_0_rgba(0,0,0,0.12)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_10px_0_rgba(0,0,0,0.12)]"
+                href="/auth/login"
+              >
+                Login
+              </a>
 
-          {/* Mobile hamburger */}
-          <button
-            className={`sm:hidden ml-2 p-2 rounded-md inline-flex items-center justify-center ${
-              theme === "black" ? "text-black" : "text-white/90"
-            } hover:bg-white/6`}
-            aria-label="Toggle menu"
-            aria-expanded={open}
-            aria-controls="mobile-menu"
-            onClick={() => setOpen((v) => !v)}
-          >
-            {open ? (
-              // Close (X) icon
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+              <button
+                className={`ml-2 inline-flex items-center justify-center rounded-md p-2 transition-colors duration-200 sm:hidden ${
+                  theme === "black"
+                    ? "text-black hover:bg-black/5"
+                    : "text-white/90 hover:bg-white/10"
+                }`}
+                aria-label="Toggle menu"
+                aria-expanded={open}
+                aria-controls="mobile-menu"
+                onClick={() => setOpen((v) => !v)}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            ) : (
-              // Hamburger icon
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+                {open ? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  </svg>
+                )}
+              </button>
+            </>
+          ) : (
+            <div className="flex items-center gap-4">
+              {/* <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-white/10 text-sm font-semibold text-white">
+                {authenticatedUser.abbreviation}
+              </span> */}
+              <span
+                className={`rounded-2xl px-4 py-2 text-sm font-medium ${greetingColor}`}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            )}
-          </button>
+                Hi {authenticatedUser.name}!
+              </span>
+              <a
+                className="transform rounded-2xl bg-[#d6ff3a] px-4 py-2 font-extrabold text-[#082926] shadow-[0_6px_0_rgba(0,0,0,0.12)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_10px_0_rgba(0,0,0,0.12)]"
+                href={DASHBOARD_ROUTES[authenticatedUser.userType]}
+              >
+                Dashboard
+              </a>
+            </div>
+          )}
         </nav>
       </div>
 
-      {/* Mobile menu panel */}
-      <div
-        id="mobile-menu"
-        className={`sm:hidden transition-max-h duration-300 ease-in-out overflow-hidden ${
-          open ? "max-h-60" : "max-h-0"
-        }`}
-      >
-        <div className="bg-[#0f4f4a]/95 backdrop-blur-md border-t border-white/5 px-6 py-4">
-          <div className="flex flex-col gap-3">
-            <a
-              className={`${
-                theme === "black" ? "text-black" : "text-white/95"
-              } font-semibold py-2`}
-              href="/students"
-            >
-              For Students
-            </a>
-            <a
-              className={`${
-                theme === "black" ? "text-black" : "text-white/95"
-              } font-semibold py-2`}
-              href="/employees/overview"
-            >
-              For Employers
-            </a>
-            <a
-              className={`${
-                theme === "black" ? "text-black" : "text-white/95"
-              } font-semibold py-2`}
-              href="/colleges/dashboard"
-            >
-              For Colleges
-            </a>
+      {!isAuthenticated && (
+        <div
+          id="mobile-menu"
+          className={`sm:hidden overflow-hidden transition-max-h duration-300 ease-in-out ${
+            open ? "max-h-60" : "max-h-0"
+          }`}
+        >
+          <div className="border-t border-white/5 bg-[#0f4f4a]/95 px-6 py-4 backdrop-blur-md">
+            <div className="flex flex-col gap-3">
+              <a
+                className={`py-2 font-semibold transition-all duration-200 ${
+                  theme === "black"
+                    ? "text-black hover:text-[#0f4f4a] hover:translate-x-1"
+                    : "text-white/95 hover:text-[#d6ff3a] hover:translate-x-1"
+                }`}
+                href="#"
+              >
+                For Students
+              </a>
+              <a
+                className={`py-2 font-semibold transition-all duration-200 ${
+                  theme === "black"
+                    ? "text-black hover:text-[#0f4f4a] hover:translate-x-1"
+                    : "text-white/95 hover:text-[#d6ff3a] hover:translate-x-1"
+                }`}
+                href="#"
+              >
+                For Employers
+              </a>
+              <a
+                className={`py-2 font-semibold transition-all duration-200 ${
+                  theme === "black"
+                    ? "text-black hover:text-[#0f4f4a] hover:translate-x-1"
+                    : "text-white/95 hover:text-[#d6ff3a] hover:translate-x-1"
+                }`}
+                href="#"
+              >
+                For Colleges
+              </a>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

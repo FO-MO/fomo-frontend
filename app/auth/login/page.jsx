@@ -1,9 +1,22 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
-import TopBar from "@/components/topBar";
-import Navbar from "@/components/Navbar";
 
 export default function Login() {
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+
+  const handleSignUpClick = () => {
+    const userData = {
+      email,
+      password,
+      timestamp: new Date().toISOString(),
+    };
+
+    console.log("Sign up triggered with user data:", userData);
+  };
+
   return (
     <div className="min-h-screen w-screen flex flex-col">
       <Link href="/">
@@ -35,6 +48,8 @@ export default function Login() {
                 type="email"
                 required
                 autoComplete="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
                 className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-teal-700 sm:text-sm"
               />
             </div>
@@ -60,12 +75,15 @@ export default function Login() {
                 type="password"
                 required
                 autoComplete="current-password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
                 className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-teal-700 sm:text-sm"
               />
             </div>
 
             <button
               type="submit"
+              onClick={handleSignUpClick}
               className="w-full flex justify-center rounded-md bg-teal-900 px-3 py-2 text-sm font-semibold text-white shadow hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
             >
               Login

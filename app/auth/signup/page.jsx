@@ -1,7 +1,26 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 
 export default function Signup() {
+  const [name, setName] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    const userData = {
+      name,
+      email,
+      password,
+      timestamp: new Date().toISOString(),
+    };
+
+    console.log("Sign up attempt:", userData);
+  };
+
   return (
     <div className="min-h-screen w-screen flex flex-col">
       <Link href="/">
@@ -20,7 +39,12 @@ export default function Signup() {
             Enter your information to create an account
           </p>
 
-          <form action="#" method="POST" className="space-y-6">
+          <form
+            action="#"
+            method="POST"
+            className="space-y-6"
+            onSubmit={handleSubmit}
+          >
             <div>
               <label
                 htmlFor="email"
@@ -34,6 +58,8 @@ export default function Signup() {
                 type="text"
                 required
                 autoComplete="text"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
                 className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-teal-700 sm:text-sm"
               />
             </div>
@@ -51,6 +77,8 @@ export default function Signup() {
                 type="email"
                 required
                 autoComplete="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
                 className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-teal-700 sm:text-sm"
               />
             </div>
@@ -76,6 +104,8 @@ export default function Signup() {
                 type="password"
                 required
                 autoComplete="current-password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
                 className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-teal-700 sm:text-sm"
               />
             </div>
