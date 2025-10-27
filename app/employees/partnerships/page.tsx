@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import PartnershipCard from "@/components/employee-section/PartnershipCard";
+import SubBar from "@/components/subBar";
 
 export default function PartnershipsPage() {
   const [partnerships, setPartnerships] = useState([
@@ -88,6 +89,32 @@ export default function PartnershipsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <SubBar
+          items={[
+            { url: "/employees/overview", name: "Overview", logo: "👤" },
+            {
+              url: "/employees/performance",
+              name: "Applications",
+              logo: "📈",
+            },
+            {
+              url: "/employees/partnerships",
+              name: "College Partnerships",
+              logo: "💬",
+            },
+            {
+              url: "/employees/overview/engagement",
+              name: "Job Postings",
+              logo: "💬",
+            },
+            {
+              url: "/employees/overview/engagement",
+              name: "Analytics",
+              logo: "💬",
+            },
+          ]}
+          className="mb-10"
+        />
         {/* Header */}
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">

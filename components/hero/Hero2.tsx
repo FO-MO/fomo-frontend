@@ -182,7 +182,7 @@ export default function Hero2() {
   return (
     <section
       ref={sectionRef}
-      className="w-full py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-gray-50 overflow-x-hidden opacity-0"
+      className="w-full min-h-[110vh] py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-gray-50 overflow-x-hidden opacity-0"
     >
       <div className="max-w-7xl mx-auto">
         <div ref={headerRef} className="text-center mb-16">

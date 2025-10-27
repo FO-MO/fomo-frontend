@@ -4,11 +4,38 @@ import React from "react";
 import OverviewCards1 from "@/components/employee-section/OverviewCards1";
 import OverviewCards2 from "@/components/employee-section/OverviewCards2";
 import OverviewCards3 from "@/components/employee-section/OverviewCards3";
+import SubBar from "@/components/subBar";
 
 export default function EmployeeOverview() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <SubBar
+          items={[
+            { url: "/employees/overview", name: "Overview", logo: "👤" },
+            {
+              url: "/employees/overview/performance",
+              name: "Applications",
+              logo: "📈",
+            },
+            {
+              url: "/employees/partnerships",
+              name: "College Partnerships",
+              logo: "💬",
+            },
+            {
+              url: "/employees/overview/engagement",
+              name: "Job Postings",
+              logo: "💬",
+            },
+            {
+              url: "/employees/overview/engagement",
+              name: "Analytics",
+              logo: "💬",
+            },
+          ]}
+          className="mb-10"
+        />
         {/* Header Section */}
         <div className="mb-8 sm:mb-12">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

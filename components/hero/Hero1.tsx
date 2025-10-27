@@ -11,7 +11,7 @@ function Writer() {
       <Typewriter
         words={["NEVER FEAR\nMISSING OUT"]}
         loop={1}
-        cursor
+        cursor={false}
         cursorStyle="|"
         typeSpeed={80}
         delaySpeed={1000}
@@ -83,7 +83,7 @@ export default function Hero1() {
 
   return (
     <section
-      className="w-full bg-[#0f4f4a] text-white"
+      className="w-full min-h-[100vh] bg-[#0f4f4a] text-white"
       style={{
         backgroundImage:
           "repeating-linear-gradient(135deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 10px, transparent 10px, transparent 20px)",
