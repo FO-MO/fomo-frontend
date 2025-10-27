@@ -83,7 +83,7 @@ export default function Hero1() {
 
   return (
     <section
-      className="w-full bg-[#0f4f4a] text-white"
+      className="w-full mt-5 bg-[#0f4f4a] text-white"
       style={{
         backgroundImage:
           "repeating-linear-gradient(135deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 10px, transparent 10px, transparent 20px)",
@@ -124,7 +124,7 @@ export default function Hero1() {
               placeholder="Type school or personal email here"
             />
             <Link href="/auth/signup" className="w-full sm:w-auto">
-              <button className="w-full sm:w-auto bg-[#d6ff3a] cursor-pointer text-[#082926] font-extrabold px-6 py-3 hover:-translate-y-1 rounded-lg shadow-[0_4px_0_rgba(0,0,0,0.3)] hover:shadow-[0_8px_0_rgba(0,0,0,0.3)] whitespace-nowrap">
+              <button className="w-full sm:w-auto bg-[#d6ff3a] cursor-pointer text-[#082926] font-extrabold px-6 py-3 rounded-lg shadow-[0_4px_0_rgba(0,0,0,0.3)] transform transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_8px_0_rgba(0,0,0,0.3)] whitespace-nowrap">
                 Sign up
               </button>
             </Link>

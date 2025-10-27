@@ -18,7 +18,7 @@ const items: Item[] = [
   { key: "dashboard", label: "Dashboard", href: "/colleges/dashboard" },
   { key: "students", label: "Students", href: "/colleges/students" },
   { key: "analytics", label: "Analytics", href: "/colleges/analytics" },
-  { key: "placements", label: "Placements", href: "/colleges/placements" },
+  { key: "placements", label: "Placements", href: "/colleges/jobs" },
   { key: "recruiting", label: "Recruiting", href: "/colleges/recruiting" },
   { key: "reports", label: "Reports", href: "/colleges/reports" },
   { key: "settings", label: "Settings", href: "/colleges/settings" },

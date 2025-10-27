@@ -153,7 +153,7 @@ export default function CollegeDashboard() {
 
       {/* HAMBURGER */}
       <button
-        className="fixed top-20 left-0 px-3 scale-110 z-[60] py-[3px] border-1 border-black/30 cursor-pointer rounded-br-2xl  bg-white shadow-lg  sm:hidden hover:bg-gray-50 transition-colors"
+        className="fixed top-20 left-0 px-3 scale-110 z-[60] py-[3px] border-2 border-black/100 cursor-pointer rounded-br-2xl  bg-gray-200 shadow-[0px_0px_4px_#0006] sm:hidden active:bg-teal-600 transition-colors"
         onClick={() => setSidebarOpen(!sidebarOpen)}
         aria-label="Toggle sidebar"
       >

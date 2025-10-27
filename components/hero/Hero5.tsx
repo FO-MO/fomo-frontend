@@ -12,7 +12,7 @@ export default function Hero5() {
           through automated upskilling and networking.
         </p>
         <Link href="/auth/signup">
-          <button className="group relative bg-[#d6ff3a] text-[#082926] font-bold px-8 py-4 rounded-lg text-base sm:text-lg transition-all duration-300 hover:shadow-[0_0_20px_rgba(214,255,58,0.4)] hover:-translate-y-1">
+          <button className="group relative cursor-pointer bg-[#d6ff3a] text-[#082926] font-bold px-8 py-4 rounded-lg text-base sm:text-lg transition-all duration-300 hover:shadow-[0_0_20px_rgba(214,255,58,0.3)] hover:-translate-y-1">
             <span className="flex items-center gap-2">
               Get Started Now
               <svg
