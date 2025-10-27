@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 
-export default function Login() {
+export default function EmployerLogin() {
   return (
     <div className="min-h-screen w-screen flex flex-col">
       {/* Full-width header */}
@@ -16,7 +16,8 @@ export default function Login() {
             Sign up for free
           </h2>
           <p className="text-sm text-gray-400 mt-2 mb-2">
-            Create an account to post your job—and gain access to more than 15 million verified students and alumni.
+            Create an account to post your job—and gain access to more than 15
+            million verified students and alumni.
           </p>
 
           <form action="#" method="POST" className="space-y-6">
@@ -103,7 +104,7 @@ export default function Login() {
                 className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-teal-700 sm:text-sm"
               />
             </div>
-            
+
             <div>
               <label
                 htmlFor="text"
@@ -192,7 +193,8 @@ export default function Login() {
             </div>
 
             <p className="text-sm text-gray-400 mt-2 mb-1">
-              By clicking "Create account", I agree to the ConnectEd Terms of Service and have read the Privacy Policy.
+              By clicking "Create account", I agree to the ConnectEd Terms of
+              Service and have read the Privacy Policy.
             </p>
 
             <button
@@ -210,7 +212,10 @@ export default function Login() {
             <div className="flex-grow border-t border-gray-300"></div>
           </div>
 
-          <Link href="/Signup" className="mt-4 w-full inline-block text-center border border-teal-900 text-teal-700 bg-white py-2 rounded-md hover:bg-teal-900 hover:text-white transition-colors duration-200">
+          <Link
+            href="/Signup"
+            className="mt-4 w-full inline-block text-center border border-teal-900 text-teal-700 bg-white py-2 rounded-md hover:bg-teal-900 hover:text-white transition-colors duration-200"
+          >
             Sign Up
           </Link>
         </div>
