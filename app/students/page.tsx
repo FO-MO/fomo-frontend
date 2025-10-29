@@ -64,70 +64,180 @@ export default function StudentsHomePage() {
   const { user, composer, postsSectionTitle, posts } = homePageData;
 
   return (
-    <main className="w-full px-6 sm:px-8 pt-8 pb-16 bg-gray-50">
-      <section className="max-w-3xl mx-auto flex flex-col gap-8">
-        <header>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back, {user.name}! {user.greetingEmoji}
-          </h1>
-          <p className="text-gray-500 mt-1">{user.subtitle}</p>
+    <main className="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-20 bg-white min-h-screen">
+      <section className="max-w-6xl mx-auto">
+        {/* Hero Header Section */}
+        <header className="mb-8">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-3xl sm:text-4xl font-bold text-black">
+              Welcome back, {user.name}! {user.greetingEmoji}
+            </h1>
+            <p className="text-base text-black max-w-2xl">{user.subtitle}</p>
+          </div>
         </header>
 
-        <section className="bg-white border border-gray-200 rounded-3xl shadow-sm p-6 flex flex-col gap-4">
-          <div className="flex items-start gap-3">
-            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-sm font-semibold text-gray-700">
-              {user.initials}
-            </div>
-            <textarea
-              className="flex-1 min-h-[100px] border-none resize-none focus:outline-none text-gray-700 placeholder:text-gray-400"
-              placeholder={composer.placeholder}
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <button
-              type="button"
-              className="flex items-center gap-2 text-gray-500 hover:text-gray-700 transition"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.5}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3 5.25a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 5.25v13.5a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18.75V5.25z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3 15l6-6 4 4 5-5 3 3"
-                />
-              </svg>
-              Add photo
-            </button>
-            <button
-              type="button"
-              className="px-5 py-2 rounded-full bg-[#879EA2] text-white font-semibold hover:bg-[#6f878b] transition"
-            >
-              {composer.postLabel}
-            </button>
-          </div>
-        </section>
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Feed (2 cols on desktop) */}
+          <div className="lg:col-span-2 flex flex-col gap-6">
+            {/* Composer Card */}
+            <section className="bg-white border border-gray-300 rounded-lg shadow-sm p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold text-black">
+                  {user.initials}
+                </div>
+                <div className="flex-1">
+                  <textarea
+                    className="w-full min-h-[80px] resize-none border border-gray-300 focus:border-gray-500 focus:outline-none text-black placeholder:text-gray-500 px-3 py-2 rounded-md"
+                    placeholder={composer.placeholder}
+                  />
 
-        <section className="flex flex-col gap-4">
-          <h2 className="text-lg font-semibold text-gray-900">
-            {postsSectionTitle}
-          </h2>
-          <div className="flex flex-col gap-4">
-            {posts.map((post) => (
-              <PostCard key={post.id} post={post} />
-            ))}
+                  <div className="mt-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-sm text-black">
+                      <button className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-gray-100 transition">
+                        <svg
+                          className="w-4 h-4 text-gray-600"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7"
+                          />
+                          <path
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M8 11l3 3 5-5"
+                          />
+                        </svg>
+                        <span className="hidden sm:inline">Photo</span>
+                      </button>
+                      <button className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-gray-100 transition">
+                        <svg
+                          className="w-4 h-4 text-gray-600"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"
+                          />
+                          <path
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M7 10l5 5 5-7"
+                          />
+                        </svg>
+                        <span className="hidden sm:inline">Video</span>
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button className="px-4 py-2 rounded-md bg-gray-200 text-black font-medium hover:bg-gray-300 transition">
+                        Cancel
+                      </button>
+                      <button className="px-4 py-2 rounded-md bg-black text-white font-medium hover:bg-gray-800 transition">
+                        {composer.postLabel}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Feed Section */}
+            <section className="flex flex-col gap-4">
+              <h2 className="text-xl font-semibold text-black">
+                {postsSectionTitle}
+              </h2>
+              <div className="flex flex-col gap-4">
+                {posts.map((post) => (
+                  <PostCard key={post.id} post={post} />
+                ))}
+              </div>
+            </section>
           </div>
-        </section>
+
+          {/* Right Sidebar */}
+          <div className="lg:col-span-1 flex flex-col gap-4">
+            {/* Trending Section */}
+            <div className="bg-white border border-gray-300 rounded-lg shadow-sm p-4">
+              <h3 className="text-lg font-semibold text-black mb-3">
+                Trending
+              </h3>
+              <div className="flex flex-col gap-2">
+                {[
+                  { tag: "#Internships", count: "2.5K posts" },
+                  { tag: "#StartupLife", count: "1.8K posts" },
+                  { tag: "#CareerGrowth", count: "3.2K posts" },
+                  { tag: "#TechJobs", count: "4.1K posts" },
+                ].map((trend, idx) => (
+                  <button
+                    key={idx}
+                    className="text-left p-2 rounded-md hover:bg-gray-100 transition"
+                  >
+                    <p className="font-medium text-black">{trend.tag}</p>
+                    <p className="text-sm text-gray-600">{trend.count}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Suggested Connections */}
+            <div className="bg-white border border-gray-300 rounded-lg shadow-sm p-4">
+              <h3 className="text-lg font-semibold text-black mb-3">
+                People You Know
+              </h3>
+              <div className="flex flex-col gap-2">
+                {[
+                  { name: "Alex Johnson", role: "Product Manager" },
+                  { name: "Sarah Chen", role: "UX Designer" },
+                  { name: "Mike Patel", role: "Full Stack Dev" },
+                ].map((person, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 transition"
+                  >
+                    <div>
+                      <p className="font-medium text-black text-sm">
+                        {person.name}
+                      </p>
+                      <p className="text-xs text-gray-600">{person.role}</p>
+                    </div>
+                    <button className="px-3 py-1 text-xs font-medium rounded-md bg-black text-white hover:bg-gray-800 transition">
+                      Follow
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="bg-white border border-gray-300 rounded-lg shadow-sm p-4">
+              <h3 className="text-lg font-semibold text-black mb-3">
+                Your Activity
+              </h3>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-gray-100 rounded-md p-3 text-center">
+                  <p className="text-xl font-semibold text-black">24</p>
+                  <p className="text-xs text-gray-600">Connections</p>
+                </div>
+                <div className="bg-gray-100 rounded-md p-3 text-center">
+                  <p className="text-xl font-semibold text-black">8</p>
+                  <p className="text-xs text-gray-600">Posts</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
     </main>
   );
