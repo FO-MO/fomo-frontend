@@ -19,7 +19,7 @@ type User = {
 const DASHBOARD_ROUTES: Record<User["userType"], string> = {
   student: "/students",
   college: "/colleges/dashboard",
-  employer: "/employees",
+  employer: "/employers/overview",
 };
 
 export default function TopBar({
@@ -97,7 +97,7 @@ export default function TopBar({
                 </a>
                 <a
                   className={`hidden md:inline-block ${navLinkBase} ${navLinkColor}`}
-                  href="#"
+                  href="/employers/overview"
                 >
                   For Employers
                 </a>
