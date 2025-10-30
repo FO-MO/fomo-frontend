@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { RefreshCw, Plus } from "lucide-react";
 import VideoPlayer from "@/components/student-section/VideoPlayer";
+import UploadVideoModal from "@/components/student-section/UploadVideoModal";
 
 type Video = {
   id: string;
@@ -32,6 +33,7 @@ export default function ClubVideosPage() {
   const [clubDetails, setClubDetails] = useState<ClubDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
 
   useEffect(() => {
     // TODO: Replace with actual API call
@@ -116,10 +118,39 @@ export default function ClubVideosPage() {
   };
 
   const handleUploadVideo = () => {
-    // TODO: Implement video upload functionality
-    // This could open a modal or navigate to an upload page
-    // Example: router.push(`/students/clubs/${clubId}/upload`);
-    console.log("Upload video clicked");
+    setShowUploadModal(true);
+  };
+
+  const handleVideoUpload = async (videoData: {
+    title: string;
+    description: string;
+    videoFile: File;
+    thumbnailFile?: File;
+  }) => {
+    // TODO: Implement actual upload to API
+    // Example implementation:
+    //
+    // const formData = new FormData();
+    // formData.append('title', videoData.title);
+    // formData.append('description', videoData.description);
+    // formData.append('video', videoData.videoFile);
+    // if (videoData.thumbnailFile) {
+    //   formData.append('thumbnail', videoData.thumbnailFile);
+    // }
+    // formData.append('clubId', clubId);
+    //
+    // const response = await fetch('/api/clubs/videos/upload', {
+    //   method: 'POST',
+    //   body: formData,
+    // });
+    //
+    // if (response.ok) {
+    //   // Refresh the videos list
+    //   handleRefresh();
+    // }
+
+    console.log("Video upload data:", videoData);
+    alert("Video upload functionality - connect to your API");
   };
 
   if (loading) {
@@ -231,6 +262,15 @@ export default function ClubVideosPage() {
         <VideoPlayer
           video={selectedVideo}
           onClose={() => setSelectedVideo(null)}
+        />
+      )}
+
+      {/* Upload Video Modal */}
+      {showUploadModal && clubDetails && (
+        <UploadVideoModal
+          clubName={clubDetails.name}
+          onClose={() => setShowUploadModal(false)}
+          onUpload={handleVideoUpload}
         />
       )}
     </main>
