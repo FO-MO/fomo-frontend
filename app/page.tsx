@@ -16,7 +16,7 @@ const user = {
 export default function Home() {
   return (
     <>
-      <TopBar theme="home" user={user} />
+      <TopBar theme="home" user={null} />
       <Hero1 />
       <Hero2 />
       <Hero3 />
