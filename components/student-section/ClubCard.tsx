@@ -1,4 +1,7 @@
+"use client";
+
 import React from "react";
+import { useRouter } from "next/navigation";
 
 export type Club = {
   id: string | number;
@@ -20,8 +23,17 @@ type Props = {
 };
 
 export default function ClubCard({ club }: Props) {
+  const router = useRouter();
+
+  const handleCardClick = () => {
+    router.push(`/students/clubs/${club.id}`);
+  };
+
   return (
-    <article className="max-w-sm bg-white rounded-2xl overflow-hidden shadow-md">
+    <article
+      onClick={handleCardClick}
+      className="max-w-sm bg-white rounded-2xl overflow-hidden shadow-md cursor-pointer hover:shadow-xl transition-shadow duration-300"
+    >
       <div className="h-36 bg-gray-200 relative flex items-center justify-center">
         {club.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element

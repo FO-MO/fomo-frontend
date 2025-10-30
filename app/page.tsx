@@ -9,7 +9,7 @@ import Footer from "@/components/bars/footer";
 const user = {
   name: "Simon Johnson",
   abbreviation: "SJ",
-  userType: "employer" as const,
+  userType: "student" as const,
   loggedIn: true,
 };
 

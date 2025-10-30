@@ -215,7 +215,7 @@ export default function SideBar({ active = "home", className = "" }: Props) {
 
   return (
     <aside
-      className={`hidden md:block fixed left-0 z-40 w-56 h-[calc(100vh-5rem)] ${className}`}
+      className={`hidden md:block fixed left-0 z-9 w-56 h-[calc(100vh-5rem)] ${className}`}
       aria-label="Sidebar"
     >
       <div className="h-full bg-[#192534] text-white min-h-screen p-6">

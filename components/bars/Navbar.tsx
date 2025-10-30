@@ -4,7 +4,7 @@ export default function Navbar() {
   return (
     <>
       <header
-        className="fixed inset-x-0 top-0 z-1000 h-20 border-b border-white/40 bg-gradient-to-r from-[#cfd5df]/60 via-white/30 to-white/20 backdrop-blur-xl"
+        className="fixed inset-x-0 top-0 z-10 h-20 border-b border-white/40 bg-gradient-to-r from-[#cfd5df]/60 via-white/30 to-white/20 backdrop-blur-xl"
         role="banner"
       >
         <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-6 sm:px-8">
