@@ -1,5 +1,8 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import ProjectCard, { Project } from "@/components/student-section/ProjectCard";
+import CreateProjectModal from "@/components/student-section/CreateProjectModal";
 
 const mockProjects: Project[] = [
   {
@@ -36,6 +39,31 @@ const mockProjects: Project[] = [
 ];
 
 export default function StudentsPage() {
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
+  const handleCreateProject = async (projectData: {
+    name: string;
+    description: string;
+    githubUrl: string;
+    coverImageUrl?: string;
+    skills: string[];
+    tags: string[];
+  }) => {
+    // TODO: Implement API call to create project
+    // Example:
+    // const response = await fetch('/api/projects', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify(projectData)
+    // });
+    // if (response.ok) {
+    //   // Refresh projects list
+    // }
+
+    console.log("Create project data:", projectData);
+    alert("Project created! (Connect to your API)");
+  };
+
   return (
     <main className="w-full px-6 sm:px-8 pt-8 pb-16">
       <div className="flex items-start justify-between gap-6">
@@ -47,7 +75,10 @@ export default function StudentsPage() {
         </div>
 
         <div className="ml-auto">
-          <button className="bg-[#0f4f4a] text-white px-4 py-2 rounded-lg inline-flex items-center gap-2">
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="bg-[#0f4f4a] text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 hover:bg-[#0d3f3b] transition-colors"
+          >
             <span className="text-2xl">+</span>
             <span>Create Project</span>
           </button>
@@ -76,6 +107,14 @@ export default function StudentsPage() {
           <ProjectCard key={p.id} project={p} />
         ))}
       </div>
+
+      {/* Create Project Modal */}
+      {showCreateModal && (
+        <CreateProjectModal
+          onClose={() => setShowCreateModal(false)}
+          onCreateProject={handleCreateProject}
+        />
+      )}
     </main>
   );
 }
