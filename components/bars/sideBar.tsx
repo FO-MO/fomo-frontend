@@ -22,7 +22,7 @@ const items: Item[] = [
   { key: "profile", label: "Profile", href: "/students/profile" },
   { key: "messages", label: "Messages", href: "/students/messages" },
   { key: "search", label: "Search", href: "/students/search" },
-  { key: "copilot", label: "FOMO AI Copilot", href: "#" },
+  { key: "copilot", label: "FOMO AI Copilot", href: "/students/ai" },
 ];
 
 function Icon({ name }: { name: string }) {

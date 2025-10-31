@@ -12,24 +12,24 @@ export default function EmployeeOverview() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <SubBar
           items={[
-            { url: "/employees/overview", name: "Overview", logo: "👤" },
+            { url: "/employers/overview", name: "Overview", logo: "👤" },
             {
-              url: "/employees/overview/performance",
+              url: "/employers/overview/performance",
               name: "Applications",
               logo: "📈",
             },
             {
-              url: "/employees/partnerships",
+              url: "/employers/partnerships",
               name: "College Partnerships",
               logo: "💬",
             },
             {
-              url: "/employees/overview/engagement",
+              url: "/employers/overview/engagement",
               name: "Job Postings",
               logo: "💬",
             },
             {
-              url: "/employees/overview/engagement",
+              url: "/employers/overview/engagement",
               name: "Analytics",
               logo: "💬",
             },
