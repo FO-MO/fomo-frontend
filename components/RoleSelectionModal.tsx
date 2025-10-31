@@ -110,7 +110,7 @@ export default function RoleSelectionModal({
               </div>
 
               <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-teal-700 transition-colors">
-                I'm a Student
+                I&apos;m a Student
               </h3>
               <p className="text-gray-600 mb-6">
                 Explore opportunities, connect with companies, and kickstart
@@ -162,7 +162,7 @@ export default function RoleSelectionModal({
               </div>
 
               <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-indigo-700 transition-colors">
-                I'm an Employer
+                I&apos;m an Employer
               </h3>
               <p className="text-gray-600 mb-6">
                 Discover top talent, post opportunities, and build partnerships
