@@ -15,7 +15,9 @@ export default function RoleSelectionModal({
   onClose,
   mode,
 }: RoleSelectionModalProps) {
-  const [selectedRole, setSelectedRole] = useState<"student" | "employer" | null>(null);
+  const [selectedRole, setSelectedRole] = useState<
+    "student" | "employer" | null
+  >(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const router = useRouter();
 
@@ -69,7 +71,7 @@ export default function RoleSelectionModal({
           >
             <X className="w-6 h-6" />
           </button>
-          
+
           <div className="text-center">
             <h2 className="text-4xl font-bold text-white mb-3 animate-fade-in">
               {mode === "login" ? "Welcome Back!" : "Join FOMO"}
@@ -111,7 +113,8 @@ export default function RoleSelectionModal({
                 I'm a Student
               </h3>
               <p className="text-gray-600 mb-6">
-                Explore opportunities, connect with companies, and kickstart your career journey.
+                Explore opportunities, connect with companies, and kickstart
+                your career journey.
               </p>
 
               {/* Features */}
@@ -162,7 +165,8 @@ export default function RoleSelectionModal({
                 I'm an Employer
               </h3>
               <p className="text-gray-600 mb-6">
-                Discover top talent, post opportunities, and build partnerships with institutions.
+                Discover top talent, post opportunities, and build partnerships
+                with institutions.
               </p>
 
               {/* Features */}
@@ -196,7 +200,9 @@ export default function RoleSelectionModal({
         {/* Footer */}
         <div className="px-8 pb-8 text-center">
           <p className="text-gray-500 text-sm">
-            {mode === "login" ? "Don't have an account?" : "Already have an account?"}{" "}
+            {mode === "login"
+              ? "Don't have an account?"
+              : "Already have an account?"}{" "}
             <button
               onClick={onClose}
               className="text-teal-600 hover:text-teal-700 font-semibold hover:underline"
@@ -220,7 +226,8 @@ export default function RoleSelectionModal({
         }
 
         @keyframes float {
-          0%, 100% {
+          0%,
+          100% {
             transform: translateY(0px);
           }
           50% {

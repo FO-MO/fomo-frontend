@@ -18,7 +18,7 @@ export default function Hero5({ onSignupClick }: Hero5Props) {
           through automated upskilling and networking.
         </p>
         <Link href="/auth/signup">
-          <button 
+          <button
             onClick={(e) => {
               if (onSignupClick) {
                 e.preventDefault();

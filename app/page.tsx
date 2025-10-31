@@ -28,7 +28,11 @@ export default function Home() {
 
   return (
     <>
-      <TopBar theme="home" user={null} onLoginClick={() => openModal("login")} />
+      <TopBar
+        theme="home"
+        user={null}
+        onLoginClick={() => openModal("login")}
+      />
       <Hero1 onSignupClick={() => openModal("signup")} />
       <Hero2 />
       <Hero3 />

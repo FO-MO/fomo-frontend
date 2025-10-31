@@ -128,7 +128,7 @@ export default function Hero1({ onSignupClick }: Hero1Props) {
               placeholder="Type school or personal email here"
             />
             <Link href="/auth/signup" className="w-full sm:w-auto">
-              <button 
+              <button
                 onClick={(e) => {
                   if (onSignupClick) {
                     e.preventDefault();
