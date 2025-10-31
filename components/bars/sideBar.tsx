@@ -2,11 +2,13 @@
 import React, { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 
 type Item = {
   key: string;
   label: string;
   href?: string;
+  icon?: string;
 };
 
 type Props = {
@@ -15,163 +17,50 @@ type Props = {
 };
 
 const items: Item[] = [
-  { key: "home", label: "Home", href: "/students" },
-  { key: "projects", label: "Projects", href: "/students/projects" },
-  { key: "clubs", label: "Clubs", href: "/students/clubs" },
-  { key: "startups", label: "Startups", href: "/students/startups" },
-  { key: "profile", label: "Profile", href: "/students/profile" },
-  { key: "messages", label: "Messages", href: "/students/messages" },
-  { key: "search", label: "Search", href: "/students/search" },
-  { key: "copilot", label: "FOMO AI Copilot", href: "/students/ai" },
+  { key: "home", label: "Home", href: "/students", icon: "/icons/home.svg" },
+  {
+    key: "projects",
+    label: "Projects",
+    href: "/students/projects",
+    icon: "/icons/projects.svg",
+  },
+  {
+    key: "clubs",
+    label: "Clubs",
+    href: "/students/clubs",
+    icon: "/icons/Clubs.svg",
+  },
+  {
+    key: "startups",
+    label: "Startups",
+    href: "/students/startups",
+    icon: "/icons/startup.svg",
+  },
+  {
+    key: "profile",
+    label: "Profile",
+    href: "/students/profile",
+    icon: "/icons/Profile.svg",
+  },
+  {
+    key: "messages",
+    label: "Messages",
+    href: "/students/messages",
+    icon: "/icons/messages.svg",
+  },
+  {
+    key: "search",
+    label: "Search",
+    href: "/students/search",
+    icon: "/icons/search.svg",
+  },
+  {
+    key: "copilot",
+    label: "FOMO AI Copilot",
+    href: "/students/ai",
+    icon: "/icons/ai.svg",
+  },
 ];
-
-function Icon({ name }: { name: string }) {
-  // simple inline icons for the set used in the sidebar
-  switch (name) {
-    case "home":
-      return (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M3 12l9-9 9 9v8a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-4H9v4a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-8z"
-          />
-        </svg>
-      );
-    case "projects":
-      return (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M3 7v10a2 2 0 0 0 2 2h4V5H5a2 2 0 0 0-2 2zM21 7v10a2 2 0 0 1-2 2h-4V5h4a2 2 0 0 1 2 2z"
-          />
-        </svg>
-      );
-    case "clubs":
-      return (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 14l9-5-9-5-9 5 9 5z"
-          />
-          <path
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 14l6.16-3.422A12.083 12.083 0 0119 8.5"
-          />
-        </svg>
-      );
-    case "startups":
-      return (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 8c-1.657 0-3 1.567-3 3.5S10.343 15 12 15s3-1.567 3-3.5S13.657 8 12 8z"
-          />
-          <path
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M19 21H5"
-          />
-        </svg>
-      );
-    case "profile":
-      return (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M5.121 17.804A9 9 0 1118.88 6.196 9 9 0 015.12 17.804z"
-          />
-        </svg>
-      );
-    case "messages":
-      return (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M7 8h10M7 12h8m-8 4h6"
-          />
-        </svg>
-      );
-    case "search":
-      return (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
-      );
-    case "copilot":
-      return (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7l3-7z"
-          />
-        </svg>
-      );
-    default:
-      return null;
-  }
-}
 
 export default function SideBar({ active = "home", className = "" }: Props) {
   const pathname = usePathname();
@@ -227,7 +116,15 @@ export default function SideBar({ active = "home", className = "" }: Props) {
             const content = (
               <>
                 <span className={`p-1 ${isActive ? "bg-transparent" : ""}`}>
-                  <Icon name={it.key} />
+                  {it.icon && (
+                    <Image
+                      src={it.icon}
+                      alt={it.label}
+                      width={20}
+                      height={20}
+                      className="w-5 h-5"
+                    />
+                  )}
                 </span>
                 <span className="font-medium">{it.label}</span>
               </>
