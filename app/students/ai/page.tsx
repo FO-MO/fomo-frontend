@@ -1,14 +1,14 @@
 "use client";
 
 import React from "react";
-import { 
-  Lightbulb, 
-  Target, 
-  Users, 
-  TrendingUp, 
-  Rocket, 
+import {
+  Lightbulb,
+  Target,
+  Users,
+  TrendingUp,
+  Rocket,
   MessageSquare,
-  ArrowLeft 
+  ArrowLeft,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -170,8 +170,7 @@ export default function AIProjectGuidePage() {
                 Team Collaboration
               </h4>
               <p className="text-sm text-gray-600">
-                Find the right team members and manage your project
-                effectively
+                Find the right team members and manage your project effectively
               </p>
             </div>
           </div>
