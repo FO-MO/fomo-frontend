@@ -31,10 +31,10 @@ const items: Item[] = [
     icon: "/icons/Clubs.svg",
   },
   {
-    key: "startups",
-    label: "Startups",
-    href: "/students/startups",
-    icon: "/icons/startup.svg",
+    key: "jobs",
+    label: "Jobs",
+    href: "/students/jobs",
+    icon: "/icons/jobs.svg",
   },
   {
     key: "profile",

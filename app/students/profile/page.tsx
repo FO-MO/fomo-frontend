@@ -18,6 +18,32 @@ const profileData = {
   profileImageUrl: "https://images.hitpaw.com/topics/3d/profile-photo-1.jpg",
   followers: 0,
   following: 0,
+  // New fields
+  institution: "Massachusetts Institute of Technology",
+  major: "Computer Science",
+  graduationYear: "2026",
+  location: "Cambridge, MA",
+  bio: "Passionate about AI/ML and building impactful products. Always looking to collaborate on innovative projects!",
+  skills: [
+    "React",
+    "TypeScript",
+    "Node.js",
+    "Python",
+    "Machine Learning",
+    "UI/UX Design",
+    "Docker",
+    "AWS",
+    "GraphQL",
+    "TensorFlow",
+  ],
+  interests: [
+    "Artificial Intelligence",
+    "Web Development",
+    "Startups",
+    "Product Design",
+    "Open Source",
+    "Hackathons",
+  ],
   tabs: [
     { key: "projects" as TabKey, label: "Projects" },
     { key: "clubs" as TabKey, label: "Clubs" },
@@ -79,6 +105,13 @@ export default function ProfilePage() {
     email: string;
     profileImage: File | null;
     backgroundImage: File | null;
+    institution: string;
+    major: string;
+    graduationYear: string;
+    location: string;
+    bio: string;
+    skills: string[];
+    interests: string[];
   }) => {
     // TODO: Implement API call to save profile data
     console.log("Saving profile:", data);
@@ -229,6 +262,146 @@ export default function ProfilePage() {
           </div>
         </div>
 
+        {/* About Section */}
+        <div className="mb-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Bio and Details */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Bio */}
+            {profileData.bio && (
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h2 className="text-lg font-bold text-gray-900 mb-3">About</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  {profileData.bio}
+                </p>
+              </div>
+            )}
+
+            {/* Skills */}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              <h2 className="text-lg font-bold text-gray-900 mb-4">Skills</h2>
+              <div className="flex flex-wrap gap-2">
+                {profileData.skills.map((skill, index) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1.5 bg-teal-50 text-teal-700 rounded-lg text-sm font-medium border border-teal-200 hover:bg-teal-100 transition-colors"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Interests */}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              <h2 className="text-lg font-bold text-gray-900 mb-4">
+                Interests
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {profileData.interests.map((interest, index) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium border border-blue-200 hover:bg-blue-100 transition-colors"
+                  >
+                    {interest}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column - Education and Info */}
+          <div className="space-y-6">
+            {/* Education */}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              <h2 className="text-lg font-bold text-gray-900 mb-4">
+                Education
+              </h2>
+              <div className="space-y-3">
+                <div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <svg
+                        className="w-5 h-5 text-white"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 14l9-5-9-5-9 5 9 5z M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"
+                        />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900 text-sm">
+                        {profileData.institution}
+                      </p>
+                      <p className="text-sm text-gray-600 mt-0.5">
+                        {profileData.major}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Class of {profileData.graduationYear}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Location */}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              <h2 className="text-lg font-bold text-gray-900 mb-4">Location</h2>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-red-400 to-red-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <svg
+                    className="w-5 h-5 text-white"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                </div>
+                <p className="text-gray-700 font-medium">
+                  {profileData.location}
+                </p>
+              </div>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="bg-gradient-to-br from-teal-50 to-blue-50 rounded-xl p-6 border border-teal-200">
+              <h2 className="text-lg font-bold text-gray-900 mb-4">Activity</h2>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-700">Projects</span>
+                  <span className="text-sm font-bold text-teal-700">
+                    {profileData.projects.length}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-700">Clubs</span>
+                  <span className="text-sm font-bold text-teal-700">
+                    {profileData.clubs.length}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-700">Internships</span>
+                  <span className="text-sm font-bold text-teal-700">
+                    {profileData.internships.length}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Tabs */}
         <div className="mb-8">
           <div className="inline-flex gap-1 bg-white rounded-xl p-1.5 shadow-md border border-gray-200">
@@ -262,6 +435,13 @@ export default function ProfilePage() {
           email: profileData.email,
           profileImageUrl: profileData.profileImageUrl,
           backgroundImageUrl: profileData.backgroundImageUrl,
+          institution: profileData.institution,
+          major: profileData.major,
+          graduationYear: profileData.graduationYear,
+          location: profileData.location,
+          bio: profileData.bio,
+          skills: profileData.skills,
+          interests: profileData.interests,
         }}
         onSave={handleSaveProfile}
       />

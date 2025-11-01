@@ -222,13 +222,13 @@ export default function ClubVideosPage() {
             >
               <RefreshCw className="w-5 h-5 text-gray-600" />
             </button>
-            <button
+            {/* <button
               onClick={handleUploadVideo}
               className="flex items-center gap-2 bg-teal-700 hover:bg-teal-800 text-white px-6 py-2.5 rounded-lg font-medium transition-all shadow-md hover:shadow-lg"
             >
               <Plus className="w-5 h-5" />
               Upload Video
-            </button>
+            </button> */}
           </div>
         </div>
 

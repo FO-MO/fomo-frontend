@@ -34,7 +34,7 @@ const employers = [
   },
 ];
 
-export default function StartupsPage() {
+export default function JobsPage() {
   const [tab, setTab] = useState<"jobs" | "employers">("jobs");
 
   return (

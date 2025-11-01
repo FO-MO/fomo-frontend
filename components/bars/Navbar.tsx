@@ -34,10 +34,10 @@ export default function Navbar() {
           </Link>
 
           <div className="flex items-center gap-6 text-gray-700">
-            <div className="relative">
+            <Link href="/students/messages" className="relative">
               <svg
                 aria-hidden="true"
-                className="h-6 w-6"
+                className="h-6 w-6 hover:text-gray-900 transition-colors cursor-pointer"
                 fill="none"
                 stroke="currentColor"
                 strokeLinecap="round"
@@ -51,7 +51,7 @@ export default function Navbar() {
                 className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-teal-500"
                 aria-hidden="true"
               />
-            </div>
+            </Link>
 
             <svg
               aria-hidden="true"

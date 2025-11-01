@@ -1,7 +1,48 @@
 "use client";
 
-import { X, Upload, Camera } from "lucide-react";
+import { X, Upload, Camera, Check } from "lucide-react";
 import { useState, useRef } from "react";
+
+// Predefined options
+const AVAILABLE_SKILLS = [
+  "React",
+  "TypeScript",
+  "JavaScript",
+  "Node.js",
+  "Python",
+  "Java",
+  "C++",
+  "Machine Learning",
+  "UI/UX Design",
+  "Docker",
+  "AWS",
+  "GraphQL",
+  "TensorFlow",
+  "MongoDB",
+  "PostgreSQL",
+  "Git",
+  "Figma",
+  "Flutter",
+  "Swift",
+  "Kotlin",
+];
+
+const AVAILABLE_INTERESTS = [
+  "Artificial Intelligence",
+  "Web Development",
+  "Mobile Development",
+  "Startups",
+  "Product Design",
+  "Open Source",
+  "Hackathons",
+  "Data Science",
+  "Cloud Computing",
+  "Cybersecurity",
+  "Blockchain",
+  "Game Development",
+  "IoT",
+  "DevOps",
+];
 
 interface EditProfileModalProps {
   isOpen: boolean;
@@ -11,12 +52,26 @@ interface EditProfileModalProps {
     email: string;
     profileImageUrl: string | null;
     backgroundImageUrl: string | null;
+    institution?: string;
+    major?: string;
+    graduationYear?: string;
+    location?: string;
+    bio?: string;
+    skills?: string[];
+    interests?: string[];
   };
   onSave: (data: {
     name: string;
     email: string;
     profileImage: File | null;
     backgroundImage: File | null;
+    institution: string;
+    major: string;
+    graduationYear: string;
+    location: string;
+    bio: string;
+    skills: string[];
+    interests: string[];
   }) => void;
 }
 
@@ -28,6 +83,20 @@ export default function EditProfileModal({
 }: EditProfileModalProps) {
   const [name, setName] = useState(currentData.name);
   const [email, setEmail] = useState(currentData.email);
+  const [institution, setInstitution] = useState(currentData.institution || "");
+  const [major, setMajor] = useState(currentData.major || "");
+  const [graduationYear, setGraduationYear] = useState(
+    currentData.graduationYear || ""
+  );
+  const [location, setLocation] = useState(currentData.location || "");
+  const [bio, setBio] = useState(currentData.bio || "");
+  const [selectedSkills, setSelectedSkills] = useState<string[]>(
+    currentData.skills || []
+  );
+  const [selectedInterests, setSelectedInterests] = useState<string[]>(
+    currentData.interests || []
+  );
+
   const [profileImagePreview, setProfileImagePreview] = useState<string | null>(
     currentData.profileImageUrl
   );
@@ -70,6 +139,20 @@ export default function EditProfileModal({
     }
   };
 
+  const toggleSkill = (skill: string) => {
+    setSelectedSkills((prev) =>
+      prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
+    );
+  };
+
+  const toggleInterest = (interest: string) => {
+    setSelectedInterests((prev) =>
+      prev.includes(interest)
+        ? prev.filter((i) => i !== interest)
+        : [...prev, interest]
+    );
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave({
@@ -77,6 +160,13 @@ export default function EditProfileModal({
       email,
       profileImage: profileImageFile,
       backgroundImage: backgroundImageFile,
+      institution,
+      major,
+      graduationYear,
+      location,
+      bio,
+      skills: selectedSkills,
+      interests: selectedInterests,
     });
   };
 
@@ -231,6 +321,134 @@ export default function EditProfileModal({
                 placeholder="Enter your email"
                 required
               />
+            </div>
+
+            {/* Bio */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Bio
+              </label>
+              <textarea
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                rows={3}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900 resize-none"
+                placeholder="Tell us about yourself..."
+              />
+            </div>
+
+            {/* Institution */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Institution
+              </label>
+              <input
+                type="text"
+                value={institution}
+                onChange={(e) => setInstitution(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900"
+                placeholder="e.g., Massachusetts Institute of Technology"
+              />
+            </div>
+
+            {/* Major and Graduation Year */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Major
+                </label>
+                <input
+                  type="text"
+                  value={major}
+                  onChange={(e) => setMajor(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900"
+                  placeholder="e.g., Computer Science"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Graduation Year
+                </label>
+                <input
+                  type="text"
+                  value={graduationYear}
+                  onChange={(e) => setGraduationYear(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900"
+                  placeholder="e.g., 2026"
+                />
+              </div>
+            </div>
+
+            {/* Location */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Location
+              </label>
+              <input
+                type="text"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900"
+                placeholder="e.g., Cambridge, MA"
+              />
+            </div>
+
+            {/* Skills Selection */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                Skills ({selectedSkills.length} selected)
+              </label>
+              <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-lg p-3">
+                <div className="flex flex-wrap gap-2">
+                  {AVAILABLE_SKILLS.map((skill) => {
+                    const isSelected = selectedSkills.includes(skill);
+                    return (
+                      <button
+                        key={skill}
+                        type="button"
+                        onClick={() => toggleSkill(skill)}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
+                          isSelected
+                            ? "bg-teal-600 text-white"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        }`}
+                      >
+                        {isSelected && <Check className="w-3.5 h-3.5" />}
+                        {skill}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Interests Selection */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                Interests ({selectedInterests.length} selected)
+              </label>
+              <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-lg p-3">
+                <div className="flex flex-wrap gap-2">
+                  {AVAILABLE_INTERESTS.map((interest) => {
+                    const isSelected = selectedInterests.includes(interest);
+                    return (
+                      <button
+                        key={interest}
+                        type="button"
+                        onClick={() => toggleInterest(interest)}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
+                          isSelected
+                            ? "bg-blue-600 text-white"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        }`}
+                      >
+                        {isSelected && <Check className="w-3.5 h-3.5" />}
+                        {interest}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
 
