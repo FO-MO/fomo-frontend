@@ -74,7 +74,7 @@ export default function RoleSelectionModal({
 
           <div className="text-center">
             <h2 className="text-4xl font-bold text-white mb-3 animate-fade-in">
-              {mode === "login" ? "Welcome Back!" : "Join FOMO"}
+              {mode === "login" ? "Welcome Back!" : "Join FOOMO"}
             </h2>
             <p className="text-teal-100 text-lg animate-fade-in-delay">
               Choose your role to continue

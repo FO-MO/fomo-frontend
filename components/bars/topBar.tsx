@@ -24,7 +24,7 @@ const DASHBOARD_ROUTES: Record<User["userType"], string> = {
 };
 
 export default function TopBar({
-  title = "Fomo",
+  title = "FOOMO",
   theme = "white",
   user = null,
   onLoginClick,

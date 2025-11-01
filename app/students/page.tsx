@@ -50,7 +50,7 @@ const homePageData: HomePageData = {
       },
       postedAgo: "3 months ago",
       message:
-        "hey guys apply for this job role in fomo startup which is pretty cool to work.",
+        "hey guys apply for this job role in FOOMO startup which is pretty cool to work.",
       stats: {
         likes: 0,
         comments: 0,

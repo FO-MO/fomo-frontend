@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FOMO - AI-Powered Career Platform for Students & Job Seekers",
+  title: "FOOMO - AI-Powered Career Platform for Students & Job Seekers",
   description:
-    "Never Fear Missing Out on your dream job. FOMO automates your career journey with AI-powered job recommendations, personalized upskilling, networking automation, and direct college placement connections.",
+    "Never Fear Missing Out on your dream job. FOOMO automates your career journey with AI-powered job recommendations, personalized upskilling, networking automation, and direct college placement connections.",
   keywords: [
     "AI career platform",
     "student job placement",
@@ -40,9 +40,9 @@ export const metadata: Metadata = {
     "AI career advisor",
     "career guidance platform",
   ],
-  authors: [{ name: "FOMO Team" }],
-  creator: "FOMO",
-  publisher: "FOMO",
+  authors: [{ name: "FOOMO Team" }],
+  creator: "FOOMO",
+  publisher: "FOOMO",
   icons: {
     icon: "/foomo_logo.jpg",
   },
@@ -60,27 +60,27 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://fomo.app",
-    title: "FOMO - AI-Powered Career Platform for Students",
+    url: "https://FOOMO.app",
+    title: "FOOMO - AI-Powered Career Platform for Students",
     description:
       "Automate your entire career journey with AI-powered upskilling, networking, and college placement automation. Never miss out on your dream job.",
-    siteName: "FOMO",
+    siteName: "FOOMO",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "FOMO - AI-Powered Career Platform",
+        alt: "FOOMO - AI-Powered Career Platform",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "FOMO - AI-Powered Career Platform for Students",
+    title: "FOOMO - AI-Powered Career Platform for Students",
     description:
       "Automate your career journey with AI-powered job recommendations, upskilling, and networking automation.",
     images: ["/og-image.png"],
-    creator: "@fomo_app",
+    creator: "@FOOMO_app",
   },
   viewport: {
     width: "device-width",
@@ -93,7 +93,7 @@ export const metadata: Metadata = {
     // yahoo: "your-yahoo-verification-code",
   },
   alternates: {
-    canonical: "https://fomo.app",
+    canonical: "https://FOOMO.app",
   },
   category: "Career Development",
 };

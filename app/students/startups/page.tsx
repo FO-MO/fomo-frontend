@@ -26,7 +26,7 @@ const employers = [
     website: null,
   },
   {
-    name: "FOMO",
+    name: "FOOMO",
     joined: "Jul 28, 2025",
     description: "AI that automates in upskilling and networking",
     tag: null,
@@ -72,7 +72,7 @@ export default function StartupsPage() {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xl font-semibold">backend developer</span>
-                <span className="text-gray-500 text-sm">FOMO</span>
+                <span className="text-gray-500 text-sm">FOOMO</span>
               </div>
               <div className="flex items-center gap-4 text-gray-500 text-sm mb-2">
                 <span className="flex items-center gap-1">

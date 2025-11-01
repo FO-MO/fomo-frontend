@@ -201,7 +201,7 @@ export default function CollegeDashboard() {
             </div>
             <div>
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
-                FOMO College Dashboard
+                FOOMO College Dashboard
               </h1>
               <p className="text-sm sm:text-base text-gray-600">College Name</p>
             </div>
