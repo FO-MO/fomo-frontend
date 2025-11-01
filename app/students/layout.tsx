@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Fomo - Connect, Learn, Grow",
+  title: "FOOMO - Connect, Learn, Grow",
   description: "A platform for students to connect and grow",
 };
 

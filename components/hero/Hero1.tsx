@@ -101,7 +101,7 @@ export default function Hero1({ onSignupClick }: Hero1Props) {
           >
             <span className="w-2 h-2 rounded-full bg-[#d6ff3a] block" />
             <span className="font-semibold ">
-              Fomo is now available for all students
+              FOOMO is now available for all students
             </span>
           </div>
         </div>

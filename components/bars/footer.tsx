@@ -5,9 +5,9 @@ export default function Footer() {
     <footer className="w-full bg-[#0f4f4a] text-white">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 py-8 flex items-center justify-between">
         <div>
-          <div className="text-xl font-semibold">Fomo</div>
+          <div className="text-xl font-semibold">FOOMO</div>
           <div className="text-sm text-white/70 mt-2">
-            © 2025 FOMO. All rights reserved.
+            © 2025 FOOMO. All rights reserved.
           </div>
         </div>
 

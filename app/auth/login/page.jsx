@@ -21,7 +21,7 @@ export default function Login() {
     <div className="min-h-screen w-screen flex flex-col">
       <Link href="/">
         <div className="w-full border-b border-gray-300 py-4 px-12">
-          <h1 className="text-black text-3xl font-bold">FOMO</h1>
+          <h1 className="text-black text-3xl font-bold">FOOMO</h1>
         </div>
       </Link>
       {/* Centered login form */}

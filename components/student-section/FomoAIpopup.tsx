@@ -7,7 +7,7 @@ type Props = {
   onClose?: () => void;
 };
 
-export default function FomoAIpopup({ isOpen = true, onClose }: Props) {
+export default function FOOMOAIpopup({ isOpen = true, onClose }: Props) {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
   if (!isOpen) return null;
@@ -32,7 +32,7 @@ export default function FomoAIpopup({ isOpen = true, onClose }: Props) {
                   </svg>
                 </div>
                 <h2 className="text-xl font-bold text-gray-900">
-                  FOMO AI Copilot
+                  FOOMO AI Copilot
                 </h2>
               </div>
 
