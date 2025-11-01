@@ -36,6 +36,49 @@ const mockProjects: Project[] = [
     actions: [{ label: "View", href: "#" }],
     imageUrl: null,
   },
+  {
+    id: "3",
+    title: "Custom Memory Allocator",
+    description:
+      "Build a custom memory allocation and deallocation system similar to malloc and free. Focus on fragmentation and performance.",
+    tags: ["Project"],
+    creator: { name: "biyon binu", avatarUrl: null },
+    membersCount: 1,
+    skills: [
+      "C",
+      "C++",
+      "Pointers",
+      "Memory Management",
+      "Linked Lists",
+      "OS Concepts",
+    ],
+    actions: [{ label: "Join Project", href: "#" }],
+    imageUrl: null,
+  },
+  {
+    id: "4",
+    title: "AI Chatbot for Campus",
+    description:
+      "Create an LLM-based chatbot to answer student queries about courses and campus life.",
+    tags: ["Project"],
+    creator: { name: "alice doe", avatarUrl: null },
+    membersCount: 3,
+    skills: ["Python", "NLP", "APIs"],
+    actions: [{ label: "View", href: "#" }],
+    imageUrl: null,
+  },
+  {
+    id: "5",
+    title: "AI Chatbot for Campus",
+    description:
+      "Create an LLM-based chatbot to answer student queries about courses and campus life.",
+    tags: ["Project"],
+    creator: { name: "alice doe", avatarUrl: null },
+    membersCount: 3,
+    skills: ["Python", "NLP", "APIs"],
+    actions: [{ label: "View", href: "#" }],
+    imageUrl: null,
+  },
 ];
 
 export default function StudentsPage() {

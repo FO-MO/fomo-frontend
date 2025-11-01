@@ -185,7 +185,7 @@ export default function StudentsHomePage() {
           {/* Left Column - Feed (2 cols on desktop) */}
           <div className="lg:col-span-2 flex flex-col gap-6">
             {/* Composer Card */}
-            <section className="bg-white border border-gray-300 rounded-lg shadow-sm p-4">
+            {/* <section className="bg-white border border-gray-300 rounded-lg shadow-sm p-4">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold text-black">
                   {user.initials}
@@ -255,7 +255,7 @@ export default function StudentsHomePage() {
                   </div>
                 </div>
               </div>
-            </section>
+            </section> */}
 
             {/* Feed Section */}
             <section className="flex flex-col gap-4">
