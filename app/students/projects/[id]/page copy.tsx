@@ -10,51 +10,47 @@ import {
   Users,
   Calendar,
   User,
+  GitCommit,
   Star,
+  GitFork,
+  Activity,
   FileText,
-  HelpCircle,
-  ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
 
-// Configuration: Set to true to fetch data from GitHub
-const USE_GITHUB_DATA = false;
-
-interface ProjectContributor {
-  name: string;
-  avatarUrl: string;
-  profileUrl: string;
-  role?: string;
-  contributions?: number;
+interface Contributor {
+  login: string;
+  avatar_url: string;
+  contributions: number;
+  html_url: string;
 }
 
-interface ProjectStats {
+interface RepoStats {
   stars: number;
-  members: number;
+  forks: number;
+  openIssues: number;
+  watchers: number;
 }
 
-interface NeedHelpItem {
-  title: string;
-  description: string;
-  skills: string[];
+interface CommitActivity {
+  week: number;
+  total: number;
+  days: number[];
 }
 
 interface ProjectDetails {
   id: string;
   title: string;
   description: string;
-  githubUrl?: string;
+  githubUrl: string;
   createdDate: string;
   owner: {
     name: string;
     avatarUrl?: string | null;
   };
   skills: string[];
+  membersCount: number;
   imageUrl?: string | null;
-  contributors: ProjectContributor[];
-  stats: ProjectStats;
-  needHelp: NeedHelpItem[];
-  detailsMarkdown: string;
 }
 
 export default function ProjectDetailsPage() {
@@ -62,6 +58,12 @@ export default function ProjectDetailsPage() {
   const projectId = params.id as string;
 
   const [project, setProject] = useState<ProjectDetails | null>(null);
+  const [contributors, setContributors] = useState<Contributor[]>([]);
+  const [repoStats, setRepoStats] = useState<RepoStats | null>(null);
+  const [commitActivity, setCommitActivity] = useState<CommitActivity[]>([]);
+  const [totalCommits, setTotalCommits] = useState<number>(0);
+  const [readme, setReadme] = useState<string>("");
+  const [projectDetails, setProjectDetails] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -72,14 +74,11 @@ export default function ProjectDetailsPage() {
       title: "Custom Memory Allocator",
       description:
         "Build a custom memory allocation and deallocation system similar to malloc and free. This project focuses on understanding low-level memory management, fragmentation issues, and performance optimization. Perfect for students interested in systems programming and operating systems.",
-      githubUrl: USE_GITHUB_DATA
-        ? "https://github.com/simonMat21/Visual-Learner"
-        : undefined,
+      githubUrl: "https://github.com/simonMat21/Visual-Learner",
       createdDate: "2024-10-15",
       owner: {
-        name: "Biyon Binu",
-        avatarUrl:
-          "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop",
+        name: "biyon binu",
+        avatarUrl: null,
       },
       skills: [
         "C",
@@ -89,74 +88,14 @@ export default function ProjectDetailsPage() {
         "Linked Lists",
         "OS Concepts",
       ],
+      membersCount: 5,
       imageUrl: null,
-      contributors: [
-        {
-          name: "Biyon Binu",
-          avatarUrl:
-            "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop",
-          profileUrl: "/students/profile/biyon",
-          role: "Project Lead",
-          contributions: 127,
-        },
-        {
-          name: "Sarah Chen",
-          avatarUrl:
-            "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop",
-          profileUrl: "/students/profile/sarah",
-          role: "Core Developer",
-          contributions: 89,
-        },
-        {
-          name: "Alex Rodriguez",
-          avatarUrl:
-            "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop",
-          profileUrl: "/students/profile/alex",
-          role: "Testing Lead",
-          contributions: 64,
-        },
-        {
-          name: "Priya Sharma",
-          avatarUrl:
-            "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop",
-          profileUrl: "/students/profile/priya",
-          role: "Documentation",
-          contributions: 52,
-        },
-        {
-          name: "Marcus Johnson",
-          avatarUrl:
-            "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop",
-          profileUrl: "/students/profile/marcus",
-          role: "Contributor",
-          contributions: 38,
-        },
-      ],
-      stats: {
-        stars: 42,
-        members: 5,
-      },
-      needHelp: [
-        {
-          title: "Performance Optimization",
-          description:
-            "Need help optimizing memory allocation speed and reducing fragmentation in our allocator.",
-          skills: ["C", "Performance Tuning", "Profiling"],
-        },
-        {
-          title: "Testing & Debugging",
-          description:
-            "Looking for someone to write comprehensive test cases and help debug edge cases.",
-          skills: ["Unit Testing", "GDB", "Valgrind"],
-        },
-        {
-          title: "Documentation",
-          description:
-            "Help us create detailed documentation and tutorials for the project.",
-          skills: ["Technical Writing", "Markdown"],
-        },
-      ],
-      detailsMarkdown: `# Project Overview
+    };
+
+    setProject(mockProject);
+
+    // Mock project details markdown
+    const mockProjectDetails = `# Project Overview
 
 This project is an ambitious undertaking to build a custom memory allocator from scratch, implementing functionality similar to C's malloc() and free() functions.
 
@@ -209,19 +148,19 @@ By the end of this project, team members will:
 
 ## Contributing
 
-We welcome contributions! Check the "Need Help In" section to see where we need assistance. Make sure to follow our coding standards and write tests for new features.
+We welcome contributions! Please check our GitHub issues for tasks that need help. Make sure to follow our coding standards and write tests for new features.
 
 ## Team Meetings
 
-Weekly meetings every **Tuesday at 6 PM EST** on Discord. All members are expected to attend and share progress updates.`,
-    };
+Weekly meetings every **Tuesday at 6 PM EST** on Discord. All members are expected to attend and share progress updates.`;
 
-    setProject(mockProject);
-    setLoading(false);
+    setProjectDetails(mockProjectDetails);
 
-    // If GitHub integration is enabled, fetch additional data
-    if (USE_GITHUB_DATA && mockProject.githubUrl) {
+    // Fetch GitHub data
+    if (mockProject.githubUrl) {
       fetchGitHubData(mockProject.githubUrl);
+    } else {
+      setLoading(false);
     }
   }, [projectId]);
 
@@ -231,35 +170,84 @@ Weekly meetings every **Tuesday at 6 PM EST** on Discord. All members are expect
       const match = githubUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/);
       if (!match) {
         setError("Invalid GitHub URL");
+        setLoading(false);
         return;
       }
 
       const [, owner, repo] = match;
       const cleanRepo = repo.replace(/\.git$/, "");
 
-      // Fetch GitHub stats
-      const repoRes = await fetch(
-        `https://api.github.com/repos/${owner}/${cleanRepo}`
-      );
+      // Fetch all data in parallel
+      const [contributorsRes, repoRes, activityRes, commitsRes, readmeRes] =
+        await Promise.all([
+          fetch(
+            `https://api.github.com/repos/${owner}/${cleanRepo}/contributors?per_page=10`
+          ),
+          fetch(`https://api.github.com/repos/${owner}/${cleanRepo}`),
+          fetch(
+            `https://api.github.com/repos/${owner}/${cleanRepo}/stats/commit_activity`
+          ),
+          fetch(
+            `https://api.github.com/repos/${owner}/${cleanRepo}/commits?per_page=1`
+          ),
+          fetch(`https://api.github.com/repos/${owner}/${cleanRepo}/readme`, {
+            headers: {
+              Accept: "application/vnd.github.v3.raw",
+            },
+          }),
+        ]);
 
+      // Process contributors
+      if (contributorsRes.ok) {
+        const contributorsData = await contributorsRes.json();
+        setContributors(contributorsData);
+      }
+
+      // Process repo stats
       if (repoRes.ok) {
         const repoData = await repoRes.json();
-        // Update project stats with GitHub data
-        setProject((prev) =>
-          prev
-            ? {
-                ...prev,
-                stats: {
-                  stars: repoData.stargazers_count,
-                  members: prev.contributors.length,
-                },
-              }
-            : null
-        );
+        setRepoStats({
+          stars: repoData.stargazers_count,
+          forks: repoData.forks_count,
+          openIssues: repoData.open_issues_count,
+          watchers: repoData.watchers_count,
+        });
+      }
+
+      // Process commit activity
+      if (activityRes.ok) {
+        const activityData = await activityRes.json();
+        console.log("Commit activity data:", activityData);
+        setCommitActivity(activityData);
+      } else {
+        console.log("Failed to fetch commit activity:", activityRes.status);
+      }
+
+      // Get total commits count from Link header
+      if (commitsRes.ok) {
+        const linkHeader = commitsRes.headers.get("Link");
+        if (linkHeader) {
+          const match = linkHeader.match(/page=(\d+)>; rel="last"/);
+          if (match) {
+            setTotalCommits(parseInt(match[1]));
+          }
+        } else {
+          // If no Link header, there's only one page, so count is < 30
+          const commits = await commitsRes.json();
+          setTotalCommits(commits.length);
+        }
+      }
+
+      // Process README
+      if (readmeRes.ok) {
+        const readmeText = await readmeRes.text();
+        setReadme(readmeText);
       }
     } catch (err) {
       console.error("Error fetching GitHub data:", err);
       setError("Could not load GitHub data");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -270,6 +258,11 @@ Weekly meetings every **Tuesday at 6 PM EST** on Discord. All members are expect
       month: "long",
       day: "numeric",
     });
+  };
+
+  const getMaxCommits = () => {
+    if (commitActivity.length === 0) return 0;
+    return Math.max(...commitActivity.map((week) => week.total));
   };
 
   if (!project) {
@@ -332,7 +325,7 @@ Weekly meetings every **Tuesday at 6 PM EST** on Discord. All members are expect
 
             <div className="flex items-center gap-2 text-gray-600">
               <Users className="w-4 h-4" />
-              <span>{project.stats.members} members</span>
+              <span>{project.membersCount} members</span>
             </div>
           </div>
 
@@ -374,74 +367,62 @@ Weekly meetings every **Tuesday at 6 PM EST** on Discord. All members are expect
         </div>
       </div>
 
-      {/* Statistics */}
-      <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
-        <div className="flex items-center gap-3 mb-6">
-          <Star className="w-6 h-6 text-gray-700" />
-          <h2 className="text-2xl font-bold text-gray-900">Statistics</h2>
-        </div>
-
-        <div className="grid grid-cols-2 gap-6">
-          {/* Stars */}
-          <div className="flex flex-col items-center p-6 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl border border-yellow-200">
-            <Star className="w-8 h-8 text-yellow-500 mb-2" />
-            <div className="text-3xl font-bold text-gray-900">
-              {project.stats.stars}
-            </div>
-            <div className="text-sm text-gray-600 mt-1">Stars</div>
-          </div>
-
-          {/* Members */}
-          <div className="flex flex-col items-center p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
-            <Users className="w-8 h-8 text-blue-500 mb-2" />
-            <div className="text-3xl font-bold text-gray-900">
-              {project.stats.members}
-            </div>
-            <div className="text-sm text-gray-600 mt-1">Members</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Need Help Section */}
-      {project.needHelp && project.needHelp.length > 0 && (
+      {/* Repository Stats */}
+      {repoStats && (
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
           <div className="flex items-center gap-3 mb-6">
-            <HelpCircle className="w-6 h-6 text-gray-700" />
-            <h2 className="text-2xl font-bold text-gray-900">Help Us with</h2>
+            <Activity className="w-6 h-6 text-gray-700" />
+            <h2 className="text-2xl font-bold text-gray-900">
+              Repository Statistics
+            </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {project.needHelp.map((item, index) => (
-              <div
-                key={index}
-                className="p-6 rounded-xl border-2 border-gray-200 hover:border-teal-500 hover:shadow-lg transition-all duration-300 group"
-              >
-                <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-teal-600 transition-colors">
-                  {item.title}
-                </h3>
-                <p className="text-gray-700 text-sm mb-4 leading-relaxed">
-                  {item.description}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {item.skills.map((skill) => (
-                    <span
-                      key={skill}
-                      className="px-2.5 py-1 bg-orange-50 text-orange-700 rounded-md text-xs font-medium border border-orange-200"
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {/* Stars */}
+            <div className="flex flex-col items-center p-6 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl border border-yellow-200">
+              <Star className="w-8 h-8 text-yellow-500 mb-2" />
+              <div className="text-3xl font-bold text-gray-900">
+                {repoStats.stars.toLocaleString()}
               </div>
-            ))}
+              <div className="text-sm text-gray-600 mt-1">Stars</div>
+            </div>
+
+            {/* Forks */}
+            <div className="flex flex-col items-center p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+              <GitFork className="w-8 h-8 text-blue-500 mb-2" />
+              <div className="text-3xl font-bold text-gray-900">
+                {repoStats.forks.toLocaleString()}
+              </div>
+              <div className="text-sm text-gray-600 mt-1">Forks</div>
+            </div>
+
+            {/* Commits */}
+            <div className="flex flex-col items-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200">
+              <GitCommit className="w-8 h-8 text-green-500 mb-2" />
+              <div className="text-3xl font-bold text-gray-900">
+                {totalCommits > 0 ? `${totalCommits.toLocaleString()}+` : "N/A"}
+              </div>
+              <div className="text-sm text-gray-600 mt-1">Commits</div>
+            </div>
+
+            {/* Watchers */}
+            <div className="flex flex-col items-center p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-200">
+              <Users className="w-8 h-8 text-purple-500 mb-2" />
+              <div className="text-3xl font-bold text-gray-900">
+                {repoStats.watchers.toLocaleString()}
+              </div>
+              <div className="text-sm text-gray-600 mt-1">Watchers</div>
+            </div>
           </div>
         </div>
       )}
 
+      {/* Commit Activity Graph */}
+
       {/* Contributors Section */}
       <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
         <div className="flex items-center gap-3 mb-6">
-          <Users className="w-6 h-6 text-gray-700" />
+          <GitCommit className="w-6 h-6 text-gray-700" />
           <h2 className="text-2xl font-bold text-gray-900">Contributors</h2>
         </div>
 
@@ -454,23 +435,25 @@ Weekly meetings every **Tuesday at 6 PM EST** on Discord. All members are expect
           <div className="text-center py-12">
             <p className="text-red-600">{error}</p>
           </div>
-        ) : project.contributors.length === 0 ? (
+        ) : contributors.length === 0 ? (
           <div className="text-center py-12">
             <Users className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-            <p className="text-gray-600">No contributors yet</p>
+            <p className="text-gray-600">No contributors found</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {project.contributors.map((contributor, index) => (
-              <Link
-                key={contributor.name}
-                href={contributor.profileUrl}
+            {contributors.map((contributor, index) => (
+              <a
+                key={contributor.login}
+                href={contributor.html_url}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center gap-4 p-4 rounded-xl border border-gray-200 hover:border-teal-500 hover:shadow-md transition-all duration-200 group"
               >
                 <div className="relative">
                   <img
-                    src={contributor.avatarUrl}
-                    alt={contributor.name}
+                    src={contributor.avatar_url}
+                    alt={contributor.login}
                     className="w-16 h-16 rounded-full object-cover"
                   />
                   {index === 0 && (
@@ -482,34 +465,28 @@ Weekly meetings every **Tuesday at 6 PM EST** on Discord. All members are expect
 
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-gray-900 truncate group-hover:text-teal-600 transition-colors">
-                    {contributor.name}
+                    {contributor.login}
                   </h3>
-                  {contributor.role && (
-                    <p className="text-xs text-gray-500 mb-1">
-                      {contributor.role}
-                    </p>
-                  )}
-                  {contributor.contributions !== undefined && (
-                    <div className="flex items-center gap-1 text-sm text-gray-600">
-                      <span className="font-medium text-teal-600">
-                        {contributor.contributions}
-                      </span>
-                      <span>contributions</span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                    <GitCommit className="w-4 h-4" />
+                    <span className="font-medium text-teal-600">
+                      {contributor.contributions.toLocaleString()}
+                    </span>
+                    <span>contributions</span>
+                  </div>
                 </div>
 
                 <div className="text-gray-400 group-hover:text-teal-600 transition-colors">
-                  <ExternalLink className="w-5 h-5" />
+                  <Github className="w-5 h-5" />
                 </div>
-              </Link>
+              </a>
             ))}
           </div>
         )}
       </div>
 
       {/* Project Details Section */}
-      {project.detailsMarkdown && (
+      {projectDetails && (
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
           <div className="flex items-center gap-3 mb-6">
             <FileText className="w-6 h-6 text-gray-700" />
@@ -625,7 +602,7 @@ Weekly meetings every **Tuesday at 6 PM EST** on Discord. All members are expect
                   hr: () => <hr className="my-6 border-t-2 border-gray-200" />,
                 }}
               >
-                {project.detailsMarkdown}
+                {projectDetails}
               </ReactMarkdown>
             </div>
           </div>
