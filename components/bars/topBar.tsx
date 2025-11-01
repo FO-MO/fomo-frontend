@@ -7,7 +7,6 @@ type Props = {
   title?: string;
   theme?: "white" | "black" | "home";
   user?: User | null;
-  onLoginClick?: () => void;
 };
 
 type User = {
@@ -27,7 +26,6 @@ export default function TopBar({
   title = "FOOMO",
   theme = "white",
   user = null,
-  onLoginClick,
 }: Props) {
   const [open, setOpen] = useState(false);
 
@@ -113,13 +111,7 @@ export default function TopBar({
 
               <a
                 className="transform rounded-2xl bg-[#d6ff3a] px-4 py-2 font-extrabold text-[#082926] shadow-[0_6px_0_rgba(0,0,0,0.12)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_10px_0_rgba(0,0,0,0.12)]"
-                href={onLoginClick ? "#" : "/auth/login"}
-                onClick={(e) => {
-                  if (onLoginClick) {
-                    e.preventDefault();
-                    onLoginClick();
-                  }
-                }}
+                href="/auth/login"
               >
                 Login
               </a>
