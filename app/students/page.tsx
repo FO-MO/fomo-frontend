@@ -31,30 +31,134 @@ const homePageData: HomePageData = {
     {
       id: "1",
       author: {
-        name: "Simon Mattekkatt",
-        initials: "S",
+        name: "Sarah Chen",
+        initials: "SC",
+        avatarUrl:
+          "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop",
+        title: "Software Engineering Intern @ Google",
       },
-      postedAgo: "2 days ago",
-      message: "car",
+      postedAgo: "2 hours ago",
+      message:
+        "Excited to share that I just completed my first major project at Google! 🎉\n\nBuilt a real-time analytics dashboard that processes millions of events per second. Huge thanks to my amazing team for all the support and mentorship.\n\nKey learnings:\n• Scalability matters from day one\n• Code reviews are invaluable\n• Don't be afraid to ask questions\n\nFeeling grateful for this incredible opportunity! 🚀",
+      images: [
+        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop",
+      ],
       stats: {
-        likes: 0,
-        comments: 0,
-        shares: 0,
+        likes: 127,
+        comments: 23,
+        shares: 8,
       },
+      isLiked: true,
     },
     {
       id: "2",
       author: {
-        name: "raghu reddy",
-        initials: "r",
+        name: "Alex Rodriguez",
+        initials: "AR",
+        avatarUrl:
+          "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop",
+        title: "CS Student @ MIT | AI Research",
       },
-      postedAgo: "3 months ago",
+      postedAgo: "5 hours ago",
       message:
-        "hey guys apply for this job role in fomo startup which is pretty cool to work.",
+        "Our hackathon team just won 1st place at HackMIT! 🏆\n\nWe built an AI-powered study assistant that helps students learn more effectively. 24 hours of coding, debugging, and way too much caffeine, but totally worth it!\n\nShoutout to my incredible teammates - couldn't have done it without you all! 💪",
+      images: [
+        "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=600&fit=crop",
+        "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=600&fit=crop",
+      ],
       stats: {
-        likes: 0,
-        comments: 0,
-        shares: 0,
+        likes: 243,
+        comments: 45,
+        shares: 19,
+      },
+    },
+    {
+      id: "3",
+      author: {
+        name: "Priya Sharma",
+        initials: "PS",
+        avatarUrl:
+          "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop",
+        title: "Product Designer | UX Enthusiast",
+      },
+      postedAgo: "1 day ago",
+      message:
+        "Just wrapped up a 3-month design internship at Airbnb! Here are some highlights from my portfolio work.\n\nLearned so much about user research, design systems, and cross-functional collaboration. The experience has been absolutely transformative for my career.\n\nAlways happy to chat about design, internships, or career advice! Feel free to reach out. ✨",
+      images: [
+        "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&h=600&fit=crop",
+        "https://images.unsplash.com/photo-1559028012-481c04fa702d?w=800&h=600&fit=crop",
+        "https://images.unsplash.com/photo-1558655146-d09347e92766?w=800&h=600&fit=crop",
+      ],
+      stats: {
+        likes: 189,
+        comments: 31,
+        shares: 12,
+      },
+    },
+    {
+      id: "4",
+      author: {
+        name: "Marcus Johnson",
+        initials: "MJ",
+        avatarUrl:
+          "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop",
+        title: "Startup Founder | Tech Entrepreneur",
+      },
+      postedAgo: "2 days ago",
+      message:
+        "Big news! Our startup just raised a $2M seed round! 🎊\n\nIt's been an incredible journey from dorm room idea to where we are today. To everyone who believed in us, supported us, and joined us on this ride - thank you from the bottom of my heart.\n\nThis is just the beginning. We're hiring across engineering, product, and marketing. DM me if you're interested in joining our mission to revolutionize education tech!\n\n#StartupLife #SeedRound #EdTech #Hiring",
+      images: [
+        "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&h=600&fit=crop",
+        "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=600&fit=crop",
+        "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&h=600&fit=crop",
+        "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&h=600&fit=crop",
+      ],
+      stats: {
+        likes: 456,
+        comments: 87,
+        shares: 34,
+      },
+      isLiked: true,
+    },
+    {
+      id: "5",
+      author: {
+        name: "Emily Zhang",
+        initials: "EZ",
+        avatarUrl:
+          "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop",
+        title: "Data Science @ Stanford | ML Researcher",
+      },
+      postedAgo: "3 days ago",
+      message:
+        "Just published my first research paper on machine learning for climate prediction! 🌍📊\n\nAfter months of data collection, model training, and countless revisions, it's finally out there. This work could help predict extreme weather events more accurately.\n\nHuge thanks to my advisor and lab mates for their incredible support throughout this journey. Science is truly a team sport!\n\nLink to the paper in comments. Would love to hear your thoughts!",
+      images: [
+        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop",
+        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop",
+        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop",
+        "https://images.unsplash.com/photo-1527474305487-b87b222841cc?w=800&h=600&fit=crop",
+        "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=800&h=600&fit=crop",
+      ],
+      stats: {
+        likes: 312,
+        comments: 56,
+        shares: 28,
+      },
+    },
+    {
+      id: "6",
+      author: {
+        name: "David Kim",
+        initials: "DK",
+        title: "Business Student @ Harvard | Aspiring Entrepreneur",
+      },
+      postedAgo: "5 days ago",
+      message:
+        "Lessons learned from my summer internship at McKinsey:\n\n1. Communication is everything - being able to explain complex ideas simply is a superpower\n2. Always ask 'So what?' - insights without impact are just data\n3. Your network is your net worth - invest in relationships\n4. Embrace feedback - it's the fastest way to grow\n5. Work hard, but don't forget to take care of yourself\n\nTo anyone applying for consulting roles - feel free to reach out! Happy to share more about my experience and help with interview prep. 📈💼",
+      stats: {
+        likes: 98,
+        comments: 15,
+        shares: 6,
       },
     },
   ],
