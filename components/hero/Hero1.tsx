@@ -20,7 +20,11 @@ function Writer() {
   );
 }
 
-export default function Hero1() {
+interface Hero1Props {
+  onSignupClick?: () => void;
+}
+
+export default function Hero1({ onSignupClick }: Hero1Props) {
   //ANIMATIONS
   const entrydiv = useRef(null);
   const textdiv = useRef(null);
@@ -124,7 +128,15 @@ export default function Hero1() {
               placeholder="Type school or personal email here"
             />
             <Link href="/auth/signup" className="w-full sm:w-auto">
-              <button className="w-full sm:w-auto bg-[#d6ff3a] cursor-pointer text-[#082926] font-extrabold px-6 py-3 rounded-lg shadow-[0_4px_0_rgba(0,0,0,0.3)] transform transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_8px_0_rgba(0,0,0,0.3)] whitespace-nowrap">
+              <button
+                onClick={(e) => {
+                  if (onSignupClick) {
+                    e.preventDefault();
+                    onSignupClick();
+                  }
+                }}
+                className="w-full sm:w-auto bg-[#d6ff3a] cursor-pointer text-[#082926] font-extrabold px-6 py-3 rounded-lg shadow-[0_4px_0_rgba(0,0,0,0.3)] transform transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_8px_0_rgba(0,0,0,0.3)] whitespace-nowrap"
+              >
                 Sign up
               </button>
             </Link>
