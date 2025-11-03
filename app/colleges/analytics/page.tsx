@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import CollegesSideBar from "@/components/bars/collegesSideBar";
 import Navbar from "@/components/bars/Navbar";
 import Link from "next/link";
 import { Pie, PieChart } from "recharts";
@@ -49,7 +48,6 @@ export default function CollegeAnalytics() {
     { label: "Overview", href: "/colleges/dashboard" },
     { label: "Students", href: "/colleges/students" },
     { label: "Jobs", href: "/colleges/jobs" },
-    { label: "Events", href: "/colleges/events" },
     { label: "Analytics", href: "/colleges/analytics" },
   ];
 
@@ -66,7 +64,7 @@ export default function CollegeAnalytics() {
 
   return (
     <div className="min-h-screen mt-6 sm:mt-16 bg-gray-50 overflow-x-hidden">
-      <Navbar />
+      <Navbar showProfile={false}/>
 
       {sidebarOpen && (
         <div
@@ -74,15 +72,6 @@ export default function CollegeAnalytics() {
           onClick={() => setSidebarOpen(false)}
         ></div>
       )}
-
-      <div
-        className={`
-        fixed left-0 top-0 z-50 w-56 h-full transform transition-transform duration-300 ease-in-out sm:translate-x-0
-        ${sidebarOpen ? "translate-x-0" : "-translate-x-full sm:translate-x-0"}
-      `}
-      >
-        <CollegesSideBar active="analytics" />
-      </div>
 
       <button
         className="fixed top-20 left-0 px-3 scale-110 z-[60] py-[3px] border-1 border-black/30 cursor-pointer rounded-br-2xl bg-white shadow-lg sm:hidden hover:bg-gray-50 transition-colors"
@@ -112,7 +101,7 @@ export default function CollegeAnalytics() {
         </svg>
       </button>
 
-      <main className="sm:ml-56 pt-20 p-4 sm:p-6 lg:p-8">
+      <main className="pt-20 p-4 sm:p-6 lg:p-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-teal-600 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -147,27 +136,6 @@ export default function CollegeAnalytics() {
               </svg>
               AI Powered
             </div>
-            <button className="p-2 text-gray-400 hover:text-gray-600">
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-            </button>
           </div>
         </div>
 

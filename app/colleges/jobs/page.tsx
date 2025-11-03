@@ -13,7 +13,6 @@ export default function CollegeJobs() {
     { label: "Overview", href: "/colleges/dashboard" },
     { label: "Students", href: "/colleges/students" },
     { label: "Jobs", href: "/colleges/jobs" },
-    { label: "Events", href: "/colleges/events" },
     { label: "Analytics", href: "/colleges/analytics" },
   ];
 
@@ -30,7 +29,7 @@ export default function CollegeJobs() {
 
   return (
     <div className="min-h-screen mt-6 sm:mt-16 bg-gray-50 overflow-x-hidden">
-      <Navbar />
+      <Navbar showProfile={false}/>
 
       {sidebarOpen && (
         <div
@@ -38,15 +37,6 @@ export default function CollegeJobs() {
           onClick={() => setSidebarOpen(false)}
         ></div>
       )}
-
-      <div
-        className={`
-        fixed left-0 top-0 z-50 w-56 h-full transform transition-transform duration-300 ease-in-out sm:translate-x-0
-        ${sidebarOpen ? "translate-x-0" : "-translate-x-full sm:translate-x-0"}
-      `}
-      >
-        <CollegesSideBar active="placements" />
-      </div>
 
       <button
         className="fixed top-20 left-0 px-3 scale-110 z-[60] py-[3px] border-1 border-black/30 cursor-pointer rounded-br-2xl bg-white shadow-lg sm:hidden hover:bg-gray-50 transition-colors"
@@ -76,7 +66,7 @@ export default function CollegeJobs() {
         </svg>
       </button>
 
-      <main className="sm:ml-56 pt-20 p-4 sm:p-6 lg:p-8">
+      <main className="pt-20 p-4 sm:p-6 lg:p-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-teal-600 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -104,9 +94,12 @@ export default function CollegeJobs() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <button className="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors">
-              + Post New Job
-            </button>
+            <div className="flex items-center gap-2 bg-blue-50 text-emerald-700 px-2.5 sm:px-3 py-1 rounded-full text-xs sm:text-sm">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              AI Powered
+            </div>
           </div>
         </div>
 
