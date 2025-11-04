@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Particles from "../Particles";
 
 export default function Hero4() {
   const features = [
@@ -68,17 +69,36 @@ export default function Hero4() {
   ];
 
   return (
-    <section className="w-full py-16 sm:py-20 lg:py-60 px-4 sm:px-6 lg:px-8 bg-gray-50">
-      <div className="max-w-7xl mx-auto">
+    <section className="w-full relative py-16 sm:py-20 lg:py-60 px-4 sm:px-6 lg:px-8 bg-black overflow-hidden">
+      {/* Particles Background */}
+      <div className="fixed inset-0 z-0">
+        <Particles
+          particleCount={5000}
+          particleColors={["#D6FF3A"]}
+          particleSpread={3}
+          speed={0.3}
+          alphaParticles={false}
+          particleBaseSize={1.2}
+          sizeRandomness={0}
+          cameraDistance={0}
+          moveParticlesOnHover={true}
+          particleHoverFactor={0.5}
+          disableRotation={true}
+          className="w-full h-full"
+        />
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12 sm:mb-16">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
             Your Biggest Edge Over{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-purple-400">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#d6ff3a] to-[#c4e82e]">
               The Competition
             </span>
           </h2>
-          <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-4xl mx-auto px-4">
+          <p className="text-base sm:text-lg lg:text-xl text-white/90 max-w-4xl mx-auto px-4">
             While others just list jobs, we automate your entire career journey
             with AI-powered upskilling, networking, and college placement
             automation.
@@ -90,22 +110,22 @@ export default function Hero4() {
           {features.map((feature, index) => (
             <div
               key={index}
-              className="bg-white rounded-2xl p-8 border border-gray-200 hover:border-purple-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 text-center group"
+              className="bg-white/5 rounded-2xl p-8 border border-white/10 hover:border-[#d6ff3a]/50 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 text-center group"
             >
               {/* Icon */}
               <div className="flex justify-center mb-6">
-                <div className="text-gray-700 group-hover:text-purple-600 transition-colors duration-300">
+                <div className="text-white/80 group-hover:text-[#d6ff3a] transition-colors duration-300">
                   {feature.icon}
                 </div>
               </div>
 
               {/* Title */}
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3">
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">
                 {feature.title}
               </h3>
 
               {/* Description */}
-              <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+              <p className="text-sm sm:text-base text-white/80 leading-relaxed">
                 {feature.description}
               </p>
             </div>

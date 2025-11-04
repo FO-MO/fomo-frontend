@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Particles from "../Particles";
 
 export default function Hero3() {
   const cards = [
@@ -19,11 +20,11 @@ export default function Hero3() {
       title: "Personalized job recs",
       description:
         "Get AI-powered suggestions for jobs and opportunities based on your profile, interests, skills, and where you are in your career journey.",
-      bgColor: "bg-gradient-to-br from-orange-400 to-orange-500",
-      badgeBg: "bg-white/20",
-      badgeText: "text-white",
+      bgColor: "bg-white/5 hover:bg-white/10",
+      badgeBg: "bg-[#d6ff3a]/20",
+      badgeText: "text-[#d6ff3a]",
       clr: "white",
-      clrdesc: "white/95",
+      clrdesc: "white/80",
     },
     {
       icon: (
@@ -40,30 +41,53 @@ export default function Hero3() {
       title: "Real career advice",
       description:
         "Grow your career with posts, videos, and articles from people who've done it before. Learn from expert-led clubs and industry professionals.",
-      bgColor: "bg-gradient-to-br from-purple-300 to-purple-400",
-      badgeBg: "bg-white/20",
-      badgeText: "text-purple-900",
-      clr: "black",
-      clrdesc: "black/95",
+      bgColor: "bg-white/5 hover:bg-white/10",
+      badgeBg: "bg-[#d6ff3a]/20",
+      badgeText: "text-[#d6ff3a]",
+      clr: "white",
+      clrdesc: "white/80",
     },
   ];
 
   return (
-    <section className="w-full bg-[#4a8a82] py-24 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+    <section className="w-full relative bg-[#000] min-h-[80vh] py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      {/* Particles Background */}
+      <div className="fixed inset-0 z-0">
+        <Particles
+          particleCount={5000}
+          particleColors={["#D6FF3A"]}
+          particleSpread={3}
+          speed={0.3}
+          alphaParticles={false}
+          particleBaseSize={1.2}
+          sizeRandomness={0}
+          cameraDistance={0}
+          moveParticlesOnHover={true}
+          particleHoverFactor={0.5}
+          disableRotation={true}
+          className="w-full h-full"
+        />
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           {cards.map((card, index) => (
             <div
               key={index}
-              className={`${card.bgColor} rounded-3xl p-8 py-12 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2`}
+              className={`${card.bgColor} rounded-3xl p-8 py-12 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group`}
             >
               {/* Badge and Icon */}
               <div className="flex items-center gap-3 mb-6">
-                <div className={`${card.badgeBg} p-3 rounded-xl text-white`}>
-                  {card.icon}
+                <div
+                  className={`${card.badgeBg} p-3 rounded-xl group-hover:bg-[#d6ff3a]/30 transition-colors duration-300`}
+                >
+                  <div className="text-white group-hover:text-[#d6ff3a] transition-colors duration-300">
+                    {card.icon}
+                  </div>
                 </div>
                 <span
-                  className={`${card.badgeBg} ${card.badgeText} px-4 py-1.5 rounded-full text-sm font-semibold`}
+                  className={`${card.badgeBg} ${card.badgeText} px-4 py-1.5 rounded-full text-sm font-semibold group-hover:bg-[#d6ff3a]/30 transition-colors duration-300`}
                 >
                   {card.badge}
                 </span>
@@ -71,7 +95,7 @@ export default function Hero3() {
 
               {/* Title */}
               <h3
-                className={`text-3xl sm:text-4xl font-bold text-${card.clr} mb-4`}
+                className={`text-3xl sm:text-4xl font-bold text-${card.clr} mb-4 group-hover:text-[#d6ff3a] transition-colors duration-300`}
               >
                 {card.title}
               </h3>

@@ -47,7 +47,7 @@ export default function TopBar({
   const navbarClasses = isHomeTheme ? "" : "backdrop-blur-md";
   const backgroundStyle = isHomeTheme
     ? {
-        backgroundColor: "#0F4F4A",
+        backgroundColor: "#000",
         borderBottom: "1px solid rgba(255,255,255,0.1)",
       }
     : {
