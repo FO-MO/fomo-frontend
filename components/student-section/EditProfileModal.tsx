@@ -2,6 +2,10 @@
 
 import { X, Upload, Camera, Check } from "lucide-react";
 import { useState, useRef } from "react";
+import { getAuthToken } from "@/lib/strapi/auth";
+
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
 
 // Predefined options
 const AVAILABLE_SKILLS = [
@@ -153,21 +157,178 @@ export default function EditProfileModal({
     );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({
-      name,
-      email,
-      profileImage: profileImageFile,
-      backgroundImage: backgroundImageFile,
-      institution,
-      major,
-      graduationYear,
-      location,
-      bio,
-      skills: selectedSkills,
-      interests: selectedInterests,
-    });
+
+    try {
+      const token = getAuthToken();
+      if (!token) {
+        alert("You must be signed in to update your profile.");
+        return;
+      }
+
+      // Get studentId from stored user (best-effort)
+      let studentId: string | null = null;
+      try {
+        const raw = localStorage.getItem("fomo_user");
+        if (raw) {
+          const parsed = JSON.parse(raw as string) as any;
+          studentId = parsed?.documentId ?? parsed?.id ?? null;
+        }
+      } catch (err) {
+        // ignore parse errors
+      }
+
+      // Check for existing profile
+      let recordId: string | null = null;
+      if (studentId) {
+        const q = `${BACKEND_URL}/api/student-profiles?filters[studentId][$eq]=${encodeURIComponent(
+          studentId
+        )}&populate=*`;
+        const res = await fetch(q, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const json = await res.json();
+          const rec = json?.data?.[0];
+          recordId = rec?.documentId ?? null;
+        } else {
+          console.warn("Failed to check existing profile", res.status);
+        }
+      }
+
+      // Upload files first (so we can include media IDs in payload)
+      const uploaded: { profile?: any; background?: any } = {};
+
+      if (profileImageFile) {
+        const fd = new FormData();
+        fd.append("files", profileImageFile as Blob);
+        const upRes = await fetch(`${BACKEND_URL}/api/upload`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: fd,
+        });
+        if (upRes.ok) {
+          const upJson = await upRes.json();
+          if (Array.isArray(upJson) && upJson[0]) uploaded.profile = upJson[0];
+        } else {
+          console.warn("Profile image upload failed", await upRes.text());
+        }
+      }
+
+      if (backgroundImageFile) {
+        const fd2 = new FormData();
+        fd2.append("files", backgroundImageFile as Blob);
+        const upRes2 = await fetch(`${BACKEND_URL}/api/upload`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: fd2,
+        });
+        if (upRes2.ok) {
+          const upJson2 = await upRes2.json();
+          if (Array.isArray(upJson2) && upJson2[0])
+            uploaded.background = upJson2[0];
+        } else {
+          console.warn("Background image upload failed", await upRes2.text());
+        }
+      }
+
+      // Build payload for Strapi (do NOT include email to prevent changes)
+      const payload: any = {
+        name,
+        about: bio,
+        college: institution,
+        course: major,
+        graduationYear,
+        location,
+        skills: selectedSkills,
+        interests: selectedInterests,
+      };
+
+      if (uploaded.profile?.id) payload.profilePic = uploaded.profile.id;
+      if (uploaded.background?.id)
+        payload.backgroundImage = uploaded.background.id;
+
+      // If record exists, try update. If update returns 404, fallback to create.
+      if (recordId) {
+        console.log({ data: payload });
+        const updateRes = await fetch(
+          `${BACKEND_URL}/api/student-profiles/${recordId}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ data: payload }),
+          }
+        );
+
+        if (!updateRes.ok) {
+          const body = await updateRes.text();
+          console.warn("Update failed", updateRes.status, body);
+          if (updateRes.status === 404) {
+            // fallback to create
+            const createRes = await fetch(
+              `${BACKEND_URL}/api/student-profiles`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ data: { ...payload, studentId } }),
+              }
+            );
+            if (!createRes.ok) {
+              console.error("Create fallback failed", await createRes.text());
+              alert(
+                "Failed to create profile after update failed. See console."
+              );
+              return;
+            }
+          } else {
+            alert("Failed to update profile. See console for details.");
+            return;
+          }
+        }
+      } else {
+        // No record -> create
+        const createRes = await fetch(`${BACKEND_URL}/api/student-profiles`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ data: { ...payload, studentId } }),
+        });
+        if (!createRes.ok) {
+          console.error("Create failed", await createRes.text());
+          alert("Failed to create profile. See console for details.");
+          return;
+        }
+      }
+
+      // call parent onSave so UI updates locally (still include email for UI)
+      onSave({
+        name,
+        email,
+        profileImage: profileImageFile,
+        backgroundImage: backgroundImageFile,
+        institution,
+        major,
+        graduationYear,
+        location,
+        bio,
+        skills: selectedSkills,
+        interests: selectedInterests,
+      });
+      // Close modal after save
+      onClose();
+    } catch (err) {
+      console.error("Failed to save profile", err);
+      alert("Failed to save profile. See console for details.");
+    }
   };
 
   return (
@@ -308,7 +469,7 @@ export default function EditProfileModal({
               />
             </div>
 
-            {/* Email */}
+            {/* Email (read-only) */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Email
@@ -316,11 +477,14 @@ export default function EditProfileModal({
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900"
-                placeholder="Enter your email"
-                required
+                readOnly
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-100 text-gray-700 cursor-not-allowed"
+                placeholder="Email"
               />
+              <p className="text-xs text-gray-500 mt-2">
+                Email cannot be changed here. Contact support to update your
+                email.
+              </p>
             </div>
 
             {/* Bio */}

@@ -13,11 +13,22 @@ const studentId = JSON.parse(
   localStorage.getItem("fomo_user") || "{}"
 ).documentId;
 
+const authToken = localStorage.getItem("fomo_token");
+
+const headers: Record<string, string> = {
+  "Content-Type": "application/json",
+};
+
+if (authToken) {
+  headers["Authorization"] = `Bearer ${authToken}`;
+}
+
 const data = await fetch(
   `${BACKEND_URL}/api/student-profiles?filters[studentId][$eq]=${studentId}&populate=*`,
-  { method: "GET", headers: { "Content-Type": "application/json" } }
+  { method: "GET", headers }
 ).then((res) => res.json());
-const studentAttributes = data.data[0];
+// If no profile exists, studentAttributes will be null
+const studentAttributes = data?.data?.[0] ?? null;
 console.log("Student Attributes:", studentAttributes);
 
 const profileData = {
