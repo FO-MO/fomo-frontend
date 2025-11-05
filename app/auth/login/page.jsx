@@ -2,19 +2,42 @@
 
 import React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { strapiLogin, setAuthToken } from "@/lib/strapi/auth";
 
 export default function Login() {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [error, setError] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
+  const router = useRouter();
 
-  const handleSignUpClick = () => {
-    const userData = {
-      email,
-      password,
-      timestamp: new Date().toISOString(),
-    };
-
-    console.log("Sign up triggered with user data:", userData);
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const result = await strapiLogin(email, password);
+      if (result?.error) {
+        setError(result.error.message || "Login failed");
+        console.error("Login error:", result);
+      } else if (result?.jwt) {
+        setAuthToken(result.jwt);
+        try {
+          localStorage.setItem("fomo_user", JSON.stringify(result.user));
+        } catch {}
+        // force full reload to ensure server components pick up cookies if needed
+        window.location.href = "/students";
+      } else {
+        setError("Unexpected login response");
+        console.error("Unexpected login response", result);
+      }
+    } catch (err) {
+      console.error(err);
+      setError("An unexpected error occurred");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -34,7 +57,13 @@ export default function Login() {
             Enter your credentials to access your account
           </p>
 
-          <form action="#" method="POST" className="space-y-6">
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <label
                 htmlFor="email"
@@ -83,10 +112,10 @@ export default function Login() {
 
             <button
               type="submit"
-              onClick={handleSignUpClick}
-              className="w-full flex justify-center rounded-md bg-teal-900 px-3 py-2 text-sm font-semibold text-white shadow hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+              disabled={loading}
+              className="w-full flex justify-center rounded-md bg-teal-900 px-3 py-2 text-sm font-semibold text-white shadow hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Login
+              {loading ? "Logging in..." : "Login"}
             </button>
           </form>
           <div className="mt-6 flex items-center">

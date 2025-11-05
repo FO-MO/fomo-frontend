@@ -2,23 +2,47 @@
 
 import React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { strapiRegister, setAuthToken } from "@/lib/strapi/auth";
 
 export default function Signup() {
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [error, setError] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
+  const [success, setSuccess] = React.useState(false);
+  const router = useRouter();
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-
-    const userData = {
-      name,
-      email,
-      password,
-      timestamp: new Date().toISOString(),
-    };
-
-    console.log("Sign up attempt:", userData);
+    setError("");
+    setLoading(true);
+    try {
+      const result = await strapiRegister(name || email, email, password);
+      if (result?.error) {
+        setError(result.error.message || "Registration failed");
+        console.error("Sign up error:", result);
+      } else if (result?.jwt) {
+        // Immediately set token and redirect
+        setAuthToken(result.jwt);
+        try {
+          localStorage.setItem("fomo_user", JSON.stringify(result.user));
+        } catch {}
+        setSuccess(true);
+        window.location.href = "/students";
+      } else {
+        // Strapi may require email confirmation depending on settings
+        setSuccess(true);
+        setError("Please check your email to confirm your account");
+        console.log("Signup response", result);
+      }
+    } catch (err) {
+      console.error(err);
+      setError("An unexpected error occurred");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -39,12 +63,25 @@ export default function Signup() {
             Enter your information to create an account
           </p>
 
-          <form
-            action="#"
-            method="POST"
-            className="space-y-6"
-            onSubmit={handleSubmit}
-          >
+          {error && (
+            <div
+              className={`${
+                error.includes("check your email")
+                  ? "bg-blue-50 border-blue-200 text-blue-700"
+                  : "bg-red-50 border-red-200 text-red-700"
+              } border px-4 py-3 rounded-md text-sm`}
+            >
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md text-sm">
+              Account created successfully! Redirecting...
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label
                 htmlFor="email"
@@ -112,9 +149,14 @@ export default function Signup() {
 
             <button
               type="submit"
-              className="w-full flex justify-center rounded-md bg-teal-900 px-3 py-2 text-sm font-semibold text-white shadow hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+              disabled={loading || success}
+              className="w-full flex justify-center rounded-md bg-teal-900 px-3 py-2 text-sm font-semibold text-white shadow hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign Up
+              {loading
+                ? "Creating account..."
+                : success
+                ? "Account created!"
+                : "Sign Up"}
             </button>
           </form>
           <div className="mt-6 flex items-center">

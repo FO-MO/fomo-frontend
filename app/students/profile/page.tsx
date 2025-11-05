@@ -5,25 +5,38 @@ import ProfileProjectCard from "@/components/student-section/ProfileProjectCard"
 import ProfileClubCard from "@/components/student-section/ProfileClubCard";
 import ProfileInternshipCard from "@/components/student-section/ProfileInternshipCard";
 import EditProfileModal from "@/components/student-section/EditProfileModal";
-import { profile } from "console";
 
 type TabKey = "projects" | "clubs" | "internships";
 
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:1337";
+const studentId = JSON.parse(
+  localStorage.getItem("fomo_user") || "{}"
+).documentId;
+
+const data = await fetch(
+  `${BACKEND_URL}/api/student-profiles?filters[studentId][$eq]=${studentId}&populate=*`,
+  { method: "GET", headers: { "Content-Type": "application/json" } }
+).then((res) => res.json());
+const studentAttributes = data.data[0];
+console.log("Student Attributes:", studentAttributes);
+
 const profileData = {
-  name: "Simon Mattekkatt",
-  email: "robertcresol@gmail.com",
+  name: studentAttributes.name,
+  email: studentAttributes.email || "tester@gmail.com",
   initials: "SM",
   backgroundImageUrl:
     "https://images.ctfassets.net/nnkxuzam4k38/2SvDjcgyav5C1DOb79JKXl/d3b06db5bb6bdb4ab237f666b5b4980e/compute-ea4c57a4.png",
-  profileImageUrl: "https://images.hitpaw.com/topics/3d/profile-photo-1.jpg",
-  followers: 0,
-  following: 0,
+  profileImageUrl:
+    `${BACKEND_URL}` + studentAttributes.profilePic.url ||
+    "https://images.hitpaw.com/topics/3d/profile-photo-1.jpg",
+  followers: studentAttributes.followers || 0,
+  following: studentAttributes.following || 0,
   // New fields
-  institution: "Massachusetts Institute of Technology",
-  major: "Computer Science",
-  graduationYear: "2026",
-  location: "Cambridge, MA",
-  bio: "Passionate about AI/ML and building impactful products. Always looking to collaborate on innovative projects!",
+  institution: studentAttributes.college || "NULL",
+  major: studentAttributes.course || "NULL",
+  graduationYear: studentAttributes.graduationYear || "NULL",
+  location: studentAttributes.location || "NULL",
+  bio: studentAttributes.about || "hi!",
   skills: [
     "React",
     "TypeScript",
@@ -95,6 +108,8 @@ const profileData = {
     },
   ],
 };
+
+console.log("Profile Data:", profileData.profileImageUrl);
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<TabKey>("projects");
