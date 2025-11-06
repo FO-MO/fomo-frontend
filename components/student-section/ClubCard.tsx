@@ -16,6 +16,7 @@ export type Club = {
   joined?: boolean;
   imageUrl?: string | null;
   badge?: string;
+  videos?: string[];
 };
 
 type Props = {

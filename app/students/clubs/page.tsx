@@ -15,7 +15,7 @@ console.log("Fetched clubs:", data.data);
 
 const mockClubs: Club[] = data.data.map((club: any) => {
   return {
-    id: club.id,
+    id: club.documentId,
     title: club.title,
     description: club.description,
     tags: club.skills,
@@ -24,6 +24,7 @@ const mockClubs: Club[] = data.data.map((club: any) => {
     joined: club.join,
     imageUrl: `${BACKEND_URL}` + club.image.url,
     badge: "Expert-led",
+    videos: club.videos.map((video: any) => `${BACKEND_URL}` + video.url) || [],
   };
 });
 

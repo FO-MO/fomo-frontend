@@ -25,6 +25,9 @@ type ClubDetails = {
   videos: Video[];
 };
 
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+
 export default function ClubVideosPage() {
   const params = useParams();
   const router = useRouter();
@@ -36,85 +39,130 @@ export default function ClubVideosPage() {
   const [showUploadModal, setShowUploadModal] = useState(false);
 
   useEffect(() => {
-    // TODO: Replace with actual API call
-    // Example API integration:
-    //
-    // const fetchClubVideos = async () => {
-    //   try {
-    //     const response = await fetch(`/api/clubs/${clubId}/videos`);
-    //     const data = await response.json();
-    //     setClubDetails(data);
-    //     setLoading(false);
-    //   } catch (error) {
-    //     console.error('Error fetching club videos:', error);
-    //     setLoading(false);
-    //   }
-    // };
-    // fetchClubVideos();
-    //
-    // Expected API response format:
-    // {
-    //   id: string,
-    //   name: string,
-    //   description: string,
-    //   videos: [
-    //     {
-    //       id: string,
-    //       title: string,
-    //       thumbnailUrl: string (optional),
-    //       author: { name: string, avatarUrl: string (optional) },
-    //       date: string (e.g., "Jul 29, 2025"),
-    //       videoUrl: string (optional, for playing video)
-    //     }
-    //   ]
-    // }
+    const fetchClubVideos = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("fomo_token");
 
-    // Mock data for now
-    setTimeout(() => {
-      setClubDetails({
-        id: clubId,
-        name: "Python",
-        description:
-          "Join expert-led clubs to access curated learning resources",
-        videos: [
+        // Fetch specific club by documentId (clubId from URL)
+        const response = await fetch(
+          `${BACKEND_URL}/api/clubs/${clubId}?populate=*`,
           {
-            id: "1",
-            title: "python lecture",
-            thumbnailUrl:
-              "https://i.ytimg.com/vi/K5KVEU3aaeQ/hq720.jpg?sqp=-oaymwEnCNAFEJQDSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLBU_XzziowJTR0U9Y8-I4BIWpWxEQ",
-            author: {
-              name: "rohith",
-            },
-            date: "Jul 29, 2025",
-            videoUrl:
-              "https://yieevfswpstgikftosfk.supabase.co/storage/v1/object/public/club_videos/e46230ed-5e61-4425-8a55-48a8b153ce3d-#2%20Python%20Tutorial%20for%20Beginners%20_%20Python%20Installation%20_%20PyCharm.mp4",
-          },
-          {
-            id: "2",
-            title: "python lecture",
-            thumbnailUrl:
-              "https://i.ytimg.com/vi/K5KVEU3aaeQ/hq720.jpg?sqp=-oaymwEnCNAFEJQDSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLBU_XzziowJTR0U9Y8-I4BIWpWxEQ",
-            author: {
-              name: "rohith",
-            },
-            date: "Jul 29, 2025",
-            videoUrl:
-              "https://yieevfswpstgikftosfk.supabase.co/storage/v1/object/public/club_videos/e46230ed-5e61-4425-8a55-48a8b153ce3d-#2%20Python%20Tutorial%20for%20Beginners%20_%20Python%20Installation%20_%20PyCharm.mp4",
-          },
-          // Add more mock videos here if needed
-        ],
-      });
-      setLoading(false);
-    }, 500);
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch club data");
+        }
+
+        const result = await response.json();
+        console.log("Fetched club data:", result);
+
+        // Transform the data to match our ClubDetails type
+        const clubData = result.data;
+        const transformedClub: ClubDetails = {
+          id: clubData.documentId,
+          name: clubData.title || "Club",
+          description:
+            clubData.description ||
+            "Join expert-led clubs to access curated learning resources",
+          videos:
+            clubData.videos?.map((video: any, index: number) => ({
+              id: video.id?.toString() || index.toString(),
+              title: video.name || video.title || "Video",
+              thumbnailUrl: video.thumbnail
+                ? `${BACKEND_URL}${video.thumbnail.url}`
+                : undefined,
+              author: {
+                name: clubData.author || "Unknown",
+                avatarUrl: undefined,
+              },
+              date: video.createdAt
+                ? new Date(video.createdAt).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })
+                : "Recently",
+              videoUrl: video.url ? `${BACKEND_URL}${video.url}` : undefined,
+            })) || [],
+        };
+
+        setClubDetails(transformedClub);
+      } catch (error) {
+        console.error("Error fetching club videos:", error);
+        // Fallback to mock data on error
+        setClubDetails({
+          id: clubId,
+          name: "Python",
+          description:
+            "Join expert-led clubs to access curated learning resources",
+          videos: [],
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (clubId) {
+      fetchClubVideos();
+    }
   }, [clubId]);
 
-  const handleRefresh = () => {
-    setLoading(true);
-    // TODO: Refetch data from API
-    // Example: fetchClubVideos();
-    setTimeout(() => {
+  const handleRefresh = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("fomo_token");
+
+      const response = await fetch(
+        `${BACKEND_URL}/api/clubs/${clubId}?populate=*`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch club data");
+      }
+
+      const result = await response.json();
+      const clubData = result.data;
+
+      const transformedClub: ClubDetails = {
+        id: clubData.documentId,
+        name: clubData.title || "Club",
+        description:
+          clubData.description ||
+          "Join expert-led clubs to access curated learning resources",
+        videos:
+          clubData.videos?.map((video: any, index: number) => ({
+            id: video.id?.toString() || index.toString(),
+            title: video.name || video.title || "Video",
+            thumbnailUrl: video.thumbnail
+              ? `${BACKEND_URL}${video.thumbnail.url}`
+              : undefined,
+            author: {
+              name: clubData.author || "Unknown",
+              avatarUrl: undefined,
+            },
+            date: video.createdAt
+              ? new Date(video.createdAt).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })
+              : "Recently",
+            videoUrl: video.url ? `${BACKEND_URL}${video.url}` : undefined,
+          })) || [],
+      };
+
+      setClubDetails(transformedClub);
+    } catch (error) {
+      console.error("Error refreshing club videos:", error);
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
 
   const handleUploadVideo = () => {
