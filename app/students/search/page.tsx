@@ -13,7 +13,6 @@ const res = await fetch(`${BACKEND_URL}/api/student-profiles?populate=*`, {
 const data = await res.json();
 
 console.log("Fetched jobs:", data.data);
-console.log("jobs:", `${BACKEND_URL}` + data.data[0].profilePic.url);
 
 const mockProfiles: Profile[] = data.data.map((search: any) => {
   return {
