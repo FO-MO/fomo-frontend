@@ -1,44 +1,72 @@
+"use client";
 import React from "react";
 import ClubCard, { Club } from "@/components/student-section/ClubCard";
+import { getAuthToken } from "@/lib/strapi/auth";
 
-const mockClubs: Club[] = [
-  {
-    id: "1",
-    title: "Web Development",
-    description:
-      "Master modern web technologies including HTML, CSS, JavaScript, React, and more.",
-    tags: ["HTML/CSS", "JavaScript", "React"],
-    leader: { name: "Dr. Sarah Johnson", avatarUrl: null },
-    membersCount: 124,
-    joined: true,
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+const token = localStorage.getItem("fomo_token");
+const res = await fetch(`${BACKEND_URL}/api/clubs?populate=*`, {
+  headers: { Authorization: `Bearer ${token}` },
+});
+const data = await res.json();
+
+console.log("Fetched clubs:", data.data);
+
+const mockClubs: Club[] = data.data.map((club: any) => {
+  return {
+    id: club.id,
+    title: club.title,
+    description: club.description,
+    tags: club.skills,
+    leader: { name: club.author, avatarUrl: null },
+    membersCount: club.no_member,
+    joined: club.join,
+    imageUrl: `${BACKEND_URL}` + club.image.url,
     badge: "Expert-led",
-    imageUrl: null,
-  },
-  {
-    id: "2",
-    title: "Python",
-    description:
-      "Learn Python programming from basics to advanced concepts. Cover data science, web, and automation.",
-    tags: ["Python Basics", "Data Science", "Django"],
-    leader: { name: "Dr. Michael Chen", avatarUrl: null },
-    membersCount: 98,
-    joined: true,
-    badge: "Expert-led",
-    imageUrl: null,
-  },
-  {
-    id: "3",
-    title: "Java",
-    description:
-      "Comprehensive Java programming course covering OOP, Spring framework, and more.",
-    tags: ["Core Java", "Spring Boot", "Hibernate"],
-    leader: { name: "Dr. Priya Sharma", avatarUrl: null },
-    membersCount: 76,
-    joined: true,
-    badge: "Expert-led",
-    imageUrl: null,
-  },
-];
+  };
+});
+
+console.log("Fetched clubs:", mockClubs);
+
+// const mockClubs: Club[] = [
+//   {
+//     id: "1",
+//     title: "Web Development",
+//     description:
+//       "Master modern web technologies including HTML, CSS, JavaScript, React, and more.",
+//     tags: ["HTML/CSS", "JavaScript", "React"],
+//     leader: { name: "Dr. Sarah Johnson", avatarUrl: null },
+//     membersCount: 124,
+//     joined: true,
+//     badge: "Expert-led",
+//     imageUrl: null,
+//   },
+//   {
+//     id: "2",
+//     title: "Python",
+//     description:
+//       "Learn Python programming from basics to advanced concepts. Cover data science, web, and automation.",
+//     tags: ["Python Basics", "Data Science", "Django"],
+//     leader: { name: "Dr. Michael Chen", avatarUrl: null },
+//     membersCount: 98,
+//     joined: true,
+//     badge: "Expert-led",
+//     imageUrl: null,
+//   },
+//   {
+//     id: "3",
+//     title: "Java",
+//     description:
+//       "Comprehensive Java programming course covering OOP, Spring framework, and more.",
+//     tags: ["Core Java", "Spring Boot", "Hibernate"],
+//     leader: { name: "Dr. Priya Sharma", avatarUrl: null },
+//     membersCount: 76,
+//     joined: true,
+//     badge: "Expert-led",
+//     imageUrl: null,
+//   },
+// ];
 
 export default function ClubsPage() {
   return (

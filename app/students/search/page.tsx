@@ -4,7 +4,34 @@ import React, { useState, useMemo } from "react";
 import SearchCard, { Profile } from "@/components/student-section/SearchCard";
 import { Search, X } from "lucide-react";
 
-const mockProfiles: Profile[] = [
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+const token = localStorage.getItem("fomo_token");
+const res = await fetch(`${BACKEND_URL}/api/student-profiles?populate=*`, {
+  headers: { Authorization: `Bearer ${token}` },
+});
+const data = await res.json();
+
+console.log("Fetched jobs:", data.data);
+console.log("jobs:", `${BACKEND_URL}` + data.data[0].profilePic.url);
+
+const mockProfiles: Profile[] = data.data.map((search: any) => {
+  return {
+    id: search.id,
+    documentId: search.documentId,
+    name: search.name,
+    email: search.email,
+    skills: search.skills,
+    followersCount: search.followers,
+    followingCount: search.following,
+    isFollowing: false,
+    avatarUrl: null, //`${BACKEND_URL}` + search.profilePic.url,
+  };
+});
+
+console.log("Fetched jobs:", mockProfiles);
+
+const mockProfiles_: Profile[] = [
   {
     id: "1",
     name: "Damon",

@@ -24,13 +24,13 @@ export default function Signup() {
         setError(result.error.message || "Registration failed");
         console.error("Sign up error:", result);
       } else if (result?.jwt) {
-        // Immediately set token and redirect
+        // Immediately set token and redirect to profile setup
         setAuthToken(result.jwt);
         try {
           localStorage.setItem("fomo_user", JSON.stringify(result.user));
         } catch {}
         setSuccess(true);
-        window.location.href = "/students";
+        window.location.href = "/auth/setup-profile";
       } else {
         // Strapi may require email confirmation depending on settings
         setSuccess(true);

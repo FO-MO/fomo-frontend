@@ -46,6 +46,7 @@ export function getAuthToken(): string | null {
   try {
     // Prefer localStorage for ease
     const t = localStorage.getItem("fomo_token");
+    console.log("Retrieved token from localStorage:", t);
     if (t) return t;
   } catch {}
   const match = document.cookie.match(new RegExp("(^| )fomo_token=([^;]+)"));
