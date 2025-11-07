@@ -1,4 +1,6 @@
+"use client";
 import PostCard, { Post } from "@/components/student-section/PostCard";
+import { useEffect, useState } from "react";
 
 export type HomePageData = {
   user: {
@@ -166,6 +168,29 @@ const homePageData: HomePageData = {
 
 export default function StudentsHomePage() {
   const { user, composer, postsSectionTitle, posts } = homePageData;
+  const [nameVal, setNameVal] = useState(user.name);
+
+  useEffect(() => {
+    // Compute initials from current user's name stored in localStorage
+    try {
+      const raw = localStorage.getItem("fomo_user");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        // Try common fields for name
+        const name =
+          (parsed && (parsed.name || parsed.username || parsed.email)) ||
+          "User";
+        // If email, strip domain
+        const cleanedName =
+          typeof name === "string" && name.includes("@")
+            ? name.split("@")[0]
+            : name;
+        setNameVal(cleanedName);
+      }
+    } catch {
+      setNameVal(user.name);
+    }
+  }, []);
 
   return (
     <main className="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-20 bg-white min-h-screen">
@@ -174,7 +199,7 @@ export default function StudentsHomePage() {
         <header className="mb-8">
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl sm:text-4xl font-bold text-black">
-              Welcome back, {user.name}! {user.greetingEmoji}
+              Welcome back, {nameVal}! {user.greetingEmoji}
             </h1>
             <p className="text-base text-black max-w-2xl">{user.subtitle}</p>
           </div>
