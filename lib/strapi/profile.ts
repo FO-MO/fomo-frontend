@@ -1,6 +1,10 @@
 // Strapi profile helper functions
+<<<<<<< HEAD
 const STRAPI_URL =
   process.env.BACKEND_URL || "https://tbs9k5m4-1337.inc1.devtunnels.ms";
+=======
+const STRAPI_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+>>>>>>> origin/backend-integration
 
 export interface StudentProfile {
   documentId?: string;
@@ -56,6 +60,7 @@ export async function getStudentProfile(
     );
     if (!res.ok) return null;
     const json = await res.json();
+    console.log("Fetched student profile:", json);
     return json?.data?.[0] || null;
   } catch (err) {
     console.error("Failed to fetch student profile:", err);
