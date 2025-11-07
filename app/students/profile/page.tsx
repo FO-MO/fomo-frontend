@@ -11,8 +11,7 @@ import { getStudentProfile } from "@/lib/strapi/profile";
 
 type TabKey = "projects" | "clubs" | "internships";
 
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function ProfilePage() {
   const router = useRouter();

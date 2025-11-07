@@ -1,136 +1,149 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import ProfileProjectCard from "@/components/student-section/ProfileProjectCard";
 import ProfileClubCard from "@/components/student-section/ProfileClubCard";
 import ProfileInternshipCard from "@/components/student-section/ProfileInternshipCard";
 import EditProfileModal from "@/components/student-section/EditProfileModal";
+import { getAuthToken } from "@/lib/strapi/auth";
+import { getStudentProfile } from "@/lib/strapi/profile";
 
 type TabKey = "projects" | "clubs" | "internships";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-const studentId = JSON.parse(
-  localStorage.getItem("fomo_user") || "{}"
-).documentId;
-
-const authToken = localStorage.getItem("fomo_token");
-
-const headers: Record<string, string> = {
-  "Content-Type": "application/json",
-};
-
-if (authToken) {
-  headers["Authorization"] = `Bearer ${authToken}`;
-}
-
-const data = await fetch(
-  `${BACKEND_URL}/api/student-profiles?filters[studentId][$eq]=${studentId}&populate=*`,
-  { method: "GET", headers }
-).then((res) => res.json());
-// If no profile exists, studentAttributes will be null
-const studentAttributes = data?.data?.[0] ?? null;
-console.log("Student Attributes:", studentAttributes);
-
-const profileData = {
-  name: studentAttributes.name,
-  email: studentAttributes.email || "tester@gmail.com",
-  initials: "SM",
-  backgroundImageUrl:
-    "https://images.ctfassets.net/nnkxuzam4k38/2SvDjcgyav5C1DOb79JKXl/d3b06db5bb6bdb4ab237f666b5b4980e/compute-ea4c57a4.png",
-  profileImageUrl:
-    `${BACKEND_URL}` + studentAttributes.profilePic.url ||
-    "https://images.hitpaw.com/topics/3d/profile-photo-1.jpg",
-  followers: studentAttributes.followers || 0,
-  following: studentAttributes.following || 0,
-  // New fields
-  institution: studentAttributes.college || "NULL",
-  major: studentAttributes.course || "NULL",
-  graduationYear: studentAttributes.graduationYear || "NULL",
-  location: studentAttributes.location || "NULL",
-  bio: studentAttributes.about || "hi!",
-  skills: [
-    "React",
-    "TypeScript",
-    "Node.js",
-    "Python",
-    "Machine Learning",
-    "UI/UX Design",
-    "Docker",
-    "AWS",
-    "GraphQL",
-    "TensorFlow",
-  ],
-  interests: [
-    "Artificial Intelligence",
-    "Web Development",
-    "Startups",
-    "Product Design",
-    "Open Source",
-    "Hackathons",
-  ],
-  tabs: [
-    { key: "projects" as TabKey, label: "Projects" },
-    { key: "clubs" as TabKey, label: "Clubs" },
-    { key: "internships" as TabKey, label: "Internships" },
-  ],
-  projects: [
-    {
-      title: "EcoTrack Mobile App",
-      description:
-        "Building an app that helps users track and reduce their carbon footprint",
-      status: "Active",
-      tags: ["React Native", "UI/UX Design"],
-    },
-    {
-      title: "College Resource Finder",
-      description:
-        "Web app that aggregates and organizes university resources for students",
-      status: "Completed",
-      tags: ["React", "Firebase", "Tailwind CSS"],
-    },
-  ],
-  clubs: [
-    {
-      name: "AI Innovators",
-      description: "Explore cutting-edge AI technologies with industry experts",
-      tags: ["Artificial Intelligence", "Machine Learning"],
-      badge: "Expert-led",
-    },
-    {
-      name: "Product Design Lab",
-      description:
-        "Learn product design methodologies from Apple and Tesla designers",
-      tags: ["Product Design", "UX"],
-      badge: "Expert-led",
-    },
-  ],
-  internships: [
-    {
-      role: "UI/UX Design Intern at Adobe",
-      timeline: "Summer 2023",
-      location: "San Francisco, CA",
-      status: "Applied",
-    },
-    {
-      role: "Frontend Developer Intern at Spotify",
-      timeline: "Summer 2023",
-      location: "Remote",
-      status: "Applied",
-    },
-  ],
-};
-
-console.log("Profile Data:", profileData.profileImageUrl);
 
 export default function ProfilePage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const userId = searchParams.get("userId"); // Get userId from URL query
   const [activeTab, setActiveTab] = useState<TabKey>("projects");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [profileData, setProfileData] = useState<any>(null);
+  const [isOwnProfile, setIsOwnProfile] = useState(false);
 
-  const handleSaveProfile = (data: {
+  useEffect(() => {
+    loadProfile();
+  }, [userId]); // Reload when userId changes
+
+  const loadProfile = async () => {
+    try {
+      const token = getAuthToken();
+      if (!token) {
+        router.push("/auth/login");
+        return;
+      }
+
+      // If no userId in URL, redirect to login or show error
+      if (!userId) {
+        router.push("/auth/login");
+        return;
+      }
+
+      // Get current logged-in user ID to check if viewing own profile
+      let currentUserId: string | null = null;
+      try {
+        const userStr = localStorage.getItem("fomo_user");
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          currentUserId = user?.documentId || user?.id || null;
+        }
+      } catch (err) {
+        console.error("Failed to parse user data:", err);
+      }
+
+      // Check if viewing own profile
+      setIsOwnProfile(userId === currentUserId);
+
+      // Load the profile for the given userId
+      const profile = await getStudentProfile(userId, token);
+      //   const data_ = await fetch(
+      //     `${BACKEND_URL}/api/student-profiles?filters[studentId][$eq]=${encodeURIComponent(
+      //       userId
+      //     )}&populate=*`,
+      //     {
+      //       headers: { Authorization: `Bearer ${token}` },
+      //     }
+      //   );
+      //   console.log("Loaded profile data:", data_);
+
+      if (!profile) {
+        setProfileData(null);
+        setLoading(false);
+        return;
+      }
+
+      // Get user email - try from profile first, then from stored data if viewing own profile
+      let userEmail = "user@example.com";
+      if (profile.email) {
+        userEmail = profile.email;
+      } else if (isOwnProfile) {
+        try {
+          const userStr = localStorage.getItem("fomo_user");
+          if (userStr) {
+            const user = JSON.parse(userStr);
+            userEmail = user?.email || userEmail;
+          }
+        } catch (err) {
+          console.error("Failed to get user email:", err);
+        }
+      }
+
+      // Transform profile data
+      const data = {
+        name: profile.name || "User",
+        email: userEmail,
+        initials: profile.name
+          ? profile.name
+              .split(" ")
+              .map((n) => n[0])
+              .join("")
+              .toUpperCase()
+              .slice(0, 2)
+          : "SM",
+        backgroundImageUrl: profile.backgroundImage?.url
+          ? `${BACKEND_URL}${profile.backgroundImage.url}`
+          : null,
+        profileImageUrl: profile.profilePic?.url
+          ? `${BACKEND_URL}${profile.profilePic.url}`
+          : null,
+        followers: profile.followers || 0,
+        following: profile.following || 0,
+        institution: profile.college || "Not specified",
+        major: profile.course || "Not specified",
+        graduationYear: profile.graduationYear || "Not specified",
+        location: profile.location || "Not specified",
+        bio: profile.about || "No bio yet",
+        skills: profile.skills || [],
+        interests: profile.interests || [],
+        tabs: [
+          { key: "projects" as TabKey, label: "Projects" },
+          { key: "clubs" as TabKey, label: "Clubs" },
+          { key: "internships" as TabKey, label: "Internships" },
+        ],
+        projects: [
+          // TODO: Fetch from API
+        ],
+        clubs: [
+          // TODO: Fetch from API
+        ],
+        internships: [
+          // TODO: Fetch from API
+        ],
+      };
+
+      setProfileData(data);
+    } catch (err) {
+      console.error("Failed to load profile:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveProfile = async (data: {
     name: string;
     email: string;
-    profileImage: File | null;
-    backgroundImage: File | null;
     institution: string;
     major: string;
     graduationYear: string;
@@ -139,71 +152,118 @@ export default function ProfilePage() {
     skills: string[];
     interests: string[];
   }) => {
-    // TODO: Implement API call to save profile data
-    console.log("Saving profile:", data);
+    // The EditProfileModal already handles the save, so we just need to reload
+    await loadProfile();
     setIsEditModalOpen(false);
   };
 
   const renderTabContent = () => {
+    if (!profileData) return null;
+
     switch (activeTab) {
       case "projects":
         return (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {profileData.projects.map((project, index) => (
-              <div
-                key={project.title}
-                className="transform transition-all duration-300 hover:-translate-y-1"
-              >
-                <ProfileProjectCard
-                  title={project.title}
-                  description={project.description}
-                  status={project.status}
-                  tags={project.tags}
-                />
+            {profileData.projects.length > 0 ? (
+              profileData.projects.map((project: any, index: number) => (
+                <div
+                  key={project.title}
+                  className="transform transition-all duration-300 hover:-translate-y-1"
+                >
+                  <ProfileProjectCard
+                    title={project.title}
+                    description={project.description}
+                    status={project.status}
+                    tags={project.tags}
+                  />
+                </div>
+              ))
+            ) : (
+              <div className="col-span-2 text-center py-12">
+                <p className="text-gray-500">No projects yet</p>
               </div>
-            ))}
+            )}
           </div>
         );
       case "clubs":
         return (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {profileData.clubs.map((club, index) => (
-              <div
-                key={club.name}
-                className="transform transition-all duration-300 hover:-translate-y-1"
-              >
-                <ProfileClubCard
-                  name={club.name}
-                  description={club.description}
-                  tags={club.tags}
-                  badge={club.badge}
-                />
+            {profileData.clubs.length > 0 ? (
+              profileData.clubs.map((club: any, index: number) => (
+                <div
+                  key={club.name}
+                  className="transform transition-all duration-300 hover:-translate-y-1"
+                >
+                  <ProfileClubCard
+                    name={club.name}
+                    description={club.description}
+                    tags={club.tags}
+                    badge={club.badge}
+                  />
+                </div>
+              ))
+            ) : (
+              <div className="col-span-2 text-center py-12">
+                <p className="text-gray-500">No clubs yet</p>
               </div>
-            ))}
+            )}
           </div>
         );
       case "internships":
         return (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {profileData.internships.map((internship, index) => (
-              <div
-                key={internship.role}
-                className="transform transition-all duration-300 hover:-translate-y-1"
-              >
-                <ProfileInternshipCard
-                  role={internship.role}
-                  timeline={internship.timeline}
-                  location={internship.location}
-                  status={internship.status}
-                />
+            {profileData.internships.length > 0 ? (
+              profileData.internships.map((internship: any, index: number) => (
+                <div
+                  key={internship.role}
+                  className="transform transition-all duration-300 hover:-translate-y-1"
+                >
+                  <ProfileInternshipCard
+                    role={internship.role}
+                    timeline={internship.timeline}
+                    location={internship.location}
+                    status={internship.status}
+                  />
+                </div>
+              ))
+            ) : (
+              <div className="col-span-2 text-center py-12">
+                <p className="text-gray-500">No internships yet</p>
               </div>
-            ))}
+            )}
           </div>
         );
       default:
         return null;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!profileData) {
+    return (
+      <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600 font-medium">Failed to load profile</p>
+          <button
+            onClick={loadProfile}
+            className="mt-4 px-6 py-2 bg-teal-700 text-white rounded-lg hover:bg-teal-800"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 to-white">
@@ -275,15 +335,28 @@ export default function ProfilePage() {
 
             {/* Action Buttons */}
             <div className="flex gap-3 pb-2">
-              <button
-                onClick={() => setIsEditModalOpen(true)}
-                className="px-6 py-2.5 bg-teal-700 hover:bg-teal-800 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300"
-              >
-                Edit Profile
-              </button>
-              <button className="px-6 py-2.5 bg-white hover:bg-gray-50 text-gray-700 rounded-lg font-medium shadow-md border border-gray-200 transition-all duration-300">
-                Share
-              </button>
+              {isOwnProfile ? (
+                <>
+                  <button
+                    onClick={() => setIsEditModalOpen(true)}
+                    className="px-6 py-2.5 bg-teal-700 hover:bg-teal-800 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300"
+                  >
+                    Edit Profile
+                  </button>
+                  <button className="px-6 py-2.5 bg-white hover:bg-gray-50 text-gray-700 rounded-lg font-medium shadow-md border border-gray-200 transition-all duration-300">
+                    Share
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button className="px-6 py-2.5 bg-teal-700 hover:bg-teal-800 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300">
+                    Follow
+                  </button>
+                  <button className="px-6 py-2.5 bg-white hover:bg-gray-50 text-gray-700 rounded-lg font-medium shadow-md border border-gray-200 transition-all duration-300">
+                    Message
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -303,36 +376,42 @@ export default function ProfilePage() {
             )}
 
             {/* Skills */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h2 className="text-lg font-bold text-gray-900 mb-4">Skills</h2>
-              <div className="flex flex-wrap gap-2">
-                {profileData.skills.map((skill, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1.5 bg-teal-50 text-teal-700 rounded-lg text-sm font-medium border border-teal-200 hover:bg-teal-100 transition-colors"
-                  >
-                    {skill}
-                  </span>
-                ))}
+            {profileData.skills.length > 0 && (
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h2 className="text-lg font-bold text-gray-900 mb-4">Skills</h2>
+                <div className="flex flex-wrap gap-2">
+                  {profileData.skills.map((skill: string, index: number) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1.5 bg-teal-50 text-teal-700 rounded-lg text-sm font-medium border border-teal-200 hover:bg-teal-100 transition-colors"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Interests */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h2 className="text-lg font-bold text-gray-900 mb-4">
-                Interests
-              </h2>
-              <div className="flex flex-wrap gap-2">
-                {profileData.interests.map((interest, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium border border-blue-200 hover:bg-blue-100 transition-colors"
-                  >
-                    {interest}
-                  </span>
-                ))}
+            {profileData.interests.length > 0 && (
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h2 className="text-lg font-bold text-gray-900 mb-4">
+                  Interests
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {profileData.interests.map(
+                    (interest: string, index: number) => (
+                      <span
+                        key={index}
+                        className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium border border-blue-200 hover:bg-blue-100 transition-colors"
+                      >
+                        {interest}
+                      </span>
+                    )
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Right Column - Education and Info */}
@@ -431,7 +510,7 @@ export default function ProfilePage() {
         {/* Tabs */}
         <div className="mb-8">
           <div className="inline-flex gap-1 bg-white rounded-xl p-1.5 shadow-md border border-gray-200">
-            {profileData.tabs.map((tab) => (
+            {profileData.tabs.map((tab: any) => (
               <button
                 key={tab.key}
                 type="button"
@@ -452,25 +531,25 @@ export default function ProfilePage() {
         <div className="pb-16">{renderTabContent()}</div>
       </div>
 
-      {/* Edit Profile Modal */}
-      <EditProfileModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        currentData={{
-          name: profileData.name,
-          email: profileData.email,
-          profileImageUrl: profileData.profileImageUrl,
-          backgroundImageUrl: profileData.backgroundImageUrl,
-          institution: profileData.institution,
-          major: profileData.major,
-          graduationYear: profileData.graduationYear,
-          location: profileData.location,
-          bio: profileData.bio,
-          skills: profileData.skills,
-          interests: profileData.interests,
-        }}
-        onSave={handleSaveProfile}
-      />
+      {/* Edit Profile Modal - Only show for own profile */}
+      {profileData && isOwnProfile && (
+        <EditProfileModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          currentData={{
+            name: profileData.name,
+            email: profileData.email,
+            institution: profileData.institution,
+            major: profileData.major,
+            graduationYear: profileData.graduationYear,
+            location: profileData.location,
+            bio: profileData.bio,
+            skills: profileData.skills,
+            interests: profileData.interests,
+          }}
+          onSave={handleSaveProfile}
+        />
+      )}
     </div>
   );
 }

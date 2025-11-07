@@ -4,6 +4,7 @@ import React from "react";
 
 export type Profile = {
   id: string | number;
+  documentId?: string;
   name: string;
   email: string;
   avatarUrl?: string | null;

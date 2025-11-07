@@ -1,35 +1,12 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import SearchCard, { Profile } from "@/components/student-section/SearchCard";
 import { Search, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const BACKEND_URL =
-  process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
-const token = localStorage.getItem("fomo_token");
-const res = await fetch(`${BACKEND_URL}/api/student-profiles?populate=*`, {
-  headers: { Authorization: `Bearer ${token}` },
-});
-const data = await res.json();
-
-console.log("Fetched jobs:", data.data);
-console.log("jobs:", `${BACKEND_URL}` + data.data[0].profilePic.url);
-
-const mockProfiles: Profile[] = data.data.map((search: any) => {
-  return {
-    id: search.id,
-    documentId: search.documentId,
-    name: search.name,
-    email: search.email,
-    skills: search.skills,
-    followersCount: search.followers,
-    followingCount: search.following,
-    isFollowing: false,
-    avatarUrl: null, //`${BACKEND_URL}` + search.profilePic.url,
-  };
-});
-
-console.log("Fetched jobs:", mockProfiles);
+  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:1337";
 
 const mockProfiles_: Profile[] = [
   {
@@ -95,38 +72,88 @@ const mockProfiles_: Profile[] = [
 ];
 
 export default function SearchPage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [followingFilter, setFollowingFilter] = useState<
     "all" | "following" | "not-following"
   >("all");
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("fomo_token");
+        const res = await fetch(
+          `${BACKEND_URL}/api/student-profiles?populate=*`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const data = await res.json();
+
+        console.log("Fetched profiles:", data.data);
+
+        const fetchedProfiles: Profile[] = data.data.map((search: any) => ({
+          id: search.id,
+          documentId: search.studentId,
+          name: search.name,
+          email: search.email || "No email",
+          skills: search.skills || [],
+          followersCount: search.followers || 0,
+          followingCount: search.following || 0,
+          isFollowing: false,
+          avatarUrl: null,
+        }));
+
+        setProfiles(fetchedProfiles);
+      } catch (error) {
+        console.error("Error fetching profiles:", error);
+        setProfiles([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfiles();
+  }, []);
 
   // Filter profiles based on search query and following filter
   const filteredProfiles = useMemo(() => {
-    let filtered = mockProfiles;
+    let filtered = profiles;
 
     // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
-        (profile) =>
+        (profile: Profile) =>
           profile.name.toLowerCase().includes(query) ||
           profile.email.toLowerCase().includes(query) ||
-          profile.skills?.some((skill) => skill.toLowerCase().includes(query))
+          profile.skills?.some((skill: string) =>
+            skill.toLowerCase().includes(query)
+          )
       );
     }
 
     // Filter by following status
     if (followingFilter === "following") {
-      filtered = filtered.filter((profile) => profile.isFollowing);
+      filtered = filtered.filter((profile: Profile) => profile.isFollowing);
     } else if (followingFilter === "not-following") {
-      filtered = filtered.filter((profile) => !profile.isFollowing);
+      filtered = filtered.filter((profile: Profile) => !profile.isFollowing);
     }
 
     return filtered;
-  }, [searchQuery, followingFilter]);
+  }, [searchQuery, followingFilter, profiles]);
 
   const handleClearSearch = () => {
     setSearchQuery("");
+  };
+
+  const handleProfileClick = (profile: Profile) => {
+    if (profile.documentId) {
+      router.push(`/profile?userId=${profile.documentId}`);
+    }
   };
 
   return (
@@ -175,7 +202,7 @@ export default function SearchPage() {
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
-                All ({mockProfiles.length})
+                All ({profiles.length})
               </button>
               <button
                 onClick={() => setFollowingFilter("following")}
@@ -185,7 +212,8 @@ export default function SearchPage() {
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
-                Following ({mockProfiles.filter((p) => p.isFollowing).length})
+                Following (
+                {profiles.filter((p: Profile) => p.isFollowing).length})
               </button>
               <button
                 onClick={() => setFollowingFilter("not-following")}
@@ -196,7 +224,7 @@ export default function SearchPage() {
                 }`}
               >
                 Not Following (
-                {mockProfiles.filter((p) => !p.isFollowing).length})
+                {profiles.filter((p: Profile) => !p.isFollowing).length})
               </button>
             </div>
           </div>
@@ -219,22 +247,26 @@ export default function SearchPage() {
 
         {/* grid */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {filteredProfiles.length > 0 ? (
-            filteredProfiles.map((profile) => (
-              <a
-                href="backendpeep"
+          {loading ? (
+            <div className="col-span-full text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto"></div>
+              <p className="text-gray-500 mt-4">Loading profiles...</p>
+            </div>
+          ) : filteredProfiles.length > 0 ? (
+            filteredProfiles.map((profile: Profile) => (
+              <div
                 key={profile.id}
-                className="transition-transform duration-300 ease-in-out hover:-translate-y-2"
+                onClick={() => handleProfileClick(profile)}
+                className="transition-transform duration-300 ease-in-out hover:-translate-y-2 cursor-pointer"
               >
                 <SearchCard
-                  key={profile.id}
                   profile={profile}
                   onFollowToggle={(profileId) => {
                     console.log("Follow toggled for profile:", profileId);
                     // Here you would typically update the profile's following status
                   }}
                 />
-              </a>
+              </div>
             ))
           ) : (
             <div className="col-span-full text-center py-12">

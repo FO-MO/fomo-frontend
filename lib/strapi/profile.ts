@@ -1,6 +1,5 @@
 // Strapi profile helper functions
-const STRAPI_URL =
-  process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+const STRAPI_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export interface StudentProfile {
   documentId?: string;
@@ -56,6 +55,7 @@ export async function getStudentProfile(
     );
     if (!res.ok) return null;
     const json = await res.json();
+    console.log("Fetched student profile:", json);
     return json?.data?.[0] || null;
   } catch (err) {
     console.error("Failed to fetch student profile:", err);

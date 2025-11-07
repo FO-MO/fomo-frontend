@@ -162,8 +162,7 @@ interface Job {
 //   },
 // ];
 
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 const token = localStorage.getItem("fomo_token");
 const res = await fetch(`${BACKEND_URL}/api/jobs?populate=*`, {
   headers: { Authorization: `Bearer ${token}` },
