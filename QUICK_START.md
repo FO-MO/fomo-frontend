@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- ✅ Strapi backend running on `http://localhost:1337`
+- ✅ Strapi backend running on `https://tbs9k5m4-1337.inc1.devtunnels.ms`
 - ✅ Node.js and npm installed
 - ✅ Next.js project setup
 
@@ -10,7 +10,7 @@
 
 ### Step 1: Create Strapi Collection (2 minutes)
 
-1. Open Strapi Admin Panel: `http://localhost:1337/admin`
+1. Open Strapi Admin Panel: `https://tbs9k5m4-1337.inc1.devtunnels.ms/admin`
 
 2. Go to **Content-Type Builder** → **Create new collection type**
 
@@ -56,7 +56,7 @@
 Check `.env.local` has:
 
 ```env
-NEXT_PUBLIC_STRAPI_URL=http://localhost:1337
+NEXT_PUBLIC_STRAPI_URL=https://tbs9k5m4-1337.inc1.devtunnels.ms
 ```
 
 ### Step 4: Start the App (30 seconds)

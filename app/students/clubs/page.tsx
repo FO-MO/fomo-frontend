@@ -3,7 +3,9 @@ import React from "react";
 import ClubCard, { Club } from "@/components/student-section/ClubCard";
 import { fetchData } from "@/lib/strapi/strapiData";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_STRAPI_URL ||
+  "https://tbs9k5m4-1337.inc1.devtunnels.ms";
 const token = localStorage.getItem("fomo_token");
 const data = await fetchData(token, "clubs?populate=*");
 
