@@ -167,7 +167,7 @@ In Strapi → Settings → Roles → Authenticated:
 
 ## 🚀 How to Test
 
-1. **Start Strapi backend** (must be running on `http://localhost:1337`)
+1. **Start Strapi backend** (must be running on `https://tbs9k5m4-1337.inc1.devtunnels.ms`)
 
    ```bash
    cd strapi-backend  # your Strapi directory
@@ -197,7 +197,7 @@ In Strapi → Settings → Roles → Authenticated:
 Make sure `.env.local` has:
 
 ```
-NEXT_PUBLIC_STRAPI_URL=http://localhost:1337
+NEXT_PUBLIC_STRAPI_URL=https://tbs9k5m4-1337.inc1.devtunnels.ms
 ```
 
 ### Customize Skills/Interests

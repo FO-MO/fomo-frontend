@@ -5,7 +5,8 @@ import ProjectCard, { Project } from "@/components/student-section/ProjectCard";
 import CreateProjectModal from "@/components/student-section/CreateProjectModal";
 
 const BACKEND_URL =
-  process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+  process.env.NEXT_PUBLIC_STRAPI_URL ||
+  "https://tbs9k5m4-1337.inc1.devtunnels.ms";
 const token = localStorage.getItem("fomo_token");
 const res = await fetch(`${BACKEND_URL}/api/projects?populate=*`, {
   headers: { Authorization: `Bearer ${token}` },

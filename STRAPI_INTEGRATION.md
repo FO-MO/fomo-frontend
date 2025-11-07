@@ -26,7 +26,7 @@ This project was updated to use Strapi's built-in authentication instead of Supa
 Add these to your `.env.local` file:
 
 ```
-NEXT_PUBLIC_STRAPI_URL=http://localhost:1337
+NEXT_PUBLIC_STRAPI_URL=https://tbs9k5m4-1337.inc1.devtunnels.ms
 ```
 
 ## User Flow:
@@ -78,7 +78,7 @@ Notes:
 
 ## Testing:
 
-1. Start Strapi backend (default `http://localhost:1337`)
+1. Start Strapi backend (default `https://tbs9k5m4-1337.inc1.devtunnels.ms`)
    - Make sure you've created the `student-profiles` collection
    - Configure permissions for authenticated users
 2. Start this Next.js app: `npm run dev`

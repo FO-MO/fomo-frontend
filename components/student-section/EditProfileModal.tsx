@@ -5,7 +5,8 @@ import { useState } from "react";
 import { getAuthToken } from "@/lib/strapi/auth";
 
 const BACKEND_URL =
-  process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+  process.env.NEXT_PUBLIC_STRAPI_URL ||
+  "https://tbs9k5m4-1337.inc1.devtunnels.ms";
 
 // Predefined options
 const AVAILABLE_SKILLS = [
