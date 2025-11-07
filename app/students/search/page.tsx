@@ -4,72 +4,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import SearchCard, { Profile } from "@/components/student-section/SearchCard";
 import { Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:1337";
-
-const mockProfiles_: Profile[] = [
-  {
-    id: "1",
-    name: "Damon",
-    email: "bloodhuntersplayzone@gmail.com",
-    skills: ["React", "TypeScript", "Node.js"],
-    followersCount: 0,
-    followingCount: 0,
-    isFollowing: false,
-    avatarUrl: null,
-  },
-  {
-    id: "2",
-    name: "Sarah Johnson",
-    email: "sarah.johnson@university.edu",
-    skills: ["Python", "Data Science", "Machine Learning", "Django"],
-    followersCount: 245,
-    followingCount: 89,
-    isFollowing: true,
-    avatarUrl: null,
-  },
-  {
-    id: "3",
-    name: "Michael Chen",
-    email: "m.chen@techcorp.com",
-    skills: ["Java", "Spring Boot", "Microservices", "Docker"],
-    followersCount: 156,
-    followingCount: 203,
-    isFollowing: false,
-    avatarUrl: null,
-  },
-  {
-    id: "4",
-    name: "Priya Sharma",
-    email: "priya.sharma@startup.io",
-    skills: ["Frontend", "React", "UI/UX", "Figma"],
-    followersCount: 89,
-    followingCount: 134,
-    isFollowing: false,
-    avatarUrl: null,
-  },
-  {
-    id: "5",
-    name: "Alex Rodriguez",
-    email: "alex.r@devstudio.com",
-    skills: ["Full Stack", "Vue.js", "PostgreSQL", "AWS"],
-    followersCount: 67,
-    followingCount: 92,
-    isFollowing: true,
-    avatarUrl: null,
-  },
-  {
-    id: "6",
-    name: "Emma Thompson",
-    email: "emma.thompson@design.co",
-    skills: ["Product Design", "Prototyping", "User Research"],
-    followersCount: 312,
-    followingCount: 156,
-    isFollowing: false,
-    avatarUrl: null,
-  },
-];
+import { fetchData } from "@/lib/strapi/strapiData";
 
 export default function SearchPage() {
   const router = useRouter();
@@ -85,15 +20,7 @@ export default function SearchPage() {
       try {
         setLoading(true);
         const token = localStorage.getItem("fomo_token");
-        const res = await fetch(
-          `${BACKEND_URL}/api/student-profiles?populate=*`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        const data = await res.json();
-
-        console.log("Fetched profiles:", data.data);
+        const data = await fetchData(token, "student-profiles?populate=*");
 
         const fetchedProfiles: Profile[] = data.data.map((search: any) => ({
           id: search.id,

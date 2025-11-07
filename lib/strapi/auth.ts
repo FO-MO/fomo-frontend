@@ -1,5 +1,5 @@
 // Minimal Strapi auth helper for client-side usage
-const STRAPI_URL = process.env.NEXT_PUBLIC_BACKEND_URLL;
+const STRAPI_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 console.log("STRAPI_URL:", STRAPI_URL);
 
 export async function strapiLogin(

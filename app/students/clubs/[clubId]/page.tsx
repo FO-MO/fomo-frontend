@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { RefreshCw, Plus } from "lucide-react";
 import VideoPlayer from "@/components/student-section/VideoPlayer";
 import UploadVideoModal from "@/components/student-section/UploadVideoModal";
+import { fetchData } from "@/lib/strapi/strapiData";
 
 type Video = {
   id: string;
@@ -44,12 +45,7 @@ export default function ClubVideosPage() {
         const token = localStorage.getItem("fomo_token");
 
         // Fetch specific club by documentId (clubId from URL)
-        const response = await fetch(
-          `${BACKEND_URL}/api/clubs/${clubId}?populate=*`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        const response = await fetchData(token, `clubs/${clubId}?populate=*`);
 
         if (!response.ok) {
           throw new Error("Failed to fetch club data");
@@ -174,28 +170,6 @@ export default function ClubVideosPage() {
     videoFile: File;
     thumbnailFile?: File;
   }) => {
-    // TODO: Implement actual upload to API
-    // Example implementation:
-    //
-    // const formData = new FormData();
-    // formData.append('title', videoData.title);
-    // formData.append('description', videoData.description);
-    // formData.append('video', videoData.videoFile);
-    // if (videoData.thumbnailFile) {
-    //   formData.append('thumbnail', videoData.thumbnailFile);
-    // }
-    // formData.append('clubId', clubId);
-    //
-    // const response = await fetch('/api/clubs/videos/upload', {
-    //   method: 'POST',
-    //   body: formData,
-    // });
-    //
-    // if (response.ok) {
-    //   // Refresh the videos list
-    //   handleRefresh();
-    // }
-
     console.log("Video upload data:", videoData);
     alert("Video upload functionality - connect to your API");
   };
