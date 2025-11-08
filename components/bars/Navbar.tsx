@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -105,16 +106,13 @@ export default function Navbar() {
 
                   {/* Log out */}
                   <div className="border-t border-gray-100 pt-1">
-                    <button
-                      onClick={() => {
-                        setIsDropdownOpen(false);
-                        // TODO: Add logout functionality
-                        console.log("Log out clicked");
-                      }}
+                    <Link
+                      href="/auth/logout"
                       className="block w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-50 transition-colors"
+                      onClick={() => setIsDropdownOpen(false)}
                     >
                       Log out
-                    </button>
+                    </Link>
                   </div>
                 </div>
               )}
