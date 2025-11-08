@@ -216,12 +216,12 @@ export default function StudentsHomePage() {
                   {user.initials}
                 </div>
                 <button
-                  onClick={() => window.location.href = '/students/posts/create'}
+                  onClick={() =>
+                    (window.location.href = "/students/posts/create")
+                  }
                   className="flex-1 text-left"
                 >
-                  <div
-                    className="w-full min-h-[80px] border border-gray-300 hover:border-gray-500 text-gray-500 px-3 py-2 rounded-md flex items-start cursor-pointer transition-colors"
-                  >
+                  <div className="w-full min-h-[80px] border border-gray-300 hover:border-gray-500 text-gray-500 px-3 py-2 rounded-md flex items-start cursor-pointer transition-colors">
                     {composer.placeholder}
                   </div>
                 </button>
