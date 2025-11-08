@@ -1,4 +1,9 @@
 "use client";
+const STRAPI_URL =
+  process.env.NEXT_PUBLIC_STRAPI_URL ||
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  "https://tbs9k5m4-1337.inc1.devtunnels.ms";
+
 
 import React, { useState } from "react";
 import {
@@ -30,23 +35,51 @@ export type Post = {
   images?: string[]; // Array of image URLs
   stats: PostStats;
   isLiked?: boolean;
+  likedBy?:string[]
 };
 
 type Props = {
   post: Post;
+  user: string;
 };
 
-export default function PostCard({ post }: Props) {
-  const { author, postedAgo, message, images, stats } = post;
+export default function PostCard({ post,user }: Props) {
+  const { id,  author, postedAgo, message, images,stats, likedBy } = post;
+  const  likes = Number(stats.likes);
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
-  const [likeCount, setLikeCount] = useState(stats.likes);
+  const [likeCount, setLikeCount] = useState(likes);
   const [showFullText, setShowFullText] = useState(false);
+  const [likedUsers,setLikedUsers] = useState([]);
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
+  const handleLike = async  () => {
+    const token = localStorage.getItem("fomo_token");
+    const body = {
+      data: {
+        likes: likeCount + 1,
+        likedBy: [...likedUsers, user],
+      },
+    };
+    console.log(likeCount+1);
+    console.log(id);
+    const res = await fetch(`${STRAPI_URL}/api/posts/${id}`,{
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    }); 
+    console.log([...likedUsers,user]);
+    if(!res.ok){
+        alert("Error liking post!");
+        return;
+    }else {
+      setIsLiked(!isLiked);
+      setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
+    }
+
   };
-
+  
   // Truncate long messages
   const shouldTruncate = message.length > 200;
   const displayMessage =
@@ -92,6 +125,7 @@ export default function PostCard({ post }: Props) {
         >
           <MoreHorizontal className="w-5 h-5" />
         </button>
+        
       </header>
 
       {/* Post Content */}
@@ -196,6 +230,9 @@ export default function PostCard({ post }: Props) {
               </div>
               <span className="hover:text-teal-700 hover:underline cursor-pointer ml-1">
                 {likeCount}
+              </span>
+              <span>
+                LikedBy {likedUsers.join(",")};
               </span>
             </>
           )}

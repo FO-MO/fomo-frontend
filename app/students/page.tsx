@@ -295,9 +295,7 @@ export default function StudentsHomePage() {
 
           return {
             id:
-              post.id?.toString() ||
-              post.documentId ||
-              Math.random().toString(),
+              post.documentId.toString(),
             author: {
               name: userName,
               initials: userInitials,
@@ -324,7 +322,7 @@ export default function StudentsHomePage() {
     };
     fetchPosts();
   }, []);
-  console.log("posts is", posts);
+  
   return (
     <main className="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-20 bg-white min-h-screen">
       <section className="max-w-6xl mx-auto">
@@ -368,7 +366,7 @@ export default function StudentsHomePage() {
               <h2 className="text-xl font-semibold text-black">Posts</h2>
               <div className="flex flex-col gap-4">
                 {posts.length > 0 ? (
-                  posts.map((post) => <PostCard key={post.id} post={post} />)
+                  posts.map((post) => <PostCard key={post.id} post={post} user={nameVal} />)
                 ) : (
                   <p className="text-gray-500">No posts yet</p>
                 )}
