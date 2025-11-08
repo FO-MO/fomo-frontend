@@ -13,7 +13,7 @@ const data = await fetchData(token, "projects?populate=*");
 
 const mockProjects: Project[] = data.data.map((project: any) => {
   return {
-    id: project.id,
+    id: project.documentId,
     title: project.title,
     description: project.description,
     tags: ["Project"],
