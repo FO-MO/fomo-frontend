@@ -2,11 +2,14 @@
 
 import React, { useState } from "react";
 import SubBar from "@/components/subBar";
+import { fetchFromBackend, postFetchFromBackend } from "@/lib/tools";
 
+const res = await fetchFromBackend("globaljobpostings?populate=*");
 export default function JobPostingsPage() {
   const [open, setOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
 
+  //FORM DATA
   const [formData, setFormData] = useState({
     title: "",
     jobType: "Full Time",
@@ -35,11 +38,68 @@ export default function JobPostingsPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
+  //WRITE PAYLOAD
+  const handleSubmit = async () => {
     if (!validateForm()) return;
-    setOpen(false);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
+
+    // Your Strapi collection only has ONE field called 'data' which is JSON YUUUHH THAS THE POINT
+    const payload = {
+      data: {
+        data: {
+          // This goes into your JSON field
+          title: formData.title,
+          jobType: formData.jobType,
+          experience: formData.experience,
+          location: formData.location,
+          deadline: formData.deadline || null,
+          description: formData.description,
+          skills: formData.skills,
+          requirements: formData.requirements,
+          benefits: formData.benefits,
+          status: "Active",
+        },
+      },
+    };
+
+    console.log(" Sending to JSON field:", JSON.stringify(payload, null, 2));
+
+    try {
+      // Use the new postFetchFromBackend function (FOR POST REQ)
+      const result = await postFetchFromBackend("globaljobpostings", payload);
+
+      console.log("Job posted successfully:", result);
+
+      // Success - close modal and show toast
+      setOpen(false);
+      setShowToast(true);
+
+      // Reset form data
+      setFormData({
+        title: "",
+        jobType: "Full Time",
+        experience: "Entry Level",
+        location: "",
+        deadline: "",
+        description: "",
+        skills: [],
+        requirements: [],
+        benefits: [],
+      });
+
+      // AUTO-REFRESH: Reload the page to show new job
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000); // Small delay to show success toast first
+    } catch (error) {
+      console.error(" Error posting job:", error);
+      alert(
+        `Failed to post job: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    } finally {
+      setTimeout(() => setShowToast(false), 3000);
+    }
   };
 
   const addItem = (
@@ -75,36 +135,96 @@ export default function JobPostingsPage() {
           className="mb-10"
         />
         <div className="p-6">
-          <h1 className="text-2xl font-bold mb-4">Your Job Postings</h1>
-
-          {/* Empty State */}
-          <div className="border rounded-2xl p-10 flex flex-col items-center justify-center text-center bg-white shadow-sm">
-            <div className="text-gray-500 mb-3">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-12 w-12 mx-auto text-gray-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M9 17v-2h6v2m2 0a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v8a2 2 0 002 2m10 0H7"
-                />
-              </svg>
-            </div>
-            <p className="text-lg font-medium">No jobs posted yet</p>
-            <p className="text-gray-500 mb-4">
-              Start attracting top talent by posting your first job opening.
-            </p>
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold">Your Job Postings</h1>
             <button
               onClick={() => setOpen(true)}
               className="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition flex items-center gap-2"
             >
-              +<span>Post Your First Job</span>
+              +<span>Post New Job</span>
             </button>
+          </div>
+
+          {/* Job Listings */}
+          <div className="grid gap-6">
+            {res.map((x) => {
+              const job = x.data;
+              return (
+                <div
+                  key={job.id}
+                  className="bg-white border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900">
+                        {job.title}
+                      </h3>
+                      <div className="flex gap-4 text-sm text-gray-500 mt-1">
+                        <span>{job.jobType}</span>
+                        <span>•</span>
+                        <span>{job.experience}</span>
+                        <span>•</span>
+                        <span>{job.location}</span>
+                      </div>
+                    </div>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        job.status === "Active"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {job.status}
+                    </span>
+                  </div>
+
+                  <p className="text-gray-700 mb-4 line-clamp-2">
+                    {job.description}
+                  </p>
+
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {job.skills.slice(0, 5).map((skill) => (
+                      <span
+                        key={skill}
+                        className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                    {job.skills.length > 5 && (
+                      <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
+                        +{job.skills.length - 5} more
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex justify-between items-center text-sm text-gray-500">
+                    <div className="flex gap-4">
+                      <span>{job.applicants} applicants</span>
+                      <span>
+                        Posted {new Date(job.postedDate).toLocaleDateString()}
+                      </span>
+                      {job.deadline && (
+                        <span>
+                          Deadline {new Date(job.deadline).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <button className="text-blue-600 hover:text-blue-800">
+                        View
+                      </button>
+                      <button className="text-gray-600 hover:text-gray-800">
+                        Edit
+                      </button>
+                      <button className="text-red-600 hover:text-red-800">
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           {/* Modal */}

@@ -348,7 +348,7 @@ export default function StudentsHomePage() {
             <section className="bg-white border border-gray-300 rounded-lg shadow-sm p-4">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold text-black">
-                  {nameVal[0].toUpperCase()}
+                  {nameVal[0]?.toUpperCase() || "X"}
                 </div>
                 <button
                   onClick={() =>
