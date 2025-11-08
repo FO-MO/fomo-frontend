@@ -49,14 +49,15 @@ export default function PostCard({ post,user }: Props) {
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [likeCount, setLikeCount] = useState(likes);
   const [showFullText, setShowFullText] = useState(false);
-  const [likedUsers,setLikedUsers] = useState([]);
-
+  const [likedUsers,setLikedUsers] = useState(likedBy|| []);
+  
+  
   const handleLike = async  () => {
     const token = localStorage.getItem("fomo_token");
     const body = {
       data: {
         likes: likeCount + 1,
-        likedBy: [...likedUsers, user],
+        likedBy: [...(likedUsers), user],
       },
     };
     console.log(likeCount+1);
@@ -232,7 +233,7 @@ export default function PostCard({ post,user }: Props) {
                 {likeCount}
               </span>
               <span>
-                LikedBy {likedUsers.join(",")};
+                Liked By {likedUsers.join(",")}
               </span>
             </>
           )}

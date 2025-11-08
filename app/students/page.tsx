@@ -175,7 +175,7 @@ export type HomePageData = {
 export default function StudentsHomePage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [nameVal, setNameVal] = useState("");
-
+//fetching posts
   useEffect(() => {
     // Compute initials from current user's name stored in localStorage
     try {
@@ -311,6 +311,7 @@ export default function StudentsHomePage() {
               shares: post.shares || post.sharesCount || 0,
             },
             isLiked: post.isLiked || false,
+            likedBy:post.likedBy,
           };
         });
 
