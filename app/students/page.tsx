@@ -210,77 +210,23 @@ export default function StudentsHomePage() {
           {/* Left Column - Feed (2 cols on desktop) */}
           <div className="lg:col-span-2 flex flex-col gap-6">
             {/* Composer Card */}
-            {/* <section className="bg-white border border-gray-300 rounded-lg shadow-sm p-4">
+            <section className="bg-white border border-gray-300 rounded-lg shadow-sm p-4">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold text-black">
                   {user.initials}
                 </div>
-                <div className="flex-1">
-                  <textarea
-                    className="w-full min-h-[80px] resize-none border border-gray-300 focus:border-gray-500 focus:outline-none text-black placeholder:text-gray-500 px-3 py-2 rounded-md"
-                    placeholder={composer.placeholder}
-                  />
-
-                  <div className="mt-3 flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-sm text-black">
-                      <button className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-gray-100 transition">
-                        <svg
-                          className="w-4 h-4 text-gray-600"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7"
-                          />
-                          <path
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M8 11l3 3 5-5"
-                          />
-                        </svg>
-                        <span className="hidden sm:inline">Photo</span>
-                      </button>
-                      <button className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-gray-100 transition">
-                        <svg
-                          className="w-4 h-4 text-gray-600"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"
-                          />
-                          <path
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M7 10l5 5 5-7"
-                          />
-                        </svg>
-                        <span className="hidden sm:inline">Video</span>
-                      </button>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <button className="px-4 py-2 rounded-md bg-gray-200 text-black font-medium hover:bg-gray-300 transition">
-                        Cancel
-                      </button>
-                      <button className="px-4 py-2 rounded-md bg-black text-white font-medium hover:bg-gray-800 transition">
-                        {composer.postLabel}
-                      </button>
-                    </div>
+                <button
+                  onClick={() => window.location.href = '/students/posts/create'}
+                  className="flex-1 text-left"
+                >
+                  <div
+                    className="w-full min-h-[80px] border border-gray-300 hover:border-gray-500 text-gray-500 px-3 py-2 rounded-md flex items-start cursor-pointer transition-colors"
+                  >
+                    {composer.placeholder}
                   </div>
-                </div>
+                </button>
               </div>
-            </section> */}
+            </section>
 
             {/* Feed Section */}
             <section className="flex flex-col gap-4">
