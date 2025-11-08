@@ -28,8 +28,7 @@ export default function JobPostingsPage() {
     const newErrors: { [key: string]: string } = {};
     if (formData.title.trim().length < 5)
       newErrors.title = "Job title must be at least 5 characters";
-    if (!formData.location.trim())
-      newErrors.location = "Location is required";
+    if (!formData.location.trim()) newErrors.location = "Location is required";
     if (formData.description.trim().length < 50)
       newErrors.description = "Job description must be at least 50 characters";
     setErrors(newErrors);
@@ -43,7 +42,10 @@ export default function JobPostingsPage() {
     setTimeout(() => setShowToast(false), 3000);
   };
 
-  const addItem = (field: "skills" | "requirements" | "benefits", value: string) => {
+  const addItem = (
+    field: "skills" | "requirements" | "benefits",
+    value: string
+  ) => {
     if (!value.trim()) return;
     setFormData({ ...formData, [field]: [...formData[field], value.trim()] });
     if (field === "skills") setNewSkill("");
@@ -53,35 +55,55 @@ export default function JobPostingsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-            <SubBar
-                      items={[
-                        { url: "/employers/overview", name: "Overview", logo: "👤" },
-                        { url: "/employers/applications", name: "Applications", logo: "📈" },
-                        { url: "/employers/partnerships", name: "College Partnerships", logo: "🎓" },
-                        { url: "/employers/jobpostings", name: "Job Postings", logo: "🧳" },
-                        { url: "/employers/analytics", name: "Analytics", logo: "📊" },
-                      ]}
-                      className="mb-10"
-                    />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <SubBar
+          items={[
+            { url: "/employers/overview", name: "Overview", logo: "👤" },
+            {
+              url: "/employers/applications",
+              name: "Applications",
+              logo: "📈",
+            },
+            {
+              url: "/employers/partnerships",
+              name: "College Partnerships",
+              logo: "🎓",
+            },
+            { url: "/employers/jobpostings", name: "Job Postings", logo: "🧳" },
+            // { url: "/employers/analytics", name: "Analytics", logo: "📊" },
+          ]}
+          className="mb-10"
+        />
         <div className="p-6">
           <h1 className="text-2xl font-bold mb-4">Your Job Postings</h1>
 
           {/* Empty State */}
           <div className="border rounded-2xl p-10 flex flex-col items-center justify-center text-center bg-white shadow-sm">
             <div className="text-gray-500 mb-3">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-2h6v2m2 0a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v8a2 2 0 002 2m10 0H7" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-12 w-12 mx-auto text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M9 17v-2h6v2m2 0a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v8a2 2 0 002 2m10 0H7"
+                />
               </svg>
             </div>
             <p className="text-lg font-medium">No jobs posted yet</p>
-            <p className="text-gray-500 mb-4">Start attracting top talent by posting your first job opening.</p>
+            <p className="text-gray-500 mb-4">
+              Start attracting top talent by posting your first job opening.
+            </p>
             <button
               onClick={() => setOpen(true)}
               className="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition flex items-center gap-2"
             >
-              +
-              <span>Post Your First Job</span>
+              +<span>Post Your First Job</span>
             </button>
           </div>
 
@@ -108,9 +130,13 @@ export default function JobPostingsPage() {
                     placeholder="e.g., Software Engineer, Product Manager"
                     className="mt-1 w-full border rounded-md p-2"
                     value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
                   />
-                  {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
+                  {errors.title && (
+                    <p className="text-red-500 text-xs mt-1">{errors.title}</p>
+                  )}
                 </div>
 
                 {/* Job Type / Experience */}
@@ -120,7 +146,9 @@ export default function JobPostingsPage() {
                     <select
                       className="mt-1 w-full border rounded-md p-2"
                       value={formData.jobType}
-                      onChange={(e) => setFormData({ ...formData, jobType: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, jobType: e.target.value })
+                      }
                     >
                       <option>Full Time</option>
                       <option>Part Time</option>
@@ -129,11 +157,15 @@ export default function JobPostingsPage() {
                     </select>
                   </div>
                   <div className="flex-1">
-                    <label className="text-sm font-medium">Experience Level</label>
+                    <label className="text-sm font-medium">
+                      Experience Level
+                    </label>
                     <select
                       className="mt-1 w-full border rounded-md p-2"
                       value={formData.experience}
-                      onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, experience: e.target.value })
+                      }
                     >
                       <option>Entry Level</option>
                       <option>Mid Level</option>
@@ -151,17 +183,27 @@ export default function JobPostingsPage() {
                       placeholder="e.g., San Francisco, CA or Remote"
                       className="mt-1 w-full border rounded-md p-2"
                       value={formData.location}
-                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, location: e.target.value })
+                      }
                     />
-                    {errors.location && <p className="text-red-500 text-xs mt-1">{errors.location}</p>}
+                    {errors.location && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.location}
+                      </p>
+                    )}
                   </div>
                   <div className="flex-1">
-                    <label className="text-sm font-medium">Application Deadline (Optional)</label>
+                    <label className="text-sm font-medium">
+                      Application Deadline (Optional)
+                    </label>
                     <input
                       type="date"
                       className="mt-1 w-full border rounded-md p-2"
                       value={formData.deadline}
-                      onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, deadline: e.target.value })
+                      }
                     />
                   </div>
                 </div>
@@ -173,14 +215,22 @@ export default function JobPostingsPage() {
                     placeholder="Describe the role, responsibilities, and what you’re looking for in a candidate..."
                     className="mt-1 w-full border rounded-md p-2 h-24"
                     value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
                   />
-                  {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
+                  {errors.description && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.description}
+                    </p>
+                  )}
                 </div>
 
                 {/* Skills */}
                 <div className="mb-4">
-                  <label className="text-sm font-medium">Skills Required (Optional)</label>
+                  <label className="text-sm font-medium">
+                    Skills Required (Optional)
+                  </label>
                   <div className="flex gap-2 mt-1">
                     <input
                       type="text"
@@ -198,14 +248,21 @@ export default function JobPostingsPage() {
                   </div>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {formData.skills.map((skill, i) => (
-                      <span key={i} className="bg-gray-200 px-2 py-1 rounded text-sm">{skill}</span>
+                      <span
+                        key={i}
+                        className="bg-gray-200 px-2 py-1 rounded text-sm"
+                      >
+                        {skill}
+                      </span>
                     ))}
                   </div>
                 </div>
 
                 {/* Requirements */}
                 <div className="mb-4">
-                  <label className="text-sm font-medium">Requirements (Optional)</label>
+                  <label className="text-sm font-medium">
+                    Requirements (Optional)
+                  </label>
                   <div className="flex gap-2 mt-1">
                     <input
                       type="text"
@@ -223,14 +280,21 @@ export default function JobPostingsPage() {
                   </div>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {formData.requirements.map((req, i) => (
-                      <span key={i} className="bg-gray-200 px-2 py-1 rounded text-sm">{req}</span>
+                      <span
+                        key={i}
+                        className="bg-gray-200 px-2 py-1 rounded text-sm"
+                      >
+                        {req}
+                      </span>
                     ))}
                   </div>
                 </div>
 
                 {/* Benefits */}
                 <div className="mb-6">
-                  <label className="text-sm font-medium">Benefits (Optional)</label>
+                  <label className="text-sm font-medium">
+                    Benefits (Optional)
+                  </label>
                   <div className="flex gap-2 mt-1">
                     <input
                       type="text"
@@ -248,7 +312,12 @@ export default function JobPostingsPage() {
                   </div>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {formData.benefits.map((ben, i) => (
-                      <span key={i} className="bg-gray-200 px-2 py-1 rounded text-sm">{ben}</span>
+                      <span
+                        key={i}
+                        className="bg-gray-200 px-2 py-1 rounded text-sm"
+                      >
+                        {ben}
+                      </span>
                     ))}
                   </div>
                 </div>

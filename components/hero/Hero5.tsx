@@ -1,11 +1,31 @@
 "use client";
 
 import Link from "next/link";
+import Particles from "../Particles";
 
 export default function Hero5() {
   return (
-    <section className="w-full bg-[#0f4f4a] text-white border-b-1 border-gray-400/35  py-20 sm:py-28">
-      <div className="max-w-4xl mx-auto px-6 sm:px-8 text-center">
+    <section className="w-full relative bg-[#000] text-white py-20 sm:py-28 overflow-hidden">
+      {/* Particles Background */}
+      <div className="fixed inset-0 z-0">
+        <Particles
+          particleCount={2000}
+          particleColors={["#D6FF3A"]}
+          particleSpread={3}
+          speed={0.3}
+          alphaParticles={false}
+          particleBaseSize={1.2}
+          sizeRandomness={0}
+          cameraDistance={0}
+          moveParticlesOnHover={true}
+          particleHoverFactor={0.5}
+          disableRotation={true}
+          className="w-full h-full"
+        />
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 max-w-4xl mx-auto px-6 sm:px-8 text-center">
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
           Ready to Get Hired?
         </h2>

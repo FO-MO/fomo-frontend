@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Particles from "../Particles";
 
 export default function Hero2() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -105,8 +106,8 @@ export default function Hero2() {
           <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
         </svg>
       ),
-      bgColor: "bg-[#d6ff3a]",
-      textColor: "text-[#082926]",
+      bgColor: "bg-white",
+      textColor: "text-[#000]",
     },
     {
       title: "Learn",
@@ -121,8 +122,8 @@ export default function Hero2() {
           <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z" />
         </svg>
       ),
-      bgColor: "bg-blue-600",
-      textColor: "text-white",
+      bgColor: "bg-white",
+      textColor: "text-#000",
     },
     {
       title: "Network",
@@ -141,8 +142,8 @@ export default function Hero2() {
           <circle cx="12" cy="14" r="2" />
         </svg>
       ),
-      bgColor: "bg-purple-600",
-      textColor: "text-white",
+      bgColor: "bg-white",
+      textColor: "text-black",
     },
     {
       title: "Create",
@@ -157,8 +158,8 @@ export default function Hero2() {
           <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z" />
         </svg>
       ),
-      bgColor: "bg-orange-600",
-      textColor: "text-white",
+      bgColor: "bg-white",
+      textColor: "text-black",
     },
     {
       title: "Get Hired",
@@ -174,22 +175,41 @@ export default function Hero2() {
           <circle cx="12" cy="12" r="3" />
         </svg>
       ),
-      bgColor: "bg-[#c4e82e]",
-      textColor: "text-[#082926]",
+      bgColor: "bg-white",
+      textColor: "text-[#000]",
     },
   ];
 
   return (
     <section
       ref={sectionRef}
-      className="w-full min-h-[110vh] py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-gray-50 overflow-x-hidden opacity-0"
+      className="w-full relative min-h-[110vh] py-16 px-4 sm:px-6 lg:px-8 bg-black overflow-hidden opacity-0"
     >
-      <div className="max-w-7xl mx-auto">
+      {/* Particles Background */}
+      <div className="fixed inset-0 z-0">
+        <Particles
+          particleCount={5000}
+          particleColors={["#D6FF3A"]}
+          particleSpread={3}
+          speed={0.3}
+          alphaParticles={false}
+          particleBaseSize={1.2}
+          sizeRandomness={0}
+          cameraDistance={0}
+          moveParticlesOnHover={true}
+          particleHoverFactor={0.5}
+          disableRotation={true}
+          className="w-full h-full"
+        />
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 max-w-7xl mx-auto">
         <div ref={headerRef} className="text-center mb-16">
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
+          <h2 className="text-4xl sm:text-5xl font-bold text-[antiquewhite] mb-4">
             How It Works
           </h2>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
+          <p className="text-lg sm:text-xl text-[antiquewhite] max-w-3xl mx-auto px-4">
             Your AI-powered journey from student to hired professional
           </p>
         </div>
@@ -209,11 +229,11 @@ export default function Hero2() {
                   {step.icon}
                 </div>
 
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                <h3 className="text-xl sm:text-2xl font-bold text-[whitesmoke] mb-2">
                   {step.title}
                 </h3>
 
-                <p className="text-sm sm:text-base text-gray-600 max-w-xs px-2">
+                <p className="text-sm sm:text-base text-[white] max-w-xs px-2">
                   {step.description}
                 </p>
               </div>

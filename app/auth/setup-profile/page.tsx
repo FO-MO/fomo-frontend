@@ -13,6 +13,7 @@ import {
 import { getAuthToken } from "@/lib/strapi/auth";
 import { createStudentProfile } from "@/lib/strapi/profile";
 import Link from "next/link";
+import { connect } from "http2";
 
 // Predefined options
 const AVAILABLE_SKILLS = [
@@ -199,6 +200,9 @@ export default function SetupProfilePage() {
         location,
         skills: selectedSkills,
         interests: selectedInterests,
+        user: {
+          connect: [studentId],
+        },
       };
 
       const result = await createStudentProfile(profileData, token);

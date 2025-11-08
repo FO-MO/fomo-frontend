@@ -1,6 +1,9 @@
 "use client";
 
 import React from "react";
+import { fetchFromBackend } from "@/lib/tools";
+
+const res = await fetchFromBackend("overview-card3s?populate=*");
 
 export default function OverviewCards3() {
   const colleges = [
@@ -53,35 +56,38 @@ export default function OverviewCards3() {
 
       {/* Colleges List */}
       <div className="space-y-4">
-        {colleges.map((college, index) => (
-          <div
-            key={index}
-            className="flex items-center gap-4 hover:bg-gray-50 p-2 rounded-lg transition-colors cursor-pointer"
-          >
-            {/* Avatar */}
+        {res.slice(0, 4).map((college, index) => {
+          const y = college.data;
+          return (
             <div
-              className={`${college.color} w-10 h-10 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0`}
+              key={index}
+              className="flex items-center gap-4 hover:bg-gray-50 p-2 rounded-lg transition-colors cursor-pointer"
             >
-              {college.initial}
-            </div>
-
-            {/* College Info */}
-            <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-semibold text-gray-900 truncate">
-                {college.name}
-              </h3>
-              <p className="text-xs text-gray-500">{college.location}</p>
-            </div>
-
-            {/* Placement Rate */}
-            <div className="text-right flex-shrink-0">
-              <div className="text-sm font-bold text-gray-900">
-                {college.placementRate}
+              {/* Avatar */}
+              <div
+                className={`${y.color} w-10 h-10 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0`}
+              >
+                {y.initial}
               </div>
-              <p className="text-xs text-gray-500">Placement Rate</p>
+
+              {/* College Info */}
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-semibold text-gray-900 truncate">
+                  {y.name}
+                </h3>
+                <p className="text-xs text-gray-500">{y.location}</p>
+              </div>
+
+              {/* Placement Rate */}
+              <div className="text-right flex-shrink-0">
+                <div className="text-sm font-bold text-gray-900">
+                  {y.placementRate}
+                </div>
+                <p className="text-xs text-gray-500">Placement Rate</p>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

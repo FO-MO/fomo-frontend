@@ -6,10 +6,41 @@ import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [initials, setInitials] = useState<string>("U");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
+    // Compute initials from current user's name stored in localStorage
+    try {
+      const raw = localStorage.getItem("fomo_user");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        // Try common fields for name
+        const name =
+          (parsed && (parsed.name || parsed.username || parsed.email)) ||
+          "User";
+        // If email, strip domain
+        const cleanedName =
+          typeof name === "string" && name.includes("@")
+            ? name.split("@")[0]
+            : name;
+        const words = String(cleanedName).trim().split(/\s+/).filter(Boolean);
+        let computed = "U";
+        if (words.length >= 2) {
+          computed = `${words[0][0] || ""}${words[1][0] || ""}`.toUpperCase();
+        } else if (words.length === 1) {
+          // Fallback: use first two characters of the single word (or single char if short)
+          const w = words[0];
+          computed =
+            (w[0] || "").toUpperCase() + ((w[1] || "").toUpperCase() || "");
+        }
+        if (computed) setInitials(computed);
+      }
+    } catch {
+      // ignore and keep fallback
+    }
+
     const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current &&
@@ -72,8 +103,9 @@ export default function Navbar() {
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-sm font-semibold text-gray-900 hover:bg-gray-200 transition-colors"
+                aria-label="Open account menu"
               >
-                SM
+                {initials}
               </button>
 
               {/* Dropdown Menu */}
@@ -84,24 +116,6 @@ export default function Navbar() {
                     <p className="text-base font-semibold text-gray-900">
                       My Account
                     </p>
-                  </div>
-
-                  {/* Menu Items */}
-                  <div className="py-1">
-                    <Link
-                      href="/students/profile"
-                      className="block px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-50 transition-colors"
-                      onClick={() => setIsDropdownOpen(false)}
-                    >
-                      Profile
-                    </Link>
-                    <Link
-                      href="/settings"
-                      className="block px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-50 transition-colors"
-                      onClick={() => setIsDropdownOpen(false)}
-                    >
-                      Settings
-                    </Link>
                   </div>
 
                   {/* Log out */}
@@ -120,7 +134,6 @@ export default function Navbar() {
           </div>
         </div>
       </header>
-      ;
     </>
   );
 }
