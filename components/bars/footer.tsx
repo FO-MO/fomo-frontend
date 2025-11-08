@@ -2,7 +2,7 @@ import React from "react";
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-[#0f4f4a] text-white">
+    <footer className="w-full relative bg-[#000] text-white z-20">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 py-8 flex items-center justify-between">
         <div>
           <div className="text-xl font-semibold">FOOMO</div>

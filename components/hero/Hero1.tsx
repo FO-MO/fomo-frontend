@@ -4,6 +4,7 @@ import { Typewriter } from "react-simple-typewriter";
 import React, { useEffect, useRef } from "react";
 import gsap from "gsap";
 import Link from "next/link";
+import Particles from "@/components/Particles";
 
 function Writer() {
   return (
@@ -82,14 +83,27 @@ export default function Hero1() {
   //
 
   return (
-    <section
-      className="w-full min-h-[100vh] bg-[#0f4f4a] text-white"
-      style={{
-        backgroundImage:
-          "repeating-linear-gradient(135deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 10px, transparent 10px, transparent 20px)",
-      }}
-    >
-      <div className="max-w-6xl mx-auto px-6 sm:px-8 py-20 sm:py-28">
+    <section className="w-full min-h-[100vh] relative text-white overflow-hidden bg-black">
+      {/* Particles Background */}
+      <div className="fixed inset-0 z-0">
+        <Particles
+          particleCount={5000}
+          particleColors={["#D6FF3A"]}
+          particleSpread={3}
+          speed={0.3}
+          alphaParticles={false}
+          particleBaseSize={1.2}
+          sizeRandomness={0}
+          cameraDistance={0}
+          moveParticlesOnHover={true}
+          particleHoverFactor={0.5}
+          disableRotation={true}
+          className="w-full h-full"
+        />
+      </div>
+
+      {/* Content Overlay */}
+      <div className="relative z-10 max-w-6xl mx-auto px-6 sm:px-8 py-20 sm:py-28">
         <div className="flex justify-center">
           <div
             className="inline-flex opacity-0 items-center gap-3 bg-white/6 border border-white/10 rounded-full px-4 py-2 text-sm"
