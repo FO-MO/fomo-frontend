@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, Sparkles, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import ReactMarkdown from "react-markdown";
 
 type Message = {
   id: string;
@@ -11,53 +12,169 @@ type Message = {
   timestamp: Date;
 };
 
-// Simple chatbot responses
+// === FOOMO Clubs & Projects Database ===
+const CLUBS = {
+  cybersecurity: {
+    name: "Cybersecurity Club",
+    projects: [
+      "Password Strength Checker – A Python tool that checks password strength.",
+      "Phishing URL Detector – Classify URLs as safe or phishing.",
+      "Basic Network Packet Sniffer – Analyze traffic using scapy.",
+      "Secure File Encryptor – Encrypt/decrypt files using AES.",
+      "Login Attempt Tracker – Track failed logins for security awareness."
+    ],
+  },
+  "web development": {
+    name: "Web Development Club",
+    projects: [
+      "Personal Portfolio Website – Showcase your resume and projects.",
+      "College Club Website – Build your own club site.",
+      "Task Tracker App – A simple to-do web app.",
+      "Feedback Form App – Store feedback in Firebase.",
+      "Weather Forecast App – Fetch live weather data."
+    ],
+  },
+  "ai": {
+    name: "AI / Machine Learning Club",
+    projects: [
+      "Fake News Detector – Use sklearn for text classification.",
+      "Spam Email Classifier – Train a spam detector.",
+      "Handwritten Digit Recognition (MNIST) – Build a CNN.",
+      "Movie Recommendation System – Based on cosine similarity.",
+      "AI Chatbot (Mini) – Rule-based chatbot using nltk."
+    ],
+  },
+  blender: {
+    name: "Blender (3D Design & Animation) Club",
+    projects: [
+      "Basic 3D Logo Design",
+      "Simple 3D Chair/Table Modeling",
+      "Create a Low-Poly Character",
+      "Model a Room or Simple House",
+      "Basic Lighting & Rendering"
+    ],
+  },
+  "cad": {
+    name: "CAD & CAM Club",
+    projects: [
+      "2D Mechanical Part Drawing",
+      "3D Modeling of a Simple Bracket",
+      "Engineering Drawing to 3D Conversion",
+      "CAD Assembly of Mechanical Parts",
+      "Design a Small Machine Component"
+    ],
+  },
+  mathematics: {
+    name: "Mathematics Club",
+    projects: [
+      "Visualizing Set Theory using Venn Diagrams",
+      "Prime Number Generator in Python",
+      "Matrix Operations (Addition, Multiplication)",
+      "Plot Linear & Quadratic Functions",
+      "Probability Simulator (Dice, Coin Toss)"
+    ],
+  },
+  python: {
+    name: "Python Programming Club",
+    projects: [
+      "Calculator App",
+      "Quiz Game",
+      "File Organizer",
+      "Expense Tracker",
+      "Password Generator"
+    ],
+  },
+  dsa: {
+    name: "DSA Club",
+    projects: [
+      "Linked List Visualizer",
+      "Stack and Queue Implementation",
+      "Sorting Algorithm Visual Demo",
+      "Searching Algorithm App",
+      "Simple Calculator using Stack"
+    ],
+  },
+  sql: {
+    name: "SQL Club",
+    projects: [
+      "Student Database Management",
+      "Library Management System",
+      "Inventory Tracker",
+      "College Attendance System",
+      "Employee Salary Manager"
+    ],
+  },
+  "power bi": {
+    name: "Power BI Club",
+    projects: [
+      "Sales Dashboard (Excel Dataset)",
+      "Student Performance Analysis",
+      "College Placement Insights Dashboard",
+      "Social Media Analytics (CSV data)",
+      "Financial Budget Tracker"
+    ],
+  },
+};
+
+// === Gemini-style FOOMO AI Response Logic ===
 const getAIResponse = (userMessage: string): string => {
-  const lowerMessage = userMessage.toLowerCase();
+  const msg = userMessage.toLowerCase().trim();
 
-  // Project ideas
-  if (
-    lowerMessage.includes("project idea") ||
-    lowerMessage.includes("project suggestion")
-  ) {
-    return "I'd be happy to help you with project ideas! Here are some popular ones:\n\n1. **Mobile App Development** - Build a cross-platform app\n2. **AI/ML Project** - Create a machine learning model\n3. **Web Application** - Develop a full-stack web app\n4. **E-commerce Platform** - Build an online store\n5. **Social Network** - Create a community platform\n\nWhat type of project interests you most?";
-  }
+  // Detect "I want to learn [skill]" pattern
+  const learnMatch = msg.match(/i want to learn (.+)/i);
+  if (learnMatch) {
+    const skill = learnMatch[1].toLowerCase();
+    const foundClubKey = Object.keys(CLUBS).find((club) =>
+      skill.includes(club)
+    );
 
-  // Skills
-  if (lowerMessage.includes("skill") || lowerMessage.includes("learn")) {
-    return "Great question! Here are some in-demand skills you should consider learning:\n\n🎯 **Technical Skills:**\n- React/Next.js for frontend\n- Node.js for backend\n- Python for AI/ML\n- Docker & Kubernetes\n\n💡 **Soft Skills:**\n- Project management\n- Team collaboration\n- Communication\n\nWhat area would you like to focus on?";
-  }
+    if (foundClubKey) {
+      const club = CLUBS[foundClubKey as keyof typeof CLUBS];
+      const beginnerProjects = club.projects.slice(0, 3);
 
-  // Team building
-  if (lowerMessage.includes("team") || lowerMessage.includes("collaborate")) {
-    return "Building a great team is crucial! Here's how to find team members:\n\n1. **Use the Search feature** to find students with complementary skills\n2. **Join relevant clubs** to meet like-minded people\n3. **Post your project** in the Projects section\n4. **Attend hackathons** and networking events\n\nWould you like tips on managing a team effectively?";
-  }
+      return `🎓 **Welcome to FOOMO!**  
+That’s awesome — learning *${skill}* is a great step toward your career goals. 💪  
 
-  // Internships
-  if (lowerMessage.includes("internship") || lowerMessage.includes("job")) {
-    return "Looking for internships? Here are some tips:\n\n✅ **Preparation:**\n- Build a strong portfolio with 2-3 projects\n- Keep your resume updated\n- Practice coding interviews\n\n🔍 **Where to look:**\n- Company career pages\n- LinkedIn\n- Handshake\n- Our Jobs section\n\nNeed help with interview preparation?";
-  }
+💬 **Club Recommendation:**  
+Join the **${club.name}** on FOOMO to collaborate with peers, attend workshops, and showcase your projects.
 
-  // Getting started
-  if (
-    lowerMessage.includes("start") ||
-    lowerMessage.includes("begin") ||
-    lowerMessage.includes("how")
-  ) {
-    return "Let's get you started! Here's what you can do:\n\n1. **Explore Projects** - Browse ongoing projects or create your own\n2. **Connect with Peers** - Use the Search feature to find collaborators\n3. **Join Clubs** - Find communities that match your interests\n4. **Build Your Profile** - Showcase your skills and projects\n\nWhat would you like to explore first?";
+🎥 **Suggested Learning Resources:**  
+- YouTube: *"${skill} for Beginners"* playlist  
+- FreeCodeCamp / Coursera courses  
+- Official documentation and practice tutorials  
+
+🧩 **Try These Beginner Projects:**  
+${beginnerProjects.map((p, i) => `${i + 1}. ${p}`).join("\n")}
+
+🚀 **Next Steps:**  
+- Explore intermediate topics and advanced toolkits  
+- Earn certifications (e.g., Google, Coursera)  
+- Participate in hackathons or mini internships via FOOMO!  
+
+Would you like to learn any other skill?`;
+    }
+
+    // Skill not found in our club list
+    return `That’s a great choice! Unfortunately, FOOMO doesn’t have a dedicated club for *${skill}* yet.  
+But don’t worry — you can still start learning from YouTube and online platforms, and share your progress with other learners on FOOMO! 💡`;
   }
 
   // Greetings
-  if (
-    lowerMessage.includes("hello") ||
-    lowerMessage.includes("hi") ||
-    lowerMessage.includes("hey")
-  ) {
-    return "Hello! 👋 I'm your AI assistant here to help you with:\n\n• Project ideas and guidance\n• Finding team members\n• Career advice\n• Learning resources\n• Skill development\n\nWhat can I help you with today?";
+  if (msg.includes("hello") || msg.includes("hi") || msg.includes("hey")) {
+    return "Hello there! 👋 I'm **FOOMO-AI**, your academic and placement assistant. You can ask me things like:\n\n• *I want to learn AI*\n• *Suggest projects in Web Development*\n• *What skills should I learn for placements?*";
   }
 
-  // Default response
-  return "That's an interesting question! I can help you with:\n\n• **Project ideas** - Get suggestions for your next project\n• **Team building** - Find the right collaborators\n• **Skills** - Learn what to focus on\n• **Internships** - Tips for landing your dream role\n• **Getting started** - Navigate the platform\n\nCould you tell me more about what you'd like to know?";
+  // Projects or skills
+  if (msg.includes("project")) {
+    return "FOOMO can help you with real project ideas across domains — AI, Web Dev, Cybersecurity, Python, and more! Try saying:\n\n👉 *I want to learn Web Development* or *I want to learn Python*";
+  }
+
+  if (msg.includes("skill")) {
+    return "Here are some in-demand skills to learn: React, Python, SQL, Power BI, AI/ML, and Cybersecurity.\nTry saying: *I want to learn [Skill Name]* to get personalized guidance.";
+  }
+
+  // Default fallback
+  return "I'm FOOMO-AI 🤖 — I can guide you with projects, clubs, and skills for placements. Try asking:\n\n• *I want to learn AI*\n• *Suggest Web Development projects*\n• *What clubs are available on FOOMO?*";
 };
 
 export default function AIAssistantPage() {
@@ -67,7 +184,7 @@ export default function AIAssistantPage() {
       id: "1",
       role: "assistant",
       content:
-        "Hello! 👋 I'm your AI assistant. I can help you with project ideas, team building, career guidance, and more. What would you like to know?",
+        "👋 Welcome to FOOMO! I'm FOOMO-AI — your academic and placement assistant. Ask me anything like:\n\n• I want to learn AI\n• Give me project ideas\n• What skills should I learn for placements?",
       timestamp: new Date(),
     },
   ]);
@@ -75,9 +192,8 @@ export default function AIAssistantPage() {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = () =>
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
 
   useEffect(() => {
     scrollToBottom();
@@ -97,7 +213,6 @@ export default function AIAssistantPage() {
     setInput("");
     setIsTyping(true);
 
-    // Simulate AI thinking delay
     setTimeout(() => {
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
@@ -119,15 +234,11 @@ export default function AIAssistantPage() {
   };
 
   const quickPrompts = [
-    "Give me project ideas",
-    "How do I find team members?",
+    "I want to learn AI",
+    "I want to learn Web Development",
+    "I want to learn Python",
     "What skills should I learn?",
-    "Help me get started",
   ];
-
-  const handleQuickPrompt = (prompt: string) => {
-    setInput(prompt);
-  };
 
   return (
     <main className="w-full h-screen bg-gradient-to-br from-gray-50 to-white flex flex-col">
@@ -146,56 +257,50 @@ export default function AIAssistantPage() {
               <Sparkles className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-gray-900">AI Assistant</h1>
-              <p className="text-xs text-gray-600">Always here to help</p>
+              <h1 className="text-lg font-bold text-gray-900">FOOMO-AI</h1>
+              <p className="text-xs text-gray-600">Your Placement Mentor</p>
             </div>
           </div>
-          <div className="w-20"></div> {/* Spacer for centering */}
+          <div className="w-20"></div>
         </header>
 
-        {/* Chat Messages */}
+        {/* Chat Section */}
         <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
-          {messages.map((message) => (
+          {messages.map((msg) => (
             <div
-              key={message.id}
+              key={msg.id}
               className={`flex gap-3 ${
-                message.role === "user" ? "flex-row-reverse" : "flex-row"
+                msg.role === "user" ? "flex-row-reverse" : "flex-row"
               }`}
             >
-              {/* Avatar */}
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  message.role === "user"
-                    ? "bg-gradient-to-br from-blue-400 to-blue-600"
+                className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  msg.role === "user"
+                    ? "bg-blue-600"
                     : "bg-gradient-to-br from-teal-400 to-teal-600"
                 }`}
               >
-                {message.role === "user" ? (
+                {msg.role === "user" ? (
                   <User className="w-5 h-5 text-white" />
                 ) : (
                   <Bot className="w-5 h-5 text-white" />
                 )}
               </div>
 
-              {/* Message Bubble */}
-              <div
-                className={`flex-1 max-w-2xl ${
-                  message.role === "user" ? "items-end" : "items-start"
-                } flex flex-col`}
-              >
+              <div className="flex flex-col flex-1 max-w-2xl">
                 <div
                   className={`px-4 py-3 rounded-2xl ${
-                    message.role === "user"
+                    msg.role === "user"
                       ? "bg-blue-600 text-white rounded-tr-sm"
                       : "bg-white border border-gray-200 text-gray-900 rounded-tl-sm"
                   }`}
                 >
-                  <p className="text-sm leading-relaxed whitespace-pre-line">
-                    {message.content}
-                  </p>
+                  <div className="prose prose-sm max-w-none">
+                     <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  </div>
                 </div>
                 <span className="text-xs text-gray-500 mt-1 px-2">
-                  {message.timestamp.toLocaleTimeString([], {
+                  {msg.timestamp.toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
                   })}
@@ -204,13 +309,12 @@ export default function AIAssistantPage() {
             </div>
           ))}
 
-          {/* Typing Indicator */}
           {isTyping && (
             <div className="flex gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center">
                 <Bot className="w-5 h-5 text-white" />
               </div>
-              <div className="bg-white border border-gray-200 px-4 py-3 rounded-2xl rounded-tl-sm">
+              <div className="bg-white border border-gray-200 px-4 py-3 rounded-2xl">
                 <div className="flex gap-1">
                   <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                   <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100"></div>
@@ -226,39 +330,37 @@ export default function AIAssistantPage() {
         {/* Quick Prompts */}
         {messages.length === 1 && (
           <div className="px-6 pb-4">
-            <p className="text-sm text-gray-600 mb-3">Quick prompts:</p>
+            <p className="text-sm text-gray-600 mb-3">Try these:</p>
             <div className="flex flex-wrap gap-2">
-              {quickPrompts.map((prompt, idx) => (
+              {quickPrompts.map((p, idx) => (
                 <button
                   key={idx}
-                  onClick={() => handleQuickPrompt(prompt)}
+                  onClick={() => setInput(p)}
                   className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm text-gray-700 hover:border-teal-500 hover:text-teal-700 transition-colors"
                 >
-                  {prompt}
+                  {p}
                 </button>
               ))}
             </div>
           </div>
         )}
 
-        {/* Input Area */}
+        {/* Input Box */}
         <div className="px-6 py-4 border-t border-gray-200 bg-white">
           <div className="flex gap-3 items-end">
-            <div className="flex-1 relative">
-              <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Ask me anything..."
-                rows={1}
-                className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-teal-500 resize-none text-sm"
-                style={{ maxHeight: "120px" }}
-              />
-            </div>
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Ask FOOMO-AI anything..."
+              rows={1}
+              className="flex-1 px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-teal-500 resize-none text-sm"
+              style={{ maxHeight: "120px" }}
+            />
             <button
               onClick={handleSendMessage}
               disabled={!input.trim() || isTyping}
-              className="px-5 py-3 bg-teal-600 text-white rounded-2xl hover:bg-teal-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+              className="px-5 py-3 bg-teal-600 text-white rounded-2xl hover:bg-teal-700 disabled:bg-gray-300 transition-colors"
             >
               <Send className="w-5 h-5" />
             </button>
