@@ -24,38 +24,38 @@ const token = localStorage.getItem("fomo_token");
 const res = await fetch(`${BACKEND_URL}/api/project-details?populate=*`, {
   headers: { Authorization: `Bearer ${token}` },
 });
-const data = await res.json();
+// const data = await res.json();
 
-console.log("Fetched clubs:", data.data);
+// console.log("Fetched projects:", data.data);
 
-const mockProject: ProjectDetails[] = data.data.map((project: any) => {
-  return {
-    id: project.documentId,
-    title: project.title,
-    description: project.description,
-    githubUrl: project.githubURL,
-    createdDate: project.date,
-    owner: {
-      name: project.Owner,
-      // avatarUrl:
-    },
-    skills: project.skills,
-    imageUrl: `${BACKEND_URL}${
-      project.image?.formats?.medium?.url || project.image?.url
-    }`,
-    contributors: project.contributors || [],
-    stats: {
-      stars: project.stars,
-      members: project.contributors.length || 0,
-    },
-    needHelp: project.needHelp?.map((item: any) => ({
-      title: item.title,
-      description: item.description,
-      skills: item.skills,
-    })),
-    detailsMarkdown: project.projectDetail,
-  };
-});
+// const mockProject: ProjectDetails[] = data.data.map((project: any) => {
+//   return {
+//     id: project.documentId,
+//     title: project.title,
+//     description: project.description,
+//     githubUrl: project.githubURL,
+//     createdDate: project.date,
+//     owner: {
+//       name: project.Owner,
+//       // avatarUrl:
+//     },
+//     skills: project.skills,
+//     imageUrl: `${BACKEND_URL}${
+//       project.image?.formats?.medium?.url || project.image?.url
+//     }`,
+//     contributors: project.contributors || [],
+//     stats: {
+//       stars: project.stars,
+//       members: project.contributors.length || 0,
+//     },
+//     needHelp: project.needHelp?.map((item: any) => ({
+//       title: item.title,
+//       description: item.description,
+//       skills: item.skills,
+//     })),
+//     detailsMarkdown: project.projectDetail,
+//   };
+// });
 
 // Configuration: Set to true to fetch data from GitHub
 const USE_GITHUB_DATA = false;
@@ -111,9 +111,8 @@ export default function ProjectDetailsPage() {
 
   const func = async () => {
     const response = await fetchData(token, `projects/${projectId}?populate=*`);
-    console.log(`project-details/${projectId}`, response.data.project_detail);
+    console.log(response.data.image,projectId);
     const project = response.data.project_detail; // single object
-
     const formattedProject: ProjectDetails = {
       id: project.documentId,
       title: project.title,
@@ -123,12 +122,12 @@ export default function ProjectDetailsPage() {
       owner: { name: project.Owner },
       skills: project.skills || [],
       imageUrl: `${BACKEND_URL}${
-        project.image?.formats?.medium?.url || project.image?.url || ""
+        response.data.image.url || project.image?.url || ""
       }`,
       contributors: project.contributors || [],
       stats: {
         stars: project.stars || 0,
-        members: project.contributors?.length || 0,
+        members: project.contributors?.length+1 || 0,
       },
       needHelp:
         project.needHelp?.map((item: any) => ({
@@ -143,8 +142,8 @@ export default function ProjectDetailsPage() {
     setLoading(false);
 
     // If GitHub integration is enabled, fetch additional data
-    if (USE_GITHUB_DATA && mockProject[0].githubUrl) {
-      fetchGitHubData(mockProject[0].githubUrl);
+    if (USE_GITHUB_DATA && formattedProject.githubUrl) {
+      fetchGitHubData(formattedProject.githubUrl);
     }
   };
 
