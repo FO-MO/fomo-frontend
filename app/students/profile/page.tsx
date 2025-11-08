@@ -11,9 +11,7 @@ import { getStudentProfile } from "@/lib/strapi/profile";
 
 type TabKey = "projects" | "clubs" | "internships";
 
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_STRAPI_URL ||
-  "https://tbs9k5m4-1337.inc1.devtunnels.ms";
+const BACKEND_URL = process.env.NEXT_PUBLIC_STRAPI_URL;
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -52,6 +50,7 @@ export default function ProfilePage() {
       }
 
       const profile = await getStudentProfile(studentId, token);
+      console.log("Fetched profile", profile);
 
       if (!profile) {
         router.push("/auth/setup-profile");
@@ -72,18 +71,18 @@ export default function ProfilePage() {
 
       // Transform profile data
       const data = {
-        name: profile.name || "User",
-        email: userEmail,
-        initials: profile.name
-          ? profile.name
+        name: profile.user.username || "User",
+        email: profile.user.email || userEmail,
+        initials: profile.user.username
+          ? profile.user.username
               .split(" ")
-              .map((n) => n[0])
+              .map((n: any) => n[0])
               .join("")
               .toUpperCase()
               .slice(0, 2)
-          : "SM",
-        backgroundImageUrl: profile.backgroundImage?.url
-          ? `${BACKEND_URL}${profile.backgroundImage.url}`
+          : "U",
+        backgroundImageUrl: profile.backgroundImg?.url
+          ? `${BACKEND_URL}${profile.backgroundImg.url}`
           : null,
         profileImageUrl: profile.profilePic?.url
           ? `${BACKEND_URL}${profile.profilePic.url}`
@@ -102,15 +101,19 @@ export default function ProfilePage() {
           { key: "clubs" as TabKey, label: "Clubs" },
           { key: "internships" as TabKey, label: "Internships" },
         ],
-        projects: [
-          // TODO: Fetch from API
-        ],
-        clubs: [
-          // TODO: Fetch from API
-        ],
-        internships: [
-          // TODO: Fetch from API
-        ],
+        projects: profile.projects.map((proj: any) => ({
+          title: proj.title,
+          description: proj.description,
+          status: "Active",
+          tags: proj.tags,
+        })),
+        clubs: profile.clubs.map((club: any) => ({
+          name: club.title,
+          description: club.description,
+          tags: club.tags || [],
+          badge: club.badge || null,
+        })),
+        internships: profile.internships,
       };
 
       setProfileData(data);
@@ -192,7 +195,7 @@ export default function ProfilePage() {
       case "internships":
         return (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {profileData.internships.length > 0 ? (
+            {profileData.internships && profileData.internships.length > 0 ? (
               profileData.internships.map((internship: any, index: number) => (
                 <div
                   key={internship.role}
@@ -466,7 +469,7 @@ export default function ProfilePage() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-700">Internships</span>
                   <span className="text-sm font-bold text-teal-700">
-                    {profileData.internships.length}
+                    {profileData.internships?.length}
                   </span>
                 </div>
               </div>

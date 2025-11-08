@@ -29,14 +29,16 @@ export default function ProfileProjectCard({
       </div>
       <p className="text-gray-700 mb-3">{description}</p>
       <div className="flex gap-2 flex-wrap">
-        {tags.map((tag) => (
-          <span
-            key={tag}
-            className="bg-gray-100 text-gray-700 rounded-full px-3 py-1 text-xs font-medium"
-          >
-            {tag}
-          </span>
-        ))}
+        {tags
+          ? tags.map((tag) => (
+              <span
+                key={tag}
+                className="bg-gray-100 text-gray-700 rounded-full px-3 py-1 text-xs font-medium"
+              >
+                {tag}
+              </span>
+            ))
+          : null}
       </div>
     </div>
   );

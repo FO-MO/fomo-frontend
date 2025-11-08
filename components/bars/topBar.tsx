@@ -10,7 +10,7 @@ type Props = {
 };
 
 type User = {
-  name: string;
+  username: string;
   abbreviation: string;
   userType: "student" | "college" | "employer";
   loggedIn: boolean;
@@ -168,7 +168,7 @@ export default function TopBar({
               <span
                 className={`rounded-2xl px-4 py-2 text-sm font-medium ${greetingColor}`}
               >
-                Hi {authenticatedUser.name}!
+                Hi {authenticatedUser.username}!
               </span>
               <a
                 className="transform rounded-2xl bg-[#d6ff3a] px-4 py-2 font-extrabold text-[#082926] shadow-[0_6px_0_rgba(0,0,0,0.12)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_10px_0_rgba(0,0,0,0.12)]"
