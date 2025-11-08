@@ -1,88 +1,149 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PartnershipCard from "@/components/employee-section/PartnershipCard";
 import SubBar from "@/components/subBar";
+import { fetchFromBackend } from "@/lib/tools";
+
+interface Partnership {
+  id: string;
+  name: string;
+  location: string;
+  verified: boolean;
+  badge: string;
+  tier: string;
+  placementRate: number;
+  avgPackage: string;
+  students: string;
+  placementTrend: number[];
+  packageGrowth: number[];
+  activeJobs: number;
+  rating: number;
+}
+
+function mapPartnershipData(x: any): Partnership {
+  return {
+    id: x.id,
+    name: x.name || "Unknown College",
+    location: x.location || "Unknown Location",
+    verified: x.verified || false,
+    badge: x.badge || "",
+    tier: x.tier || "Tier-3",
+    placementRate: Number(x.placementRate) || 0,
+    avgPackage: x.avgPackage || "N/A",
+    students: x.students || "N/A",
+    placementTrend: x.placementTrend || [],
+    packageGrowth: x.packageGrowth || [],
+    activeJobs: x.activeJobs || 0,
+    rating: x.rating || 0,
+  };
+}
 
 export default function PartnershipsPage() {
-  const [partnerships, setPartnerships] = useState([
-    {
-      id: 1,
-      name: "Indian Institute of Technology Delhi",
-      location: "New Delhi",
-      verified: true,
-      badge: "Platinum",
-      tier: "Tier-1",
-      placementRate: 95.5,
-      avgPackage: "₹18.0L",
-      students: "8.5K",
-      placementTrend: [60, 70, 75, 85, 95],
-      packageGrowth: [50, 60, 70, 75, 80],
-      activeJobs: 1,
-      rating: 4.7,
-    },
-    {
-      id: 2,
-      name: "Indian Institute of Technology Bombay",
-      location: "Mumbai",
-      verified: true,
-      badge: "Gold",
-      tier: "Tier-1",
-      placementRate: 97.2,
-      avgPackage: "₹22.0L",
-      students: "9.0K",
-      placementTrend: [65, 75, 80, 90, 97],
-      packageGrowth: [55, 65, 75, 85, 10],
-      activeJobs: 3,
-      rating: 4.6,
-    },
-    {
-      id: 3,
-      name: "Birla Institute of Technology and Science",
-      location: "Pilani",
-      verified: true,
-      badge: "Bronze",
-      tier: "Tier-1",
-      placementRate: 94.1,
-      avgPackage: "₹16.0L",
-      students: "4.2K",
-      placementTrend: [58, 68, 78, 88, 94],
-      packageGrowth: [48, 20, 68, 73, 78],
-      activeJobs: 0,
-      rating: 4.5,
-    },
-    {
-      id: 4,
-      name: "National Institute of Technology Trichy",
-      location: "Tiruchirappalli",
-      verified: true,
-      badge: "Bronze",
-      tier: "Tier-1",
-      placementRate: 92.8,
-      avgPackage: "₹14.0L",
-      students: "6.5K",
-      placementTrend: [55, 65, 75, 85, 93],
-      packageGrowth: [45, 55, 65, 70, 75],
-      activeJobs: 0,
-      rating: 4.5,
-    },
-  ]);
+  const [partnerships, setPartnerships] = useState<Partnership[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPartnerships = async () => {
+      try {
+        const res = await fetchFromBackend("Partnershipcards?populate=*");
+        console.log("Partnership data:", res);
+
+        if (res && res.length > 0) {
+          const mappedPartnerships = res.map((item: any) => {
+            const x = item.data;
+            return mapPartnershipData(x);
+          });
+          setPartnerships(mappedPartnerships);
+        } else {
+          setError("No partnerships data found");
+        }
+      } catch (err) {
+        console.error("Error fetching partnerships:", err);
+        setError("Failed to fetch partnerships");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPartnerships();
+  }, []);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [tierFilter, setTierFilter] = useState("All Tiers");
   const [locationFilter, setLocationFilter] = useState("All Locations");
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-gray-500">Loading partnerships...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-red-500">Error: {error}</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   //SEARCH BAR MECHANISM
+  /**
+   * Helper function to check if a single field includes the search query.
+   * @param {string} fieldValue - The value of the field (e.g., partnership.name).
+   * @param {string} normalizedQuery - The lowercase search query.
+   * @returns {boolean} - True if the field contains the query.
+   */
+  const doesFieldMatch = (fieldValue, normalizedQuery) => {
+    // Check if the field is a non-empty string before converting to lowercase.
+    if (typeof fieldValue === "string" && fieldValue.length > 0) {
+      return fieldValue.toLowerCase().includes(normalizedQuery);
+    }
+    return false;
+  };
+
+  // --- Main Filtering Logic ---
   const filteredPartnerships = partnerships.filter((partnership) => {
-    const matchesSearch =
-      partnership.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      partnership.location.toLowerCase().includes(searchQuery.toLowerCase());
+    // Normalize the search query once for efficiency
+    const normalizedSearchQuery = searchQuery.toLowerCase();
+
+    // 1. **Search Match (Logical OR)**
+    // Define all the partnership fields you want to search against.
+    const searchableFields = [
+      partnership.name,
+      partnership.location,
+      // Add more fields here as needed (e.g., partnership.category, partnership.description)
+    ];
+
+    // .some() returns true if ANY field matches the query (Logical OR)
+    const matchesSearch = searchableFields.some((field) =>
+      doesFieldMatch(field, normalizedSearchQuery)
+    );
+
+    // 2. **Tier Filter (Logical AND)**
     const matchesTier =
       tierFilter === "All Tiers" || partnership.tier === tierFilter;
-    const matchesLocation =
+
+    // 3. **Location Filter (Logical AND)**
+    // This is for a specific filter dropdown, not the general search query.
+    const matchesLocationFilter =
       locationFilter === "All Locations" ||
       partnership.location.includes(locationFilter);
-    return matchesSearch && matchesTier && matchesLocation;
+
+    // 4. **Final Result (Logical AND)**
+    // A partnership must satisfy ALL three conditions (Search AND Tier AND Location Filter)
+    return matchesSearch && matchesTier && matchesLocationFilter;
   });
   //
 
