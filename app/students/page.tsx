@@ -3,7 +3,10 @@ import PostCard, { Post } from "@/components/student-section/PostCard";
 import { useEffect, useState } from "react";
 
 // Access environment variables from .env.local
-const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "https://tbs9k5m4-1337.inc1.devtunnels.ms";
+const STRAPI_URL =
+  process.env.NEXT_PUBLIC_STRAPI_URL ||
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  "https://tbs9k5m4-1337.inc1.devtunnels.ms";
 
 export type HomePageData = {
   user: {
@@ -199,20 +202,23 @@ export default function StudentsHomePage() {
     const fetchPosts = async () => {
       try {
         const token = localStorage.getItem("fomo_token");
-        const response = await fetch(`${STRAPI_URL}/api/posts?populate=*&sort=createdAt:desc`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-        
+        const response = await fetch(
+          `${STRAPI_URL}/api/posts?populate=*&sort=createdAt:desc`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
         if (!response.ok) {
           throw new Error(`Failed to fetch posts: ${response.statusText}`);
         }
-        
+
         const data = await response.json();
         const rawPosts = data.data || [];
-        
+
         // Transform Strapi posts to match Post type
         const transformedPosts: Post[] = rawPosts.map((post: any) => {
           // Get user data
@@ -224,41 +230,61 @@ export default function StudentsHomePage() {
             .join("")
             .toUpperCase()
             .slice(0, 2);
-          
+
           // Get avatar URL
-          const avatarUrl = user.avatar?.url || user.profilePic?.url 
-            ? `${STRAPI_URL}${user.avatar?.url || user.profilePic?.url}`
-            : null;
-          
+          const avatarUrl =
+            user.avatar?.url || user.profilePic?.url
+              ? `${STRAPI_URL}${user.avatar?.url || user.profilePic?.url}`
+              : null;
+
           // Get images - handle both array and single image
           let images: string[] = [];
           if (post.images) {
             if (Array.isArray(post.images.data)) {
-              images = post.images.data.map((img: any) => 
-                `${STRAPI_URL}${img.attributes?.url || img.url}`
+              images = post.images.data.map(
+                (img: any) => `${STRAPI_URL}${img.attributes?.url || img.url}`
               );
             } else if (post.images.data) {
-              images = [`${STRAPI_URL}${post.images.data.attributes?.url || post.images.data.url}`];
+              images = [
+                `${STRAPI_URL}${
+                  post.images.data.attributes?.url || post.images.data.url
+                }`,
+              ];
             } else if (Array.isArray(post.images)) {
-              images = post.images.map((img: any) => 
-                `${STRAPI_URL}${img.url || img.attributes?.url || img.formats?.medium?.url}`
+              images = post.images.map(
+                (img: any) =>
+                  `${STRAPI_URL}${
+                    img.url || img.attributes?.url || img.formats?.medium?.url
+                  }`
               );
             } else {
-              images = [`${STRAPI_URL}${post.images.url || post.images.attributes?.url || post.images.formats?.medium?.url}`];
+              images = [
+                `${STRAPI_URL}${
+                  post.images.url ||
+                  post.images.attributes?.url ||
+                  post.images.formats?.medium?.url
+                }`,
+              ];
             }
           }
-          
+
           // Format date
-          const createdAt = new Date(post.createdAt || post.publishedAt || Date.now());
+          const createdAt = new Date(
+            post.createdAt || post.publishedAt || Date.now()
+          );
           const now = new Date();
-          const diffInSeconds = Math.floor((now.getTime() - createdAt.getTime()) / 1000);
+          const diffInSeconds = Math.floor(
+            (now.getTime() - createdAt.getTime()) / 1000
+          );
           let postedAgo = "";
-          
+
           if (diffInSeconds < 60) {
             postedAgo = "just now";
           } else if (diffInSeconds < 3600) {
             const minutes = Math.floor(diffInSeconds / 60);
-            postedAgo = `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
+            postedAgo = `${minutes} ${
+              minutes === 1 ? "minute" : "minutes"
+            } ago`;
           } else if (diffInSeconds < 86400) {
             const hours = Math.floor(diffInSeconds / 3600);
             postedAgo = `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
@@ -266,9 +292,12 @@ export default function StudentsHomePage() {
             const days = Math.floor(diffInSeconds / 86400);
             postedAgo = `${days} ${days === 1 ? "day" : "days"} ago`;
           }
-          
+
           return {
-            id: post.id?.toString() || post.documentId || Math.random().toString(),
+            id:
+              post.id?.toString() ||
+              post.documentId ||
+              Math.random().toString(),
             author: {
               name: userName,
               initials: userInitials,
@@ -276,7 +305,7 @@ export default function StudentsHomePage() {
               title: user.title || user.bio || user.course || undefined,
             },
             postedAgo: postedAgo,
-            message: post.description ||  "",
+            message: post.description || "",
             images: images.length > 0 ? images : undefined,
             stats: {
               likes: post.likes || post.likesCount || 0,
@@ -286,7 +315,7 @@ export default function StudentsHomePage() {
             isLiked: post.isLiked || false,
           };
         });
-        
+
         setPosts(transformedPosts);
       } catch (error) {
         console.error("Error fetching posts:", error);
@@ -295,7 +324,7 @@ export default function StudentsHomePage() {
     };
     fetchPosts();
   }, []);
-  console.log("posts is",posts);
+  console.log("posts is", posts);
   return (
     <main className="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-20 bg-white min-h-screen">
       <section className="max-w-6xl mx-auto">
@@ -305,7 +334,9 @@ export default function StudentsHomePage() {
             <h1 className="text-3xl sm:text-4xl font-bold text-black">
               Welcome back, {nameVal}! 👋
             </h1>
-            <p className="text-base text-black max-w-2xl">Share your achievements and connect with your network</p>
+            <p className="text-base text-black max-w-2xl">
+              Share your achievements and connect with your network
+            </p>
           </div>
         </header>
 
@@ -317,7 +348,7 @@ export default function StudentsHomePage() {
             <section className="bg-white border border-gray-300 rounded-lg shadow-sm p-4">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold text-black">
-                  {user.initials}
+                  {nameVal[0].toUpperCase()}
                 </div>
                 <button
                   onClick={() =>
@@ -326,7 +357,7 @@ export default function StudentsHomePage() {
                   className="flex-1 text-left"
                 >
                   <div className="w-full min-h-[80px] border border-gray-300 hover:border-gray-500 text-gray-500 px-3 py-2 rounded-md flex items-start cursor-pointer transition-colors">
-                    {composer.placeholder}
+                    {"Post what's on your mind, " + nameVal + "?"}
                   </div>
                 </button>
               </div>
@@ -334,14 +365,10 @@ export default function StudentsHomePage() {
 
             {/* Feed Section */}
             <section className="flex flex-col gap-4">
-              <h2 className="text-xl font-semibold text-black">
-                Posts
-              </h2>
+              <h2 className="text-xl font-semibold text-black">Posts</h2>
               <div className="flex flex-col gap-4">
                 {posts.length > 0 ? (
-                  posts.map((post) => (
-                    <PostCard key={post.id} post={post} />
-                  ))
+                  posts.map((post) => <PostCard key={post.id} post={post} />)
                 ) : (
                   <p className="text-gray-500">No posts yet</p>
                 )}
