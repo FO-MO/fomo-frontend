@@ -1,6 +1,10 @@
 "use client";
 
 import React from "react";
+import { fetchFromBackend } from "@/lib/tools";
+
+const res = await fetchFromBackend("overview-card1s?populate=*");
+console.log(res[0].data.name); //this is how you take json type from backend
 
 export default function OverviewCards1() {
   // Function to get color based on match score (0 = red, 50 = yellow, 100 = green)
@@ -20,42 +24,15 @@ export default function OverviewCards1() {
     }
   };
 
-  const colleges = [
-    {
-      name: "IIT Roorkee",
-      location: "Roorkee, Uttarakhand • Tier-1",
-      matchScore: 95,
-      aiRecommended: true,
-      whyRecommended: [
-        "High placement rate in tech roles",
-        "Strong in required skills (React, Python)",
-        "Previous successful hires from this college",
-      ],
-      stats: {
-        placement: { value: "94%", label: "Placement" },
-        package: { value: "₹16.5L", label: "Avg Package" },
-        students: { value: "8.5K", label: "Students" },
-      },
-      skills: ["Python", "React", "Java", "Machine Learning"],
-    },
-    {
-      name: "NIT Trichy",
-      location: "Tiruchirappalli, Tamil Nadu • Tier-1",
-      matchScore: 50,
-      aiRecommended: true,
-      whyRecommended: [
-        "Excellent computer science program",
-        "High student engagement rates",
-        "Affordable hiring costs",
-      ],
-      stats: {
-        placement: { value: "91%", label: "Placement" },
-        package: { value: "₹14.0L", label: "Avg Package" },
-        students: { value: "9.2K", label: "Students" },
-      },
-      skills: ["Java", "Python", "JavaScript", "Data Science"],
-    },
-  ];
+  const colleges = res.slice(0, 2).map((item: any) => ({
+    name: item.data?.name,
+    location: item.data?.location,
+    matchScore: item.data?.matchScore,
+    aiRecommended: item.data?.aiRecommended,
+    whyRecommended: item.data?.whyRecommended,
+    stats: item.data?.stats,
+    skills: item.data?.skills,
+  }));
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 w-full">

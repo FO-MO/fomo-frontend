@@ -2,19 +2,10 @@
 import React from "react";
 import ClubCard, { Club } from "@/components/student-section/ClubCard";
 import { getAuthToken } from "@/lib/strapi/auth";
+import { backendurl, fetchFromBackend } from "@/lib/tools";
 
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_STRAPI_URL ||
-  "https://tbs9k5m4-1337.inc1.devtunnels.ms";
-const token = localStorage.getItem("fomo_token");
-const res = await fetch(`${BACKEND_URL}/api/clubs?populate=*`, {
-  headers: { Authorization: `Bearer ${token}` },
-});
-const data = await res.json();
-
-console.log("Fetched clubs:", data.data);
-
-const mockClubs: Club[] = data.data.map((club: any) => {
+const x = await fetchFromBackend("clubs?populate=*");
+const mockClubs: Club[] = x.map((club: any) => {
   return {
     id: club.documentId,
     title: club.title,
@@ -23,9 +14,9 @@ const mockClubs: Club[] = data.data.map((club: any) => {
     leader: { name: club.author, avatarUrl: null },
     membersCount: club.no_member,
     joined: club.join,
-    imageUrl: `${BACKEND_URL}` + club.image.url,
+    imageUrl: `${backendurl}` + club.image.url,
     badge: "Expert-led",
-    videos: club.videos.map((video: any) => `${BACKEND_URL}` + video.url) || [],
+    videos: club.videos.map((video: any) => `${backendurl}` + video.url) || [],
   };
 });
 

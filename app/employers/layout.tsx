@@ -1,8 +1,14 @@
+"use client";
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
+import { fetchFromBackend } from "@/lib/tools";
 
 //SEO NEEDS TO BE DONE...
+
+const res = await fetchFromBackend("employer-dash-tiles?populate=*");
+const x = res[0]; //data.data is an array
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,86 +20,86 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "FOOMO - AI-Powered Career Platform for Students & Job Seekers",
-  description:
-    "Never Fear Missing Out on your dream job. FOOMO automates your career journey with AI-powered job recommendations, personalized upskilling, networking automation, and direct college placement connections.",
-  keywords: [
-    "AI career platform",
-    "student job placement",
-    "AI-powered job search",
-    "career automation",
-    "college placement",
-    "student networking",
-    "personalized learning paths",
-    "upskilling platform",
-    "job recommendations",
-    "campus placements",
-    "career development for students",
-    "AI networking",
-    "automated job matching",
-    "student career platform",
-    "entry-level jobs",
-    "internship opportunities",
-    "college to career",
-    "job portal for students",
-    "AI career advisor",
-    "career guidance platform",
-  ],
-  authors: [{ name: "FOOMO Team" }],
-  creator: "FOOMO",
-  publisher: "FOOMO",
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: "https://FOOMO.app",
-    title: "FOOMO - AI-Powered Career Platform for Students",
-    description:
-      "Automate your entire career journey with AI-powered upskilling, networking, and college placement automation. Never miss out on your dream job.",
-    siteName: "FOOMO",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "FOOMO - AI-Powered Career Platform",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "FOOMO - AI-Powered Career Platform for Students",
-    description:
-      "Automate your career journey with AI-powered job recommendations, upskilling, and networking automation.",
-    images: ["/og-image.png"],
-    creator: "@FOOMO_app",
-  },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
-  },
-  verification: {
-    google: "your-google-verification-code",
-    // yandex: "your-yandex-verification-code",
-    // yahoo: "your-yahoo-verification-code",
-  },
-  alternates: {
-    canonical: "https://FOOMO.app",
-  },
-  category: "Career Development",
-};
+// export const metadata: Metadata = {
+//   title: "FOOMO - AI-Powered Career Platform for Students & Job Seekers",
+//   description:
+//     "Never Fear Missing Out on your dream job. FOOMO automates your career journey with AI-powered job recommendations, personalized upskilling, networking automation, and direct college placement connections.",
+//   keywords: [
+//     "AI career platform",
+//     "student job placement",
+//     "AI-powered job search",
+//     "career automation",
+//     "college placement",
+//     "student networking",
+//     "personalized learning paths",
+//     "upskilling platform",
+//     "job recommendations",
+//     "campus placements",
+//     "career development for students",
+//     "AI networking",
+//     "automated job matching",
+//     "student career platform",
+//     "entry-level jobs",
+//     "internship opportunities",
+//     "college to career",
+//     "job portal for students",
+//     "AI career advisor",
+//     "career guidance platform",
+//   ],
+//   authors: [{ name: "FOOMO Team" }],
+//   creator: "FOOMO",
+//   publisher: "FOOMO",
+//   robots: {
+//     index: true,
+//     follow: true,
+//     googleBot: {
+//       index: true,
+//       follow: true,
+//       "max-video-preview": -1,
+//       "max-image-preview": "large",
+//       "max-snippet": -1,
+//     },
+//   },
+//   openGraph: {
+//     type: "website",
+//     locale: "en_US",
+//     url: "https://FOOMO.app",
+//     title: "FOOMO - AI-Powered Career Platform for Students",
+//     description:
+//       "Automate your entire career journey with AI-powered upskilling, networking, and college placement automation. Never miss out on your dream job.",
+//     siteName: "FOOMO",
+//     images: [
+//       {
+//         url: "/og-image.png",
+//         width: 1200,
+//         height: 630,
+//         alt: "FOOMO - AI-Powered Career Platform",
+//       },
+//     ],
+//   },
+//   twitter: {
+//     card: "summary_large_image",
+//     title: "FOOMO - AI-Powered Career Platform for Students",
+//     description:
+//       "Automate your career journey with AI-powered job recommendations, upskilling, and networking automation.",
+//     images: ["/og-image.png"],
+//     creator: "@FOOMO_app",
+//   },
+//   viewport: {
+//     width: "device-width",
+//     initialScale: 1,
+//     maximumScale: 5,
+//   },
+//   verification: {
+//     google: "your-google-verification-code",
+//     // yandex: "your-yandex-verification-code",
+//     // yahoo: "your-yahoo-verification-code",
+//   },
+//   alternates: {
+//     canonical: "https://FOOMO.app",
+//   },
+//   category: "Career Development",
+// };
 
 export default function RootLayout({
   children,
@@ -103,9 +109,9 @@ export default function RootLayout({
   const stats = [
     {
       title: "Total Applications",
-      value: "2,847",
+      value: x.applicationNumber,
       subtitle: "This month",
-      change: "+12% from last month",
+      change: `+${x.applicationPercentage}% from last month`,
       icon: (
         <svg
           aria-hidden="true"
@@ -123,9 +129,9 @@ export default function RootLayout({
     },
     {
       title: "Active Jobs",
-      value: "15",
-      subtitle: "Across 10 colleges",
-      change: "+3 new this week",
+      value: x.activeJobs,
+      subtitle: `Across ${x.activeJobsCollege} colleges`,
+      change: `+ ${x.activeJobsWeek}new this week`,
       icon: (
         <svg
           aria-hidden="true"
@@ -143,9 +149,9 @@ export default function RootLayout({
     },
     {
       title: "Avg. Time to Hire",
-      value: "18 days",
-      subtitle: "Industry avg: 24 days",
-      change: "-3 days improved",
+      value: x.hireTime,
+      subtitle: `Industry avg: ${x.hireTimeIndustrial} days`,
+      change: `-${x.hireTimeImprovement} days improved`,
       icon: (
         <svg
           aria-hidden="true"
@@ -163,9 +169,9 @@ export default function RootLayout({
     },
     {
       title: "Hires This Month",
-      value: "89",
-      subtitle: "12.5% conversion rate",
-      change: "+8% from last month",
+      value: x.hireMonth,
+      subtitle: `${x.hireConversion}% conversion rate`,
+      change: `+${x.hirePercent}% from last month`,
       icon: (
         <svg
           aria-hidden="true"
@@ -183,9 +189,9 @@ export default function RootLayout({
     },
     {
       title: "Cost Saved vs Traditional",
-      value: "₹25.0L",
+      value: `₹${x.costSave}L`,
       subtitle: "Using FOOMO platform",
-      change: "40% cost reduction",
+      change: `${x.costRednpercentage}% cost reduction`,
       icon: (
         <svg
           aria-hidden="true"
@@ -358,7 +364,7 @@ export default function RootLayout({
               </div>
             </section>
 
-            <div className="mt-10">{children}</div>
+            <div className="mt-10 ">{children}</div>
           </main>
         </div>
       </body>

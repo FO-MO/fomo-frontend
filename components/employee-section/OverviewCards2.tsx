@@ -1,29 +1,11 @@
 "use client";
 
 import React from "react";
+import { fetchFromBackend } from "@/lib/tools";
+
+const res = await fetchFromBackend("overview-card2s?populate=*");
 
 export default function OverviewCards2() {
-  const performanceData = [
-    {
-      label: "Application Rate",
-      percentage: 68,
-      change: "+24% this month",
-      color: "bg-teal-700",
-    },
-    {
-      label: "Interview Conversion",
-      percentage: 68,
-      change: null,
-      color: "bg-teal-700",
-    },
-    {
-      label: "Offer Acceptance",
-      percentage: 85,
-      change: null,
-      color: "bg-teal-700",
-    },
-  ];
-
   return (
     <div className="bg-white rounded-2xl shadow-[0px_0px_3px_#0006] p-6">
       {/* Header */}
@@ -47,21 +29,21 @@ export default function OverviewCards2() {
 
       {/* Performance Metrics */}
       <div className="space-y-6">
-        {performanceData.map((item, index) => (
+        {res.map((item, index) => (
           <div key={index}>
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-700">
-                {item.label}
+                {item.data.label}
               </span>
               <div className="flex items-center gap-2">
-                {item.change && (
+                {item.data.change && (
                   <span className="text-xs font-semibold text-gray-900">
-                    {item.change}
+                    {item.data.change}
                   </span>
                 )}
                 {!item.change && (
                   <span className="text-sm font-bold text-gray-900">
-                    {item.percentage}%
+                    {item.data.percentage}%
                   </span>
                 )}
               </div>
@@ -69,8 +51,8 @@ export default function OverviewCards2() {
             {/* Progress Bar */}
             <div className="w-full bg-gray-200 rounded-full h-2.5">
               <div
-                className={`${item.color} h-2.5 rounded-full transition-all duration-500`}
-                style={{ width: `${item.percentage}%` }}
+                className={`${item.data.color} h-2.5 rounded-full transition-all duration-500`}
+                style={{ width: `${item.data.percentage}%` }}
               ></div>
             </div>
           </div>

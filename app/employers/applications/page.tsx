@@ -12,55 +12,22 @@ import {
   XCircle,
   Building2,
 } from "lucide-react";
+import { fetchFromBackend } from "@/lib/tools";
+
+const res = await fetchFromBackend("employerapplications?populate=*");
 
 export default function ApplicationsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
   const [collegeFilter, setCollegeFilter] = useState("All Colleges");
-
-  const stats = [
-    {
-      label: "Total",
-      value: 0,
-      icon: <User2 className="h-5 w-5 text-gray-700" />,
-      color: "bg-emerald-50 border-emerald-100",
-    },
-    {
-      label: "Pending",
-      value: 0,
-      icon: <Clock className="h-5 w-5 text-yellow-500" />,
-      color: "bg-yellow-50 border-yellow-100",
-    },
-    {
-      label: "Reviewed",
-      value: 0,
-      icon: <Eye className="h-5 w-5 text-blue-500" />,
-      color: "bg-blue-50 border-blue-100",
-    },
-    {
-      label: "Interview",
-      value: 0,
-      icon: <MessageSquare className="h-5 w-5 text-purple-500" />,
-      color: "bg-purple-50 border-purple-100",
-    },
-    {
-      label: "Accepted",
-      value: 0,
-      icon: <CheckCircle2 className="h-5 w-5 text-green-500" />,
-      color: "bg-green-50 border-green-100",
-    },
-    {
-      label: "Rejected",
-      value: 0,
-      icon: <XCircle className="h-5 w-5 text-red-500" />,
-      color: "bg-red-50 border-red-100",
-    },
-    {
-      label: "Colleges",
-      value: 0,
-      icon: <Building2 className="h-5 w-5 text-indigo-500" />,
-      color: "bg-indigo-50 border-indigo-100",
-    },
+  const icons = [
+    <User2 key={1} className="h-5 w-5 text-gray-700" />, // Total
+    <Clock key={2} className="h-5 w-5 text-yellow-500" />, // Pending
+    <Eye key={3} className="h-5 w-5 text-blue-500" />, // Reviewed
+    <MessageSquare key={4} className="h-5 w-5 text-purple-500" />, // Interview
+    <CheckCircle2 key={5} className="h-5 w-5 text-green-500" />, // Accepted
+    <XCircle key={6} className="h-5 w-5 text-red-500" />, // Rejected
+    <Building2 key={7} className="h-5 w-5 text-indigo-500" />, // Colleges
   ];
 
   return (
@@ -80,27 +47,30 @@ export default function ApplicationsPage() {
               logo: "🎓",
             },
             { url: "/employers/jobpostings", name: "Job Postings", logo: "🧳" },
-            { url: "/employers/analytics", name: "Analytics", logo: "📊" },
+            // { url: "/employers/analytics", name: "Analytics", logo: "📊" },
           ]}
           className="mb-10"
         />
         <div className="flex flex-col p-6 space-y-6">
           {/* Stats Section */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4">
-            {stats.map((item, idx) => (
-              <div
-                key={idx}
-                className={`flex flex-col items-center justify-center rounded-lg ${item.color} border shadow-sm p-5 transition hover:shadow-md hover:bg-white`}
-              >
-                <div className="p-2 rounded-md bg-white shadow-sm mb-2">
-                  {item.icon}
+            {res.map((item, idx) => {
+              const y = item.data;
+              return (
+                <div
+                  key={idx}
+                  className={`flex flex-col items-center justify-center rounded-lg ${y.color} border shadow-sm p-5 transition hover:shadow-md hover:bg-white`}
+                >
+                  <div className="p-2 rounded-md bg-white shadow-sm mb-2">
+                    {icons[idx]}
+                  </div>
+                  <p className="text-sm text-gray-600">{y.label}</p>
+                  <p className="text-xl font-extrabold text-gray-900 mt-1">
+                    {y.value}
+                  </p>
                 </div>
-                <p className="text-sm text-gray-600">{item.label}</p>
-                <p className="text-xl font-extrabold text-gray-900 mt-1">
-                  {item.value}
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Search + Filters */}
