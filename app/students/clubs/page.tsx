@@ -20,47 +20,6 @@ const mockClubs: Club[] = x.map((club: any) => {
   };
 });
 
-console.log("Fetched clubs:", mockClubs);
-
-// const mockClubs: Club[] = [
-//   {
-//     id: "1",
-//     title: "Web Development",
-//     description:
-//       "Master modern web technologies including HTML, CSS, JavaScript, React, and more.",
-//     tags: ["HTML/CSS", "JavaScript", "React"],
-//     leader: { name: "Dr. Sarah Johnson", avatarUrl: null },
-//     membersCount: 124,
-//     joined: true,
-//     badge: "Expert-led",
-//     imageUrl: null,
-//   },
-//   {
-//     id: "2",
-//     title: "Python",
-//     description:
-//       "Learn Python programming from basics to advanced concepts. Cover data science, web, and automation.",
-//     tags: ["Python Basics", "Data Science", "Django"],
-//     leader: { name: "Dr. Michael Chen", avatarUrl: null },
-//     membersCount: 98,
-//     joined: true,
-//     badge: "Expert-led",
-//     imageUrl: null,
-//   },
-//   {
-//     id: "3",
-//     title: "Java",
-//     description:
-//       "Comprehensive Java programming course covering OOP, Spring framework, and more.",
-//     tags: ["Core Java", "Spring Boot", "Hibernate"],
-//     leader: { name: "Dr. Priya Sharma", avatarUrl: null },
-//     membersCount: 76,
-//     joined: true,
-//     badge: "Expert-led",
-//     imageUrl: null,
-//   },
-// ];
-
 export default function ClubsPage() {
   return (
     <main className="w-full px-6 sm:px-8 pt-8 pb-16">

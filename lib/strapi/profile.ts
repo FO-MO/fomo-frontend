@@ -18,9 +18,13 @@ export interface StudentProfile {
   followers?: number;
   following?: number;
   profilePic?: any;
-  backgroundImage?: any;
+  backgroundImg?: any;
   createdAt?: string;
   updatedAt?: string;
+  user?: any;
+  projects?: any;
+  clubs?: any;
+  internships?: any;
 }
 
 export interface CreateProfileData {

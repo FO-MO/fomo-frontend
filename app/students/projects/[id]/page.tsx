@@ -16,6 +16,46 @@ import {
   ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
+import { fetchData } from "@/lib/strapi/strapiData";
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_STRAPI_URL ||
+  "https://tbs9k5m4-1337.inc1.devtunnels.ms";
+const token = localStorage.getItem("fomo_token");
+const res = await fetch(`${BACKEND_URL}/api/project-details?populate=*`, {
+  headers: { Authorization: `Bearer ${token}` },
+});
+const data = await res.json();
+
+console.log("Fetched clubs:", data.data);
+
+const mockProject: ProjectDetails[] = data.data.map((project: any) => {
+  return {
+    id: project.documentId,
+    title: project.title,
+    description: project.description,
+    githubUrl: project.githubURL,
+    createdDate: project.date,
+    owner: {
+      name: project.Owner,
+      // avatarUrl:
+    },
+    skills: project.skills,
+    imageUrl: `${BACKEND_URL}${
+      project.image?.formats?.medium?.url || project.image?.url
+    }`,
+    contributors: project.contributors || [],
+    stats: {
+      stars: project.stars,
+      members: project.contributors.length || 0,
+    },
+    needHelp: project.needHelp?.map((item: any) => ({
+      title: item.title,
+      description: item.description,
+      skills: item.skills,
+    })),
+    detailsMarkdown: project.projectDetail,
+  };
+});
 
 // Configuration: Set to true to fetch data from GitHub
 const USE_GITHUB_DATA = false;
@@ -66,164 +106,47 @@ export default function ProjectDetailsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // TODO: Replace with actual API call to fetch project details
-    const mockProject: ProjectDetails = {
-      id: projectId,
-      title: "Custom Memory Allocator",
-      description:
-        "Build a custom memory allocation and deallocation system similar to malloc and free. This project focuses on understanding low-level memory management, fragmentation issues, and performance optimization. Perfect for students interested in systems programming and operating systems.",
-      githubUrl: USE_GITHUB_DATA
-        ? "https://github.com/simonMat21/Visual-Learner"
-        : undefined,
-      createdDate: "2024-10-15",
-      owner: {
-        name: "Biyon Binu",
-        avatarUrl:
-          "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop",
-      },
-      skills: [
-        "C",
-        "C++",
-        "Pointers",
-        "Memory Management",
-        "Linked Lists",
-        "OS Concepts",
-      ],
-      imageUrl: null,
-      contributors: [
-        {
-          name: "Biyon Binu",
-          avatarUrl:
-            "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop",
-          profileUrl: "/students/profile/biyon",
-          role: "Project Lead",
-          contributions: 127,
-        },
-        {
-          name: "Sarah Chen",
-          avatarUrl:
-            "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop",
-          profileUrl: "/students/profile/sarah",
-          role: "Core Developer",
-          contributions: 89,
-        },
-        {
-          name: "Alex Rodriguez",
-          avatarUrl:
-            "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop",
-          profileUrl: "/students/profile/alex",
-          role: "Testing Lead",
-          contributions: 64,
-        },
-        {
-          name: "Priya Sharma",
-          avatarUrl:
-            "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop",
-          profileUrl: "/students/profile/priya",
-          role: "Documentation",
-          contributions: 52,
-        },
-        {
-          name: "Marcus Johnson",
-          avatarUrl:
-            "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop",
-          profileUrl: "/students/profile/marcus",
-          role: "Contributor",
-          contributions: 38,
-        },
-      ],
+    func();
+  }, [projectId]);
+
+  const func = async () => {
+    const response = await fetchData(token, `projects/${projectId}?populate=*`);
+    console.log(`project-details/${projectId}`, response.data.project_detail);
+    const project = response.data.project_detail; // single object
+
+    const formattedProject: ProjectDetails = {
+      id: project.documentId,
+      title: project.title,
+      description: project.description,
+      githubUrl: project.githubURL,
+      createdDate: project.date,
+      owner: { name: project.Owner },
+      skills: project.skills || [],
+      imageUrl: `${BACKEND_URL}${
+        project.image?.formats?.medium?.url || project.image?.url || ""
+      }`,
+      contributors: project.contributors || [],
       stats: {
-        stars: 42,
-        members: 5,
+        stars: project.stars || 0,
+        members: project.contributors?.length || 0,
       },
-      needHelp: [
-        {
-          title: "Performance Optimization",
-          description:
-            "Need help optimizing memory allocation speed and reducing fragmentation in our allocator.",
-          skills: ["C", "Performance Tuning", "Profiling"],
-        },
-        {
-          title: "Testing & Debugging",
-          description:
-            "Looking for someone to write comprehensive test cases and help debug edge cases.",
-          skills: ["Unit Testing", "GDB", "Valgrind"],
-        },
-        {
-          title: "Documentation",
-          description:
-            "Help us create detailed documentation and tutorials for the project.",
-          skills: ["Technical Writing", "Markdown"],
-        },
-      ],
-      detailsMarkdown: `# Project Overview
-
-This project is an ambitious undertaking to build a custom memory allocator from scratch, implementing functionality similar to C's malloc() and free() functions.
-
-## Goals & Objectives
-
-- **Learn low-level memory management** - Understand how operating systems handle memory allocation
-- **Optimize performance** - Reduce fragmentation and improve allocation speed
-- **Implement best practices** - Follow industry standards for memory management
-
-## Technical Approach
-
-### Phase 1: Basic Allocator
-We'll start by implementing a simple bump allocator that allocates memory linearly. This will help us understand the fundamentals before moving to more complex strategies.
-
-### Phase 2: Free List Implementation
-Next, we'll implement a free list to track deallocated memory blocks and enable memory reuse.
-
-### Phase 3: Coalescing
-We'll add block coalescing to merge adjacent free blocks, reducing fragmentation.
-
-## Learning Outcomes
-
-By the end of this project, team members will:
-1. Understand memory alignment and padding
-2. Learn about different allocation strategies (first-fit, best-fit, worst-fit)
-3. Gain experience with pointer arithmetic
-4. Build debugging and testing skills
-
-## Prerequisites
-
-- Strong understanding of C/C++
-- Familiarity with pointers and memory addresses
-- Basic knowledge of operating system concepts
-- Experience with debugging tools like GDB or Valgrind
-
-## Timeline
-
-| Week | Milestone | Status |
-|------|-----------|--------|
-| 1-2 | Design and planning | ✅ Complete |
-| 3-4 | Basic allocator implementation | 🔄 In Progress |
-| 5-6 | Free list and deallocation | ⏳ Upcoming |
-| 7-8 | Optimization and testing | ⏳ Upcoming |
-
-## Resources
-
-- [Operating Systems: Three Easy Pieces](https://pages.cs.wisc.edu/~remzi/OSTEP/)
-- [Memory Allocators 101](https://arjunsreedharan.org/post/148675821737/memory-allocators-101-write-a-simple-memory)
-- [Writing a Memory Allocator](http://dmitrysoshnikov.com/compilers/writing-a-memory-allocator/)
-
-## Contributing
-
-We welcome contributions! Check the "Need Help In" section to see where we need assistance. Make sure to follow our coding standards and write tests for new features.
-
-## Team Meetings
-
-Weekly meetings every **Tuesday at 6 PM EST** on Discord. All members are expected to attend and share progress updates.`,
+      needHelp:
+        project.needHelp?.map((item: any) => ({
+          title: item.title,
+          description: item.description,
+          skills: item.skills,
+        })) || [],
+      detailsMarkdown: project.projectDetail || "",
     };
+    setProject(formattedProject);
 
-    setProject(mockProject);
     setLoading(false);
 
     // If GitHub integration is enabled, fetch additional data
-    if (USE_GITHUB_DATA && mockProject.githubUrl) {
-      fetchGitHubData(mockProject.githubUrl);
+    if (USE_GITHUB_DATA && mockProject[0].githubUrl) {
+      fetchGitHubData(mockProject[0].githubUrl);
     }
-  }, [projectId]);
+  };
 
   const fetchGitHubData = async (githubUrl: string) => {
     try {

@@ -3,21 +3,17 @@
 import React, { useState } from "react";
 import ProjectCard, { Project } from "@/components/student-section/ProjectCard";
 import CreateProjectModal from "@/components/student-section/CreateProjectModal";
+import { fetchData } from "@/lib/strapi/strapiData";
 
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_STRAPI_URL ||
   "https://tbs9k5m4-1337.inc1.devtunnels.ms";
 const token = localStorage.getItem("fomo_token");
-const res = await fetch(`${BACKEND_URL}/api/projects?populate=*`, {
-  headers: { Authorization: `Bearer ${token}` },
-});
-const data = await res.json();
-
-console.log("Fetched projects:", data.data);
+const data = await fetchData(token, "projects?populate=*");
 
 const mockProjects: Project[] = data.data.map((project: any) => {
   return {
-    id: project.id,
+    id: project.documentId,
     title: project.title,
     description: project.description,
     tags: ["Project"],
@@ -31,83 +27,6 @@ const mockProjects: Project[] = data.data.map((project: any) => {
 });
 
 console.log("Fetched projects:", mockProjects);
-
-// const mockProjects: Project[] = [
-//   {
-//     id: "1",
-//     title: "Custom Memory Allocator",
-//     description:
-//       "Build a custom memory allocation and deallocation system similar to malloc and free. Focus on fragmentation and performance.",
-//     tags: ["Project"],
-//     creator: { name: "biyon binu", avatarUrl: null },
-//     membersCount: 1,
-//     skills: [
-//       "C",
-//       "C++",
-//       "Pointers",
-//       "Memory Management",
-//       "Linked Lists",
-//       "OS Concepts",
-//     ],
-//     actions: [{ label: "Join Project", href: "#" }],
-//     imageUrl: null,
-//   },
-//   {
-//     id: "2",
-//     title: "AI Chatbot for Campus",
-//     description:
-//       "Create an LLM-based chatbot to answer student queries about courses and campus life.",
-//     tags: ["Project"],
-//     creator: { name: "alice doe", avatarUrl: null },
-//     membersCount: 3,
-//     skills: ["Python", "NLP", "APIs"],
-//     actions: [{ label: "View", href: "#" }],
-//     imageUrl: null,
-//   },
-//   {
-//     id: "3",
-//     title: "Custom Memory Allocator",
-//     description:
-//       "Build a custom memory allocation and deallocation system similar to malloc and free. Focus on fragmentation and performance.",
-//     tags: ["Project"],
-//     creator: { name: "biyon binu", avatarUrl: null },
-//     membersCount: 1,
-//     skills: [
-//       "C",
-//       "C++",
-//       "Pointers",
-//       "Memory Management",
-//       "Linked Lists",
-//       "OS Concepts",
-//     ],
-//     actions: [{ label: "Join Project", href: "#" }],
-//     imageUrl: null,
-//   },
-//   {
-//     id: "4",
-//     title: "AI Chatbot for Campus",
-//     description:
-//       "Create an LLM-based chatbot to answer student queries about courses and campus life.",
-//     tags: ["Project"],
-//     creator: { name: "alice doe", avatarUrl: null },
-//     membersCount: 3,
-//     skills: ["Python", "NLP", "APIs"],
-//     actions: [{ label: "View", href: "#" }],
-//     imageUrl: null,
-//   },
-//   {
-//     id: "5",
-//     title: "AI Chatbot for Campus",
-//     description:
-//       "Create an LLM-based chatbot to answer student queries about courses and campus life.",
-//     tags: ["Project"],
-//     creator: { name: "alice doe", avatarUrl: null },
-//     membersCount: 3,
-//     skills: ["Python", "NLP", "APIs"],
-//     actions: [{ label: "View", href: "#" }],
-//     imageUrl: null,
-//   },
-// ];
 
 export default function StudentsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);

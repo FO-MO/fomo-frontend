@@ -8,10 +8,18 @@ import Hero4 from "@/components/hero/Hero4";
 import Hero5 from "@/components/hero/Hero5";
 import Footer from "@/components/bars/footer";
 
+const rawUser = localStorage.getItem("fomo_user");
+const parsedUser = {
+  ...JSON.parse(rawUser || "null"),
+  loggedIn: true,
+  userType: "student",
+};
+console.log("User from localStorage:", parsedUser);
+
 export default function Home() {
   return (
     <>
-      <TopBar theme="home" user={null} />
+      <TopBar theme="home" user={parsedUser} />
       <Hero1 />
       <Hero2 />
       <Hero3 />
