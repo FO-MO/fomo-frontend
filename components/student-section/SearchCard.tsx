@@ -3,14 +3,29 @@
 import React from "react";
 
 export type Profile = {
-  id: string | number;
   documentId?: string;
+  id?: number;
+  studentId: string;
   name: string;
-  email: string;
-  avatarUrl?: string | null;
+  email?: string;
+  about?: string;
+  college?: string;
+  course?: string;
+  graduationYear?: string;
+  location?: string;
   skills?: string[];
-  followersCount?: number;
-  followingCount?: number;
+  interests?: string[];
+  followers?: any[];
+  following?: any[];
+  profilePic?: any;
+  backgroundImg?: any;
+  createdAt?: string;
+  updatedAt?: string;
+  avatarUrl?: string | null;
+  user?: any;
+  projects?: any;
+  clubs?: any;
+  internships?: any;
   isFollowing?: boolean;
 };
 
@@ -22,7 +37,7 @@ type Props = {
 export default function SearchCard({ profile, onFollowToggle }: Props) {
   const handleFollowClick = () => {
     if (onFollowToggle) {
-      onFollowToggle(profile.id);
+      onFollowToggle(profile.id || 0);
     }
   };
 
@@ -84,13 +99,13 @@ export default function SearchCard({ profile, onFollowToggle }: Props) {
             <div className="flex items-center gap-4 mt-2">
               <div className="text-xs">
                 <span className="font-semibold text-gray-900">
-                  {profile.followersCount ?? 0}
+                  {profile.followers?.length ?? 0}
                 </span>
                 <span className="text-gray-600 ml-1">followers</span>
               </div>
               <div className="text-xs">
                 <span className="font-semibold text-gray-900">
-                  {profile.followingCount ?? 0}
+                  {profile.following?.length ?? 0}
                 </span>
                 <span className="text-gray-600 ml-1">following</span>
               </div>

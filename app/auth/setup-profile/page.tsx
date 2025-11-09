@@ -16,7 +16,6 @@ import { getAuthToken } from "@/lib/strapi/auth";
 import { createStudentProfile } from "@/lib/strapi/profile";
 import Link from "next/link";
 import { uploadImage } from "@/lib/strapi/strapiData";
-import { connect } from "http2";
 
 // Predefined options
 const AVAILABLE_SKILLS = [
@@ -58,6 +57,38 @@ const AVAILABLE_INTERESTS = [
   "IoT",
   "DevOps",
 ];
+
+const KERALA_COLLEGES = [
+  "Indian Institute of Technology Palakkad (IIT Palakkad)",
+  "National Institute of Technology Calicut (NIT Calicut)",
+  "Indian Institute of Management Kozhikode (IIM Kozhikode)",
+  "Cochin University of Science and Technology (CUSAT)",
+  "University of Kerala",
+  "Mahatma Gandhi University, Kottayam",
+  "Kannur University",
+  "Calicut University",
+  "Kerala University of Digital Sciences, Innovation and Technology",
+  "Amrita Vishwa Vidyapeetham, Amritapuri Campus",
+  "College of Engineering Trivandrum (CET)",
+  "Government Engineering College Thrissur",
+  "Rajagiri School of Engineering and Technology",
+  "Toc H Institute of Science and Technology",
+  "Mar Baselios College of Engineering and Technology",
+  "Sree Chitra Thirunal College of Engineering",
+  "Model Engineering College, Ernakulam",
+  "TKM College of Engineering, Kollam",
+  "LBS Institute of Technology for Women",
+  "NSS College of Engineering, Palakkad",
+  "Government Engineering College Barton Hill",
+  "Malabar College of Engineering and Technology",
+  "Ilahia College of Engineering and Technology",
+  "Federal Institute of Science and Technology (FISAT)",
+  "Albertian Institute of Science and Technology",
+];
+
+// Generate years from current year to next 10 years
+const currentYear = new Date().getFullYear();
+const GRADUATION_YEARS = Array.from({ length: 11 }, (_, i) => currentYear + i);
 
 export default function SetupProfilePage() {
   const router = useRouter();
@@ -408,14 +439,19 @@ export default function SetupProfilePage() {
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Institution *
               </label>
-              <input
-                type="text"
+              <select
                 value={institution}
                 onChange={(e) => setInstitution(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900"
-                placeholder="e.g., Massachusetts Institute of Technology"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900 bg-white cursor-pointer"
                 required
-              />
+              >
+                <option value="">Select your college</option>
+                {KERALA_COLLEGES.map((college) => (
+                  <option key={college} value={college}>
+                    {college}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
@@ -436,14 +472,19 @@ export default function SetupProfilePage() {
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Graduation Year *
               </label>
-              <input
-                type="text"
+              <select
                 value={graduationYear}
                 onChange={(e) => setGraduationYear(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900"
-                placeholder="e.g., 2026"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900 bg-white cursor-pointer"
                 required
-              />
+              >
+                <option value="">Select graduation year</option>
+                {GRADUATION_YEARS.map((year) => (
+                  <option key={year} value={year.toString()}>
+                    {year}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
         );

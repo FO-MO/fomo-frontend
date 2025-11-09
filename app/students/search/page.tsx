@@ -56,7 +56,7 @@ export default function SearchPage() {
       filtered = filtered.filter(
         (profile: Profile) =>
           profile.name.toLowerCase().includes(query) ||
-          profile.email.toLowerCase().includes(query) ||
+          profile.email?.toLowerCase().includes(query) ||
           profile.skills?.some((skill: string) =>
             skill.toLowerCase().includes(query)
           )
