@@ -323,7 +323,7 @@ export default function StudentsHomePage() {
     };
     fetchPosts();
   }, []);
-  
+  console.log(posts);
   return (
     <main className="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-20 bg-white min-h-screen">
       <section className="max-w-6xl mx-auto">
@@ -378,32 +378,12 @@ export default function StudentsHomePage() {
           {/* Right Sidebar */}
           <div className="lg:col-span-1 flex flex-col gap-4">
             {/* Trending Section */}
-            <div className="bg-white border border-gray-300 rounded-lg shadow-sm p-4">
-              <h3 className="text-lg font-semibold text-black mb-3">
-                Trending
-              </h3>
-              <div className="flex flex-col gap-2">
-                {[
-                  { tag: "#Internships", count: "2.5K posts" },
-                  { tag: "#StartupLife", count: "1.8K posts" },
-                  { tag: "#CareerGrowth", count: "3.2K posts" },
-                  { tag: "#TechJobs", count: "4.1K posts" },
-                ].map((trend, idx) => (
-                  <button
-                    key={idx}
-                    className="text-left p-2 rounded-md hover:bg-gray-100 transition"
-                  >
-                    <p className="font-medium text-black">{trend.tag}</p>
-                    <p className="text-sm text-gray-600">{trend.count}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
+            
 
             {/* Suggested Connections */}
             <div className="bg-white border border-gray-300 rounded-lg shadow-sm p-4">
               <h3 className="text-lg font-semibold text-black mb-3">
-                People You Know
+                Suggested People
               </h3>
               <div className="flex flex-col gap-2">
                 {[
