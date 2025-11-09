@@ -14,19 +14,10 @@ export type Profile = {
   graduationYear?: string;
   location?: string;
   skills?: string[];
-  interests?: string[];
-  followers?: any[];
-  following?: any[];
-  profilePic?: any;
-  backgroundImg?: any;
-  createdAt?: string;
-  updatedAt?: string;
-  avatarUrl?: string | null;
-  user?: any;
-  projects?: any;
-  clubs?: any;
-  internships?: any;
+  followers?: string[];
+  following?: string[];
   isFollowing?: boolean;
+  avatarUrl?: string | null;
 };
 
 type Props = {

@@ -21,7 +21,7 @@ const mockProjects: Project[] = data.data.map((project: any) => {
     skills: project.skills,
     membersCount: project.no_member,
     // joined: project.join,
-    imageUrl: `${BACKEND_URL}` + project.image.url,
+    imageUrl: project.image ? `${BACKEND_URL}${project.image.url}` : null,
     actions: [{ label: "Join Project", href: "#" }],
   };
 });
