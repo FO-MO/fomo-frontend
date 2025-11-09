@@ -9,10 +9,13 @@ import {
   GraduationCap,
   MapPin,
   BookOpen,
+  Camera,
+  Image as ImageIcon,
 } from "lucide-react";
 import { getAuthToken } from "@/lib/strapi/auth";
 import { createStudentProfile } from "@/lib/strapi/profile";
 import Link from "next/link";
+import { uploadImage } from "@/lib/strapi/strapiData";
 import { connect } from "http2";
 
 // Predefined options
@@ -71,6 +74,10 @@ export default function SetupProfilePage() {
   const [location, setLocation] = useState("");
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [profilePicFile, setProfilePicFile] = useState<File | null>(null);
+  const [backgroundImgFile, setBackgroundImgFile] = useState<File | null>(null);
+  const [profilePicPreview, setProfilePicPreview] = useState<string>("");
+  const [backgroundImgPreview, setBackgroundImgPreview] = useState<string>("");
 
   useEffect(() => {
     // Check if user is authenticated
@@ -106,6 +113,67 @@ export default function SetupProfilePage() {
         ? prev.filter((i) => i !== interest)
         : [...prev, interest]
     );
+  };
+
+  const handleProfilePicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setProfilePicFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePicPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleBackgroundImgChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setBackgroundImgFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setBackgroundImgPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadImage_ = async (
+    file: File,
+    token: string
+  ): Promise<number | null> => {
+    try {
+      const BACKEND_URL =
+        process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:1337";
+      const formData = new FormData();
+      formData.append("files", file);
+      console.log("Uploading file to Strapi:", formData.get("files"), formData);
+
+      const uploadResponse = await fetch(`${BACKEND_URL}/api/upload`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        console.error("Failed to upload image:", await uploadResponse.text());
+        return null;
+      }
+
+      const uploadedFiles = await uploadResponse.json();
+      if (uploadedFiles && uploadedFiles.length > 0) {
+        return uploadedFiles[0].id;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      return null;
+    }
   };
 
   const validateStep = (step: number): boolean => {
@@ -146,7 +214,7 @@ export default function SetupProfilePage() {
   const handleNext = () => {
     setError("");
     if (validateStep(currentStep)) {
-      if (currentStep < 4) {
+      if (currentStep < 5) {
         setCurrentStep(currentStep + 1);
       }
     }
@@ -190,7 +258,7 @@ export default function SetupProfilePage() {
       }
 
       // Create profile
-      const profileData = {
+      const profileData: any = {
         studentId,
         name,
         about: bio,
@@ -203,6 +271,8 @@ export default function SetupProfilePage() {
         user: {
           connect: [studentId],
         },
+        // ...(profilePicId && { profilePic: profilePicId }),
+        // ...(backgroundImgId && { backgroundImage: backgroundImgId }),
       };
 
       const result = await createStudentProfile(profileData, token);
@@ -211,6 +281,42 @@ export default function SetupProfilePage() {
         // Profile created successfully
         // Store profile completion flag
         localStorage.setItem("profile_completed", "true");
+        console.log("Profile created:", result);
+        if (profilePicFile) {
+          uploadImage(
+            token,
+            "api::student-profile.student-profile",
+            result.id ? result.id - 1 : undefined,
+            "profilePic",
+            profilePicFile
+          );
+        }
+        if (backgroundImgFile) {
+          uploadImage(
+            token,
+            "api::student-profile.student-profile",
+            result.id ? result.id - 1 : undefined,
+            "backgroundImg",
+            backgroundImgFile
+          );
+        }
+
+        const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+        const r = await fetch(
+          `${BACKEND_URL}/api/student-profile/${result.documentId}`,
+          {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              data: {
+                age: 12,
+              },
+            }),
+          }
+        );
+        console.log("Updated profile with age:", r);
 
         // Redirect to students dashboard
         router.push("/students");
@@ -429,6 +535,127 @@ export default function SetupProfilePage() {
           </div>
         );
 
+      case 5:
+        return (
+          <div className="space-y-6">
+            <div className="text-center mb-8">
+              <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Camera className="w-10 h-10 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Profile Images
+              </h2>
+              <p className="text-gray-600">
+                Add photos to personalize your profile (Optional)
+              </p>
+            </div>
+
+            {/* Profile Picture */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                Profile Picture
+              </label>
+              <div className="bg-gray-50 rounded-lg p-6 border-2 border-gray-200">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
+                    {profilePicPreview ? (
+                      <img
+                        src={profilePicPreview}
+                        alt="Profile preview"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center text-gray-400">
+                        <User className="w-12 h-12 mb-2" />
+                        <span className="text-xs">No photo</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-center">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleProfilePicChange}
+                      className="hidden"
+                      id="profilePicInput"
+                    />
+                    <label
+                      htmlFor="profilePicInput"
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium cursor-pointer transition-colors shadow-md"
+                    >
+                      <Camera className="w-5 h-5" />
+                      {profilePicPreview ? "Change Photo" : "Upload Photo"}
+                    </label>
+                    <p className="text-xs text-gray-500 mt-2">
+                      JPG, PNG or GIF (max. 5MB)
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Background Image */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                Background Image
+              </label>
+              <div className="bg-gray-50 rounded-lg p-6 border-2 border-gray-200">
+                <div className="flex flex-col gap-4">
+                  <div className="w-full h-48 rounded-lg bg-gradient-to-br from-gray-200 via-gray-300 to-gray-200 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
+                    {backgroundImgPreview ? (
+                      <img
+                        src={backgroundImgPreview}
+                        alt="Background preview"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center text-gray-400">
+                        <ImageIcon className="w-16 h-16 mb-3" />
+                        <span className="text-sm font-medium">
+                          No background image
+                        </span>
+                        <span className="text-xs">
+                          Upload to customize your profile
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-center">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleBackgroundImgChange}
+                      className="hidden"
+                      id="backgroundImgInput"
+                    />
+                    <label
+                      htmlFor="backgroundImgInput"
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium cursor-pointer transition-colors shadow-md"
+                    >
+                      <ImageIcon className="w-5 h-5" />
+                      {backgroundImgPreview
+                        ? "Change Background"
+                        : "Upload Background"}
+                    </label>
+                    <p className="text-xs text-gray-500 mt-2">
+                      JPG, PNG or GIF (max. 5MB)
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
+              <p className="font-medium mb-1">💡 Tip:</p>
+              <p>
+                These images are optional but help make your profile stand out!
+                You can always add or change them later from your profile
+                settings.
+              </p>
+            </div>
+          </div>
+        );
+
       default:
         return null;
     }
@@ -450,16 +677,16 @@ export default function SetupProfilePage() {
           <div className="mb-8">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-semibold text-gray-700">
-                Step {currentStep} of 4
+                Step {currentStep} of 5
               </span>
               <span className="text-sm font-semibold text-teal-700">
-                {Math.round((currentStep / 4) * 100)}% Complete
+                {Math.round((currentStep / 5) * 100)}% Complete
               </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-3">
               <div
                 className="bg-gradient-to-r from-teal-500 to-cyan-600 h-3 rounded-full transition-all duration-300"
-                style={{ width: `${(currentStep / 4) * 100}%` }}
+                style={{ width: `${(currentStep / 5) * 100}%` }}
               ></div>
             </div>
           </div>
@@ -485,7 +712,7 @@ export default function SetupProfilePage() {
                 Back
               </button>
 
-              {currentStep < 4 ? (
+              {currentStep < 5 ? (
                 <button
                   type="button"
                   onClick={handleNext}
