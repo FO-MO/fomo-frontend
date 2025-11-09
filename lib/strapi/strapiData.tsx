@@ -55,17 +55,18 @@ export async function uploadImage(
     if (file) {
       formData.append("files", file);
     }
-    formData.append("ref", ref);
-    formData.append("refId", refId ? refId.toString() : "");
-    formData.append("field", field);
+    // formData.append("ref", ref);
+    // formData.append("refId", refId ? refId.toString() : "");
+    // formData.append("field", field);
+    // formData.append("publishedAt", new Date().toISOString());
 
-    console.log("Uploading image to Strapi:", formData.get("files"));
-    console.log(
-      "other details:",
-      formData.get("ref"),
-      formData.get("refId"),
-      formData.get("field")
-    );
+    // console.log("Uploading image to Strapi:", formData.get("files"));
+    // console.log(
+    //   "other details:",
+    //   formData.get("ref"),
+    //   formData.get("refId"),
+    //   formData.get("field")
+    // );
 
     const res = await fetch(`${BACKEND_URL}/api/upload`, {
       method: "POST",
@@ -74,7 +75,7 @@ export async function uploadImage(
       },
       body: formData,
     });
-    console.log("Upload done");
+    console.log("Upload done", res);
 
     if (!res.ok) {
       console.error("Failed to upload image:", await res.text());
@@ -82,6 +83,8 @@ export async function uploadImage(
     }
 
     const uploadedFiles = await res.json();
+    const imageId = uploadedFiles[0].id;
+    console.log("Uploaded image ID:", imageId);
     if (uploadedFiles && uploadedFiles.length > 0) {
       return uploadedFiles[0].id;
     }

@@ -19,7 +19,7 @@ console.log("User from localStorage:", parsedUser);
 export default function Home() {
   return (
     <>
-      <TopBar theme="home" user={parsedUser} />
+      <TopBar theme="home" user={rawUser ? parsedUser : null} />
       <Hero1 />
       <Hero2 />
       <Hero3 />

@@ -67,6 +67,7 @@ export default function SetupProfilePage() {
 
   // Form state
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [bio, setBio] = useState("");
   const [institution, setInstitution] = useState("");
   const [major, setMajor] = useState("");
@@ -94,6 +95,9 @@ export default function SetupProfilePage() {
         const user = JSON.parse(userStr);
         if (user.username) {
           setName(user.username);
+        }
+        if (user.email) {
+          setEmail(user.email);
         }
       }
     } catch (err) {
@@ -179,8 +183,8 @@ export default function SetupProfilePage() {
   const validateStep = (step: number): boolean => {
     switch (step) {
       case 1:
-        if (!name.trim()) {
-          setError("Name is required");
+        if (!name.trim() || !email.trim()) {
+          setError("Name and email are required. Please log in again if missing.");
           return false;
         }
         return true;
@@ -261,6 +265,7 @@ export default function SetupProfilePage() {
       const profileData: any = {
         studentId,
         name,
+        email,
         about: bio,
         college: institution,
         course: major,
@@ -343,21 +348,41 @@ export default function SetupProfilePage() {
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
                 Basic Information
               </h2>
-              <p className="text-gray-600">Let's start with your name</p>
+              <p className="text-gray-600">Confirm your account details</p>
             </div>
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Full Name *
+                Full Name
               </label>
               <input
                 type="text"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900"
-                placeholder="Enter your full name"
-                required
+                readOnly
+                disabled
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
+                placeholder="Your name"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                This is your registered name and cannot be changed here
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Email Address
+              </label>
+              <input
+                type="email"
+                value={email}
+                readOnly
+                disabled
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
+                placeholder="Your email"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                This is your registered email and cannot be changed here
+              </p>
             </div>
           </div>
         );
