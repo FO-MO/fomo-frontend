@@ -68,13 +68,12 @@ export default function ProfilePage() {
       } catch (err) {
         console.error("Failed to get user email:", err);
       }
-
       // Transform profile data
       const data = {
-        name: profile.user.username || "User",
-        email: profile.user.email || userEmail,
-        initials: profile.user.username
-          ? profile.user.username
+        name: profile.name || "User",
+        email: profile.email || userEmail,
+        initials: profile.name
+          ? profile.name
               .split(" ")
               .map((n: any) => n[0])
               .join("")
@@ -87,8 +86,32 @@ export default function ProfilePage() {
         profileImageUrl: profile.profilePic?.url
           ? `${BACKEND_URL}${profile.profilePic.url}`
           : null,
-        followers: profile.followers || 0,
-        following: profile.following || 0,
+        followers: Array.isArray(profile.followers) 
+          ? profile.followers?.map((follower: any) => ({
+              id: follower.documentId,
+              name: follower.name,
+              avatarUrl: follower.profilePic?.url
+                ? `${BACKEND_URL}${follower.profilePic.url}`
+                : "/icons/Profile.svg",
+              institution: follower.college || "Not specified",
+              course: follower.course || "Not specified",
+              skills: follower.skills || [],
+              profileUrl: `/students/profile/${follower.studentId}`,
+            })) 
+          : [],
+        following: Array.isArray(profile.following)
+          ? profile.following?.map((following: any) => ({
+              id: following.documentId,
+              name: following.name,
+              avatarUrl: following.profilePic?.url
+                ? `${BACKEND_URL}${following.profilePic.url}`
+                : "/icons/Profile.svg",
+              institution: following.college || "Not specified",
+              course: following.course || "Not specified",
+              skills: following.skills || [],
+              profileUrl: `/students/profile/${following.studentId}`,
+            }))
+          : [],
         institution: profile.college || "Not specified",
         major: profile.course || "Not specified",
         graduationYear: profile.graduationYear || "Not specified",
@@ -300,17 +323,18 @@ export default function ProfilePage() {
               <p className="text-gray-600 text-base mb-3">
                 @{profileData.email.split("@")[0]}
               </p>
+              {/* Display follower/following counts */}
               <div className="flex flex-wrap gap-3">
                 <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200">
                   <span className="text-sm text-gray-600">Followers</span>
                   <span className="text-sm font-bold text-gray-900">
-                    {profileData.followers}
+                    {profileData.followers.length}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200">
                   <span className="text-sm text-gray-600">Following</span>
                   <span className="text-sm font-bold text-gray-900">
-                    {profileData.following}
+                    {profileData.following.length}
                   </span>
                 </div>
               </div>

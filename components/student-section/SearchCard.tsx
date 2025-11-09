@@ -9,8 +9,8 @@ export type Profile = {
   email: string;
   avatarUrl?: string | null;
   skills?: string[];
-  followersCount?: number;
-  followingCount?: number;
+  followers?: string[];
+  following?: string[];
   isFollowing?: boolean;
 };
 
@@ -84,13 +84,13 @@ export default function SearchCard({ profile, onFollowToggle }: Props) {
             <div className="flex items-center gap-4 mt-2">
               <div className="text-xs">
                 <span className="font-semibold text-gray-900">
-                  {profile.followersCount ?? 0}
+                  {profile.followers?.length ?? 0}
                 </span>
                 <span className="text-gray-600 ml-1">followers</span>
               </div>
               <div className="text-xs">
                 <span className="font-semibold text-gray-900">
-                  {profile.followingCount ?? 0}
+                  {profile.following?.length ?? 0}
                 </span>
                 <span className="text-gray-600 ml-1">following</span>
               </div>
