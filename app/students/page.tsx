@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 // Access environment variables from .env.local
 const STRAPI_URL =
-  process.env.NEXT_PUBLIC_STRAPI_URL ||
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
   process.env.NEXT_PUBLIC_BACKEND_URL ||
   "https://tbs9k5m4-1337.inc1.devtunnels.ms";
 

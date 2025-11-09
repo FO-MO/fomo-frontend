@@ -148,7 +148,7 @@ Edit `/app/auth/setup-profile/page.tsx` and modify the `renderStepContent()` fun
 
 - Check Strapi permissions for authenticated users
 - Check browser console for API errors
-- Verify `NEXT_PUBLIC_STRAPI_URL` is set correctly
+- Verify `NEXT_PUBLIC_BACKEND_URL` is set correctly
 
 ### Stuck in redirect loop
 
