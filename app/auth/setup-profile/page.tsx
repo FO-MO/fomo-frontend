@@ -184,7 +184,9 @@ export default function SetupProfilePage() {
     switch (step) {
       case 1:
         if (!name.trim() || !email.trim()) {
-          setError("Name and email are required. Please log in again if missing.");
+          setError(
+            "Name and email are required. Please log in again if missing."
+          );
           return false;
         }
         return true;
