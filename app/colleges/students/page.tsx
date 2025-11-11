@@ -132,7 +132,7 @@ export default function CollegeStudents() {
         </div>
 
         {/* TABS */}
-        <div className="flex bg-white border-1 border-black/5 rounded-full overflow-x-auto gap-2 mb-8 py-1 -mx-4 px-4 sm:mx-0 sm:px-2 scrollbar-hide">
+        {/* <div className="flex bg-white border-1 border-black/5 rounded-full overflow-x-auto gap-2 mb-8 py-1 -mx-4 px-4 sm:mx-0 sm:px-2 scrollbar-hide">
           {tabs.map((tab) => {
             const isActive = pathname === tab.href;
             return (
@@ -149,7 +149,7 @@ export default function CollegeStudents() {
               </Link>
             );
           })}
-        </div>
+        </div> */}
 
         {/* Student List */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
