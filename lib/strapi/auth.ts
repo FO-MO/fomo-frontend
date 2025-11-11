@@ -16,13 +16,15 @@ export async function strapiLogin(
 export async function strapiRegister(
   username: string,
   email: string,
-  password: string
+  password: string,
+  usertype: string
 ): Promise<any> {
   const res = await fetch(`${STRAPI_URL}/api/auth/local/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, email, password }),
   });
+  // console.log("Register response:", res.json());
   return res.json();
 }
 

@@ -429,41 +429,6 @@ export default function SetupProfilePage() {
     }
   };
 
-  const uploadImage_ = async (
-    file: File,
-    token: string
-  ): Promise<number | null> => {
-    try {
-      const BACKEND_URL =
-        process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:1337";
-      const formData = new FormData();
-      formData.append("files", file);
-      console.log("Uploading file to Strapi:", formData.get("files"), formData);
-
-      const uploadResponse = await fetch(`${BACKEND_URL}/api/upload`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      if (!uploadResponse.ok) {
-        console.error("Failed to upload image:", await uploadResponse.text());
-        return null;
-      }
-
-      const uploadedFiles = await uploadResponse.json();
-      if (uploadedFiles && uploadedFiles.length > 0) {
-        return uploadedFiles[0].id;
-      }
-      return null;
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      return null;
-    }
-  };
-
   const validateStep = (step: number): boolean => {
     switch (step) {
       case 1:

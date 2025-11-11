@@ -111,7 +111,13 @@ export default function Signup() {
 
     setLoading(true);
     try {
-      const result = await strapiRegister(name || email, email, password);
+      const result = await strapiRegister(
+        name || email,
+        email,
+        password,
+        "student"
+      );
+      console.log("Register response:", result);
       if (result?.error) {
         setError(result.error.message || "Registration failed");
         console.error("Sign up error:", result);
