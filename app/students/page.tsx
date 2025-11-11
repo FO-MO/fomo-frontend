@@ -89,8 +89,8 @@ export default function StudentsHomePage() {
               : null;
 
           // Get images - handle both array and single image
-          let images: string[] = post.media
-            ? post.media.map((img: any) => `${STRAPI_URL}${img.url}`)
+          let images: string[] = post.images
+            ? post.images.map((img: any) => `${STRAPI_URL}${img.url}`)
             : [];
 
           console.log("post media is", images);
@@ -235,52 +235,6 @@ export default function StudentsHomePage() {
           {/* Right Sidebar */}
           <div className="lg:col-span-1 flex flex-col gap-4">
             {/* Trending Section */}
-
-            {/* Suggested Connections */}
-            <div className="bg-white border border-gray-300 rounded-lg shadow-sm p-4">
-              <h3 className="text-lg font-semibold text-black mb-3">
-                Suggested People
-              </h3>
-              <div className="flex flex-col gap-2">
-                {[
-                  { name: "Alex Johnson", role: "Product Manager" },
-                  { name: "Sarah Chen", role: "UX Designer" },
-                  { name: "Mike Patel", role: "Full Stack Dev" },
-                ].map((person, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 transition"
-                  >
-                    <div>
-                      <p className="font-medium text-black text-sm">
-                        {person.name}
-                      </p>
-                      <p className="text-xs text-gray-600">{person.role}</p>
-                    </div>
-                    <button className="px-3 py-1 text-xs font-medium rounded-md bg-black text-white hover:bg-gray-800 transition">
-                      Follow
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Quick Stats */}
-            <div className="bg-white border border-gray-300 rounded-lg shadow-sm p-4">
-              <h3 className="text-lg font-semibold text-black mb-3">
-                Your Activity
-              </h3>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="bg-gray-100 rounded-md p-3 text-center">
-                  <p className="text-xl font-semibold text-black">24</p>
-                  <p className="text-xs text-gray-600">Connections</p>
-                </div>
-                <div className="bg-gray-100 rounded-md p-3 text-center">
-                  <p className="text-xl font-semibold text-black">8</p>
-                  <p className="text-xs text-gray-600">Posts</p>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </section>

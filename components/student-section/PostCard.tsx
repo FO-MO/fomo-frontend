@@ -466,10 +466,10 @@ export default function PostCard({ post, user }: Props) {
             <Share2 className="w-5 h-5" />
             <span className="text-sm font-semibold hidden sm:block">Share</span>
           </button>
-          <button className="flex items-center justify-center gap-2 py-3 px-4 rounded-md hover:bg-gray-100 transition-colors flex-1 text-gray-600">
+          {/* <button className="flex items-center justify-center gap-2 py-3 px-4 rounded-md hover:bg-gray-100 transition-colors flex-1 text-gray-600">
             <Send className="w-5 h-5" />
             <span className="text-sm font-semibold hidden sm:block">Send</span>
-          </button>
+          </button> */}
         </div>
       </div>
 

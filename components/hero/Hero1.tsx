@@ -128,17 +128,12 @@ export default function Hero1() {
 
         <div className="mt-10 max-w-3xl mx-auto px-4">
           <div
-            className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center bg-white rounded-xl p-3 sm:p-2 shadow-md"
+            className="flex justify-center"
             ref={entrydiv}
             style={{ opacity: 0 }}
           >
-            <input
-              aria-label="Email"
-              className="flex-1 bg-white rounded-lg px-4 py-3 text-gray-700 placeholder-gray-400 outline-none text-sm sm:text-base"
-              placeholder="Type school or personal email here"
-            />
-            <Link href="/auth/signup" className="w-full sm:w-auto">
-              <button className="w-full sm:w-auto bg-[#d6ff3a] cursor-pointer text-[#082926] font-extrabold px-6 py-3 rounded-lg shadow-[0_4px_0_rgba(0,0,0,0.3)] transform transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_8px_0_rgba(0,0,0,0.3)] whitespace-nowrap">
+            <Link href="/auth/signup" className="w-full sm:w-auto max-w-xs">
+              <button className="w-full sm:w-auto bg-[#d6ff3a] cursor-pointer text-[#082926] font-extrabold px-8 py-4 rounded-lg shadow-[0_4px_0_rgba(0,0,0,0.3)] transform transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_8px_0_rgba(0,0,0,0.3)] whitespace-nowrap text-lg">
                 Sign up
               </button>
             </Link>

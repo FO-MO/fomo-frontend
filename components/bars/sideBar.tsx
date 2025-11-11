@@ -57,7 +57,7 @@ const items: Item[] = [
   },
   {
     key: "copilot",
-    label: "Ask FOMO AI ",
+    label: "Ask FOOMO AI ",
     href: "/students/ai",
     icon: "/icons/ai.svg",
   },
@@ -160,9 +160,9 @@ export default function SideBar({ className = "" }: Omit<Props, "active">) {
         </div>
       </aside>
 
-      {/* Bottom Navigation - Always visible */}
+      {/* Bottom Navigation - Mobile only */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-[51] bg-[#192534] border-t border-gray-700 px-2 py-1"
+        className="sm:hidden fixed bottom-0 left-0 right-0 z-[51] bg-[#192534] border-t border-gray-700 px-2 py-1"
         style={{
           paddingBottom: "max(0.25rem, env(safe-area-inset-bottom))",
           minHeight: "4rem", // Ensure consistent height
@@ -251,9 +251,9 @@ export default function SideBar({ className = "" }: Omit<Props, "active">) {
           </button>
         </div>
 
-        {/* Overflow Menu */}
+        {/* Overflow Menu - Mobile only */}
         {showMobileMenu && (
-          <div className="absolute bottom-full left-0 right-0 bg-[#192534] border-t border-gray-700 py-2 z-[52]">
+          <div className="sm:hidden absolute bottom-full left-0 right-0 bg-[#192534] border-t border-gray-700 py-2 z-[52]">
             <div className="flex flex-wrap justify-center gap-2 px-4 max-w-md mx-auto">
               {items.slice(4).map((it) => {
                 const isActive = it.key === current;
@@ -310,10 +310,10 @@ export default function SideBar({ className = "" }: Omit<Props, "active">) {
         )}
       </nav>
 
-      {/* Menu Backdrop - Always available when menu is open */}
+      {/* Menu Backdrop - Mobile only when menu is open */}
       {showMobileMenu && (
         <div
-          className="fixed inset-0 bg-black/20 z-[50]"
+          className="sm:hidden fixed inset-0 bg-black/20 z-[50]"
           onClick={() => setShowMobileMenu(false)}
         />
       )}
