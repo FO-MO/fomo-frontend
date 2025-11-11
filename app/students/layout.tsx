@@ -1,20 +1,9 @@
 "use client";
 
-import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import SideBar from "@/components/bars/sideBar";
 import Navbar from "@/components/bars/Navbar";
 import { useProfileCheck } from "@/lib/useProfileCheck";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export default function RootLayout({
   children,
@@ -53,15 +42,14 @@ export default function RootLayout({
 
   return (
     <div className="flex">
-      {/* Sidebar fixed on left */}
-      <div className="hidden md:block">
-        <SideBar />
-      </div>
+      {/* Sidebar - Desktop only, Mobile uses bottom nav */}
+      <SideBar />
       <Navbar />
 
-      {/* Main content area. Add left margin equal to sidebar width on md+ and top padding for the fixed TopBar */}
-      <main className="md:ml-56 w-full">
-        <div className="pt-20">{children}</div>
+      {/* Main content area with responsive padding */}
+      <main className="sm:ml-56 w-full min-h-screen">
+        {/* Top padding for navbar, generous bottom padding for bottom navigation */}
+        <div className="pt-20 pb-32">{children}</div>
       </main>
     </div>
   );

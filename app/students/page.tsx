@@ -26,7 +26,7 @@ export type HomePageData = {
 export default function StudentsHomePage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [nameVal, setNameVal] = useState("");
-//fetching posts
+  //fetching posts
   useEffect(() => {
     // Compute initials from current user's name stored in localStorage
     try {
@@ -150,8 +150,7 @@ export default function StudentsHomePage() {
           }
 
           return {
-            id:
-              post.documentId.toString(),
+            id: post.documentId.toString(),
             author: {
               name: userName,
               initials: userInitials,
@@ -167,7 +166,7 @@ export default function StudentsHomePage() {
               shares: post.shares || post.sharesCount || 0,
             },
             isLiked: post.isLiked || false,
-            likedBy:post.likedBy,
+            likedBy: post.likedBy,
           };
         });
 
@@ -219,11 +218,13 @@ export default function StudentsHomePage() {
             </section>
 
             {/* Feed Section */}
-            <section className="flex flex-col gap-4">
+            <section className="flex flex-col gap-4 mb-8">
               <h2 className="text-xl font-semibold text-black">Posts</h2>
               <div className="flex flex-col gap-4">
                 {posts.length > 0 ? (
-                  posts.map((post) => <PostCard key={post.id} post={post} user={nameVal} />)
+                  posts.map((post) => (
+                    <PostCard key={post.id} post={post} user={nameVal} />
+                  ))
                 ) : (
                   <p className="text-gray-500">No posts yet</p>
                 )}
@@ -234,7 +235,6 @@ export default function StudentsHomePage() {
           {/* Right Sidebar */}
           <div className="lg:col-span-1 flex flex-col gap-4">
             {/* Trending Section */}
-            
 
             {/* Suggested Connections */}
             <div className="bg-white border border-gray-300 rounded-lg shadow-sm p-4">

@@ -84,8 +84,8 @@ export default function SearchPage() {
   };
 
   return (
-    <main className="w-full px-6 sm:px-8 pt-10 pb-16">
-      <div className="max-w-6xl mx-auto">
+    <div className="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-20 bg-white min-h-screen">
+      <section className="max-w-6xl mx-auto">
         <div className="flex items-start justify-between gap-6">
           <div>
             <h1 className="text-3xl font-extrabold">Find People</h1>
@@ -118,12 +118,17 @@ export default function SearchPage() {
           </div>
 
           {/* Filter Buttons */}
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-medium text-gray-700">Filter:</span>
-            <div className="flex gap-2">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <span className="text-xs sm:text-sm font-medium text-gray-700 hidden sm:inline">
+              Filter:
+            </span>
+            <span className="text-xs font-medium text-gray-700 sm:hidden">
+              Filters
+            </span>
+            <div className="flex gap-1 sm:gap-2 flex-wrap">
               <button
                 onClick={() => setFollowingFilter("all")}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                   followingFilter === "all"
                     ? "bg-teal-600 text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -133,7 +138,7 @@ export default function SearchPage() {
               </button>
               <button
                 onClick={() => setFollowingFilter("following")}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                   followingFilter === "following"
                     ? "bg-teal-600 text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -144,14 +149,13 @@ export default function SearchPage() {
               </button>
               <button
                 onClick={() => setFollowingFilter("not-following")}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                   followingFilter === "not-following"
                     ? "bg-teal-600 text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
-                Not Following (
-                {profiles.filter((p: Profile) => !p.isFollowing).length})
+                New ({profiles.filter((p: Profile) => !p.isFollowing).length})
               </button>
             </div>
           </div>
@@ -210,7 +214,7 @@ export default function SearchPage() {
             </div>
           )}
         </div>
-      </div>
-    </main>
+      </section>
+    </div>
   );
 }
