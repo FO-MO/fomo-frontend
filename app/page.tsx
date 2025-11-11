@@ -7,19 +7,40 @@ import Hero3 from "@/components/hero/Hero3";
 import Hero4 from "@/components/hero/Hero4";
 import Hero5 from "@/components/hero/Hero5";
 import Footer from "@/components/bars/footer";
+import { useEffect, useState } from "react";
 
-const rawUser = localStorage.getItem("fomo_user");
-const parsedUser = {
-  ...JSON.parse(rawUser || "null"),
-  loggedIn: true,
-  userType: "student",
-};
-console.log("User from localStorage:", parsedUser);
+// Safely access localStorage only in the browser
+function useParsedUser() {
+  const [parsedUser, setParsedUser] = useState<any | null>(null);
+
+  useEffect(() => {
+    try {
+      const rawUser =
+        typeof window !== "undefined"
+          ? window.localStorage.getItem("fomo_user")
+          : null;
+      if (rawUser) {
+        const userObj = JSON.parse(rawUser);
+        setParsedUser({
+          ...userObj,
+          loggedIn: true,
+          userType: "student",
+        });
+        console.log("User from localStorage:", userObj);
+      }
+    } catch (e) {
+      console.warn("Failed to read user from localStorage", e);
+    }
+  }, []);
+
+  return parsedUser;
+}
 
 export default function Home() {
+  const parsedUser = useParsedUser();
   return (
     <>
-      <TopBar theme="home" user={rawUser ? parsedUser : null} />
+      <TopBar theme="home" user={parsedUser} />
       <Hero1 />
       <Hero2 />
       <Hero3 />
