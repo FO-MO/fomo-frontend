@@ -14,12 +14,30 @@ import {
 } from "lucide-react";
 import { fetchFromBackend } from "@/lib/tools";
 
+interface ApplicationStat {
+  data: {
+    label: string;
+    value: string | number;
+    color: string;
+  };
+}
+
 const res = await fetchFromBackend("employerapplications?populate=*");
 
 export default function ApplicationsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
   const [collegeFilter, setCollegeFilter] = useState("All Colleges");
+  const [skillFilter, setSkillFilter] = useState("All Skills");
+  const [cgpaFilter, setCgpaFilter] = useState("");
+
+  // Reset CGPA filter when college filter changes to "All Colleges"
+  const handleCollegeFilterChange = (value: string) => {
+    setCollegeFilter(value);
+    if (value === "All Colleges") {
+      setCgpaFilter("");
+    }
+  };
   const icons = [
     <User2 key={1} className="h-5 w-5 text-gray-700" />, // Total
     <Clock key={2} className="h-5 w-5 text-yellow-500" />, // Pending
@@ -54,7 +72,7 @@ export default function ApplicationsPage() {
         <div className="flex flex-col p-6 space-y-6">
           {/* Stats Section */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4">
-            {res.map((item, idx) => {
+            {res.map((item: ApplicationStat, idx: number) => {
               const y = item.data;
               return (
                 <div
@@ -74,7 +92,7 @@ export default function ApplicationsPage() {
           </div>
 
           {/* Search + Filters */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
+          <div className="flex flex-col gap-4 bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
             {/* Search */}
             <div className="flex items-center w-full sm:w-1/2 border border-gray-200 rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-blue-100">
               <Search className="h-4 w-4 text-gray-400" />
@@ -88,11 +106,11 @@ export default function ApplicationsPage() {
             </div>
 
             {/* Filters */}
-            <div className="flex gap-3 w-full sm:w-auto">
+            <div className="flex flex-wrap gap-3 w-full">
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 bg-white focus:ring-2 focus:ring-blue-100"
+                className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 bg-white focus:ring-2 focus:ring-blue-100 min-w-[120px]"
               >
                 <option>All Status</option>
                 <option>Pending</option>
@@ -104,8 +122,8 @@ export default function ApplicationsPage() {
 
               <select
                 value={collegeFilter}
-                onChange={(e) => setCollegeFilter(e.target.value)}
-                className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 bg-white focus:ring-2 focus:ring-blue-100"
+                onChange={(e) => handleCollegeFilterChange(e.target.value)}
+                className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 bg-white focus:ring-2 focus:ring-blue-100 min-w-[130px]"
               >
                 <option>All Colleges</option>
                 <option>IIT Delhi</option>
@@ -114,6 +132,60 @@ export default function ApplicationsPage() {
                 <option>VIT Vellore</option>
                 <option>SRM University</option>
               </select>
+
+              <select
+                value={skillFilter}
+                onChange={(e) => setSkillFilter(e.target.value)}
+                className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 bg-white focus:ring-2 focus:ring-blue-100 min-w-[120px]"
+              >
+                <option>All Skills</option>
+                <option>React</option>
+                <option>Node.js</option>
+                <option>Python</option>
+                <option>Java</option>
+                <option>JavaScript</option>
+                <option>TypeScript</option>
+                <option>Angular</option>
+                <option>Vue.js</option>
+                <option>Machine Learning</option>
+                <option>Data Science</option>
+                <option>DevOps</option>
+                <option>UI/UX Design</option>
+                <option>Mobile Development</option>
+                <option>Backend Development</option>
+                <option>Frontend Development</option>
+                <option>Full Stack Development</option>
+              </select>
+
+              <div className="relative">
+                <select
+                  value={cgpaFilter}
+                  onChange={(e) => setCgpaFilter(e.target.value)}
+                  disabled={collegeFilter === "All Colleges"}
+                  className={`border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-100 min-w-[120px] ${
+                    collegeFilter === "All Colleges"
+                      ? "text-gray-400 bg-gray-50 cursor-not-allowed opacity-60"
+                      : "text-gray-700"
+                  }`}
+                  title={
+                    collegeFilter === "All Colleges"
+                      ? "Select a specific college to filter by CGPA"
+                      : "Filter applications by CGPA range"
+                  }
+                >
+                  <option value="" disabled>
+                    Select CGPA Range
+                  </option>
+                  <option>9.0 - 10.0</option>
+                  <option>8.5 - 8.9</option>
+                  <option>8.0 - 8.4</option>
+                  <option>7.5 - 7.9</option>
+                  <option>7.0 - 7.4</option>
+                  <option>6.5 - 6.9</option>
+                  <option>6.0 - 6.4</option>
+                  <option>Below 6.0</option>
+                </select>
+              </div>
             </div>
           </div>
 

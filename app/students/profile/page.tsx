@@ -86,7 +86,7 @@ export default function ProfilePage() {
         profileImageUrl: profile.profilePic?.url
           ? `${BACKEND_URL}${profile.profilePic.url}`
           : null,
-        followers: Array.isArray(profile.followers) 
+        followers: Array.isArray(profile.followers)
           ? profile.followers?.map((follower: any) => ({
               id: follower.documentId,
               name: follower.name,
@@ -97,7 +97,7 @@ export default function ProfilePage() {
               course: follower.course || "Not specified",
               skills: follower.skills || [],
               profileUrl: `/students/profile/${follower.studentId}`,
-            })) 
+            }))
           : [],
         following: Array.isArray(profile.following)
           ? profile.following?.map((following: any) => ({
@@ -272,27 +272,27 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 to-white">
-      {/* Cover Image */}
-      <div className="w-full h-48 relative overflow-hidden">
-        {profileData.backgroundImageUrl ? (
-          <>
-            <img
-              src={profileData.backgroundImageUrl}
-              alt="Cover"
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-black/20"></div>
-          </>
-        ) : (
-          <>
-            <div className="w-full h-full bg-gradient-to-r from-teal-600 via-teal-700 to-teal-800"></div>
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE0YzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00em0wIDQwYzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00ek0xMiAxNGMwLTIuMjEgMS43OS00IDQtNHM0IDEuNzkgNCA0LTEuNzkgNC00IDQtNC0xLjc5LTQtNHptMCA0MGMwLTIuMjEgMS43OS00IDQtNHM0IDEuNzkgNCA0LTEuNzkgNC00IDQtNC0xLjc5LTQtNHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30"></div>
-          </>
-        )}
-      </div>
+    <div className="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-20 bg-white min-h-screen">
+      <section className="max-w-6xl mx-auto">
+        {/* Cover Image */}
+        <div className="w-full h-48 relative overflow-hidden rounded-lg mb-6">
+          {profileData.backgroundImageUrl ? (
+            <>
+              <img
+                src={profileData.backgroundImageUrl}
+                alt="Cover"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/20"></div>
+            </>
+          ) : (
+            <>
+              <div className="w-full h-full bg-gradient-to-r from-teal-600 via-teal-700 to-teal-800"></div>
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE0YzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00em0wIDQwYzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00ek0xMiAxNGMwLTIuMjEgMS43OS00IDQtNHM0IDEuNzkgNCA0LTEuNzkgNC00IDQtNC0xLjc5LTQtNHptMCA0MGMwLTIuMjEgMS43OS00IDQtNHM0IDEuNzkgNCA0LTEuNzkgNC00IDQtNC0xLjc5LTQtNHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30"></div>
+            </>
+          )}
+        </div>
 
-      <div className="max-w-6xl mx-auto px-6 sm:px-8">
         {/* Profile Header */}
         <div className="relative mb-8">
           {/* Avatar - positioned to overlap cover image */}
@@ -522,28 +522,28 @@ export default function ProfilePage() {
         </div>
 
         {/* Content */}
-        <div className="pb-16">{renderTabContent()}</div>
-      </div>
+        <div className="pb-8">{renderTabContent()}</div>
 
-      {/* Edit Profile Modal */}
-      {profileData && (
-        <EditProfileModal
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          currentData={{
-            name: profileData.name,
-            email: profileData.email,
-            institution: profileData.institution,
-            major: profileData.major,
-            graduationYear: profileData.graduationYear,
-            location: profileData.location,
-            bio: profileData.bio,
-            skills: profileData.skills,
-            interests: profileData.interests,
-          }}
-          onSave={handleSaveProfile}
-        />
-      )}
+        {/* Edit Profile Modal */}
+        {profileData && (
+          <EditProfileModal
+            isOpen={isEditModalOpen}
+            onClose={() => setIsEditModalOpen(false)}
+            currentData={{
+              name: profileData.name,
+              email: profileData.email,
+              institution: profileData.institution,
+              major: profileData.major,
+              graduationYear: profileData.graduationYear,
+              location: profileData.location,
+              bio: profileData.bio,
+              skills: profileData.skills,
+              interests: profileData.interests,
+            }}
+            onSave={handleSaveProfile}
+          />
+        )}
+      </section>
     </div>
   );
 }

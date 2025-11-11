@@ -218,7 +218,7 @@ export default function StudentsHomePage() {
             </section>
 
             {/* Feed Section */}
-            <section className="flex flex-col gap-4">
+            <section className="flex flex-col gap-4 mb-8">
               <h2 className="text-xl font-semibold text-black">Posts</h2>
               <div className="flex flex-col gap-4">
                 {posts.length > 0 ? (

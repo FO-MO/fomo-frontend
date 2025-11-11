@@ -11,15 +11,20 @@ import {
 
 // Helper functions (moved outside component for consistency)
 const getInitials = (name) => {
-  return name ? name.split(/\s+/).map((n) => n[0]).join('') : '??';
+  return name
+    ? name
+        .split(/\s+/)
+        .map((n) => n[0])
+        .join("")
+    : "??";
 };
 
 const formatDate = (dateString) => {
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   });
 };
 
@@ -27,8 +32,8 @@ const formatDate = (dateString) => {
 
 // Environment variable handling
 const STRAPI_URL =
-  (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_STRAPI_URL) ||
-  (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_BACKEND_URL) ||
+  (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_STRAPI_URL) ||
+  (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_BACKEND_URL) ||
   "https://tbs9k5m4-1337.inc1.devtunnels.ms";
 
 type PostAuthor = {
@@ -77,22 +82,22 @@ const mapStrapiComment = (strapiComment) => {
   if (!strapiComment || !strapiComment.attributes) return null;
 
   const { id, attributes } = strapiComment;
-  
+
   // *** FIX APPLIED HERE: Making access to commenterData more explicit ***
   // Access the relation field named 'user'
   const userRelation = attributes.user;
-  
+
   // Check if the relation has a populated data object
   const commenterData = userRelation?.data?.attributes;
 
   // Use username or email for the name, as the default Strapi User usually doesn't have a 'name' field
-  const username = commenterData?.username || commenterData?.email || 'User';
-  
+  const username = commenterData?.username || commenterData?.email || "User";
+
   // Derive initials from username
   const initials = getInitials(username);
-  
+
   // Assuming no profile picture is available directly on the default User for now
-  const avatarUrl = undefined; 
+  const avatarUrl = undefined;
 
   return {
     id: id,
@@ -102,13 +107,13 @@ const mapStrapiComment = (strapiComment) => {
       name: username,
       initials: initials,
       avatarUrl: avatarUrl ? `${STRAPI_URL}${avatarUrl}` : undefined,
-    }
+    },
   };
 };
 
 // --- SUB COMPONENTS ---
 
-const UserAvatar = ({ user }) => (
+const UserAvatar = ({ user }) =>
   user.avatarUrl ? (
     <img
       src={user.avatarUrl}
@@ -119,18 +124,19 @@ const UserAvatar = ({ user }) => (
     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-sm font-bold text-white shadow-md flex-shrink-0">
       {user.initials.toUpperCase()}
     </div>
-  )
-);
+  );
 
 // --- MAIN COMPONENT ---
 
 export default function PostCard({ post, user }: Props) {
   // Get userId and token from localStorage (Changed from studentId to userId)
   let userId: string | number | null = null;
-  const token = typeof window !== 'undefined' ? localStorage.getItem("fomo_token") : null;
-  
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("fomo_token") : null;
+
   try {
-    const userStr = typeof window !== 'undefined' ? localStorage.getItem("fomo_user") : null;
+    const userStr =
+      typeof window !== "undefined" ? localStorage.getItem("fomo_user") : null;
     if (userStr) {
       const parsedUser = JSON.parse(userStr);
       // PULLING DEFAULT STRAPI USER ID: This assumes the user ID is stored in parsedUser.id
@@ -177,7 +183,7 @@ export default function PostCard({ post, user }: Props) {
     setIsLiked(newIsLiked);
     setLikeCount(newLikeCount);
     setLikedUsers(newLikedUsers);
-    
+
     // API Call Body
     const body = {
       data: {
@@ -219,9 +225,9 @@ export default function PostCard({ post, user }: Props) {
     setIsCommentsExpanded((prev) => !prev);
     // If we're collapsing or already loading, stop here
     if (isCommentsExpanded || isLoadingComments) return;
-    
+
     setIsLoadingComments(true);
-    
+
     // Using populate=user to fetch the default Strapi User details
     const apiUrl = `${STRAPI_URL}/api/comments?filters[blog][id][$eq]=ri0u7lqjvsoheov2qq83rn2z&populate=user&sort=sentAt:desc&pagination[limit]=10`;
 
@@ -231,24 +237,26 @@ export default function PostCard({ post, user }: Props) {
           Authorization: `Bearer ${token}`,
         },
       });
-      
+
       if (!res.ok) {
         // Log the exact status and error message for debugging
         const errorData = await res.json();
-        console.error(`Failed to fetch comments. Status: ${res.status}. Error:`, errorData);
+        console.error(
+          `Failed to fetch comments. Status: ${res.status}. Error:`,
+          errorData
+        );
         // Throwing the error here will catch it below and stop execution
         throw new Error(`Failed to fetch comments (Status: ${res.status})`);
       }
-      
+
       const json = await res.json();
-      
+
       // Map the nested Strapi data to a flatter structure for the UI
       const mappedComments = json.data
         .map(mapStrapiComment)
-        .filter((c) => c !== null); 
-        
-      setPostComments(mappedComments);
+        .filter((c) => c !== null);
 
+      setPostComments(mappedComments);
     } catch (err) {
       console.error("Network or API Error fetching comments", err);
     } finally {
@@ -259,17 +267,26 @@ export default function PostCard({ post, user }: Props) {
   // --- COMMENT POST HANDLER ---
   const handleComment = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     // Validate comment text and User ID existence/type
-    if (!commentText || !userId || (typeof userId !== 'number' && typeof userId !== 'string')) {
-      console.error("Comment post failed: Comment text or valid User ID missing.", { commentText, userId });
+    if (
+      !commentText ||
+      !userId ||
+      (typeof userId !== "number" && typeof userId !== "string")
+    ) {
+      console.error(
+        "Comment post failed: Comment text or valid User ID missing.",
+        { commentText, userId }
+      );
       return;
     }
-    
+
     setIsPostingComment(true);
-    
+
     // IMPORTANT: Log the ID being sent to confirm the value
-    console.log(`Attempting to post comment for Post ID: ${id} using User ID: ${userId}`);
+    console.log(
+      `Attempting to post comment for Post ID: ${id} using User ID: ${userId}`
+    );
 
     try {
       const res = await fetch(`${STRAPI_URL}/api/comments`, {
@@ -280,8 +297,8 @@ export default function PostCard({ post, user }: Props) {
         },
         body: JSON.stringify({
           data: {
-            blog: id,         // Post ID
-            user: userId,     // Sending the default Strapi User ID to the 'user' field
+            blog: id, // Post ID
+            user: userId, // Sending the default Strapi User ID to the 'user' field
             content: commentText,
             sentAt: new Date().toISOString(),
           },
@@ -294,16 +311,15 @@ export default function PostCard({ post, user }: Props) {
         console.error("Failed to post comment:", data.error || data);
         return;
       }
-      
+
       // Success: Clear input and refetch comments for the most accurate list
       setCommentText("");
       // Optimistically increment the local comment count
-      setCommentCount(prev => prev + 1); 
+      setCommentCount((prev) => prev + 1);
 
       // Re-fetch comments to show the new one at the top
       setIsCommentsExpanded(true);
-      await showComments(); 
-
+      await showComments();
     } catch (err) {
       console.error("Error posting comment", err);
     } finally {
@@ -365,7 +381,7 @@ export default function PostCard({ post, user }: Props) {
 
       {/* Images (omitting image gallery logic for brevity, assumed correct) */}
       {images && images.length > 0 && (
-         <div className="mb-3">
+        <div className="mb-3">
           {images.length === 1 && (
             <div className="w-full">
               <img
@@ -394,9 +410,12 @@ export default function PostCard({ post, user }: Props) {
               </span>
               {/* Optional: Show Liked By list on hover/modal */}
               <span className="ml-2 text-gray-500">
-                {likedUsers.length > 0 && (
-                  `Liked by ${likedUsers.slice(0, 3).join(", ")}${likedUsers.length > 3 ? ` and ${likedUsers.length - 3} others` : ''}`
-                )}
+                {likedUsers.length > 0 &&
+                  `Liked by ${likedUsers.slice(0, 3).join(", ")}${
+                    likedUsers.length > 3
+                      ? ` and ${likedUsers.length - 3} others`
+                      : ""
+                  }`}
               </span>
             </>
           )}
@@ -404,9 +423,9 @@ export default function PostCard({ post, user }: Props) {
 
         <div className="flex items-center gap-3">
           {(commentCount > 0 || postComments.length > 0) && (
-            <span 
-                className="hover:text-teal-700 hover:underline cursor-pointer"
-                onClick={showComments}
+            <span
+              className="hover:text-teal-700 hover:underline cursor-pointer"
+              onClick={showComments}
             >
               {commentCount} {commentCount === 1 ? "comment" : "comments"}
             </span>
@@ -418,7 +437,7 @@ export default function PostCard({ post, user }: Props) {
           )}
         </div>
       </div>
-      
+
       {/* Action Buttons */}
       <div className="border-t border-gray-200 px-2 py-1">
         <div className="flex items-center justify-around">
@@ -429,37 +448,37 @@ export default function PostCard({ post, user }: Props) {
             }`}
           >
             <ThumbsUp className={`w-5 h-5 ${isLiked ? "fill-blue-600" : ""}`} />
-            <span className="text-sm font-semibold">Like</span>
+            <span className="text-sm font-semibold hidden sm:block">Like</span>
           </button>
 
-          <button 
-            className="flex items-center justify-center gap-2 py-3 px-4 rounded-md hover:bg-gray-100 transition-colors flex-1 text-gray-600" 
+          <button
+            className="flex items-center justify-center gap-2 py-3 px-4 rounded-md hover:bg-gray-100 transition-colors flex-1 text-gray-600"
             onClick={showComments}
           >
             <MessageCircle className="w-5 h-5" />
-            <span className="text-sm font-semibold">Comment</span>
+            <span className="text-sm font-semibold hidden sm:block">
+              Comment
+            </span>
           </button>
-          
+
           {/* Other action buttons */}
           <button className="flex items-center justify-center gap-2 py-3 px-4 rounded-md hover:bg-gray-100 transition-colors flex-1 text-gray-600">
             <Share2 className="w-5 h-5" />
-            <span className="text-sm font-semibold">Share</span>
+            <span className="text-sm font-semibold hidden sm:block">Share</span>
           </button>
           <button className="flex items-center justify-center gap-2 py-3 px-4 rounded-md hover:bg-gray-100 transition-colors flex-1 text-gray-600">
             <Send className="w-5 h-5" />
-            <span className="text-sm font-semibold">Send</span>
+            <span className="text-sm font-semibold hidden sm:block">Send</span>
           </button>
         </div>
       </div>
-      
+
       {/* Comments Section */}
       {isCommentsExpanded && (
         <div className="px-4 pt-3 pb-4 border-t border-gray-100">
-          
           {/* Comment Form */}
           <form onSubmit={handleComment} className="flex flex-col gap-2 mb-6">
             <div className="flex items-start gap-3 border rounded-3xl p-2 bg-gray-50 focus-within:ring-2 focus-within:ring-teal-300 transition-shadow">
-              
               {/* Current User Avatar (Placeholder, or actual user context needed) */}
               <div className="mt-1">
                 <div className="w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
@@ -470,22 +489,28 @@ export default function PostCard({ post, user }: Props) {
               <textarea
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
-                placeholder={userId ? "Write a comment..." : "Sign in to comment..."}
+                placeholder={
+                  userId ? "Write a comment..." : "Sign in to comment..."
+                }
                 rows={1}
                 disabled={!userId || isPostingComment}
                 className="flex-1 resize-none bg-transparent pt-1 pb-1 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none overflow-hidden"
               />
-              
+
               <button
                 type="submit"
                 disabled={!userId || !commentText || isPostingComment}
                 className={`flex-shrink-0 mt-1 p-1.5 rounded-full transition-colors ${
                   userId && commentText && !isPostingComment
-                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    ? "bg-blue-600 hover:bg-blue-700 text-white"
+                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
                 }`}
               >
-                {isPostingComment ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                {isPostingComment ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Send className="w-5 h-5" />
+                )}
               </button>
             </div>
           </form>
@@ -493,7 +518,8 @@ export default function PostCard({ post, user }: Props) {
           {/* Comment List */}
           {isLoadingComments ? (
             <div className="flex justify-center py-4 text-gray-500">
-              <Loader2 className="w-6 h-6 animate-spin mr-2" /> Loading comments...
+              <Loader2 className="w-6 h-6 animate-spin mr-2" /> Loading
+              comments...
             </div>
           ) : (
             <div className="space-y-4">
@@ -520,7 +546,9 @@ export default function PostCard({ post, user }: Props) {
                   </div>
                 ))
               ) : (
-                <p className="text-center text-gray-500 text-sm py-4">No comments yet. Be the first to reply!</p>
+                <p className="text-center text-gray-500 text-sm py-4">
+                  No comments yet. Be the first to reply!
+                </p>
               )}
             </div>
           )}

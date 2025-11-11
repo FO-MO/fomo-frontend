@@ -22,8 +22,8 @@ const mockClubs: Club[] = x.map((club: any) => {
 
 export default function ClubsPage() {
   return (
-    <main className="w-full px-6 sm:px-8 pt-8 pb-16">
-      <div className="max-w-6xl mx-auto">
+    <div className="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-20 bg-white min-h-screen">
+      <section className="max-w-6xl mx-auto">
         <div className="flex items-start justify-between gap-6">
           <div>
             <h1 className="text-3xl font-extrabold">Clubs</h1>
@@ -66,7 +66,7 @@ export default function ClubsPage() {
             <ClubCard key={c.id} club={c} />
           ))}
         </div>
-      </div>
-    </main>
+      </section>
+    </div>
   );
 }

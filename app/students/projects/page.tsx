@@ -55,56 +55,68 @@ export default function StudentsPage() {
   };
 
   return (
-    <main className="w-full px-6 sm:px-8 pt-8 pb-16">
-      <div className="flex items-start justify-between gap-6">
-        <div>
-          <h1 className="text-3xl font-extrabold">Projects</h1>
-          <p className="text-gray-600 mt-2">
-            Join or create projects to collaborate with other students
-          </p>
+    <div className="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-20 bg-white min-h-screen">
+      <section className="max-w-6xl mx-auto">
+        <div className="flex items-start justify-between gap-6">
+          <div>
+            <h1 className="text-3xl font-extrabold">Projects</h1>
+            <p className="text-gray-600 mt-2">
+              Join or create projects to collaborate with other students
+            </p>
+          </div>
+
+          <div className="ml-auto">
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="bg-[#0f4f4a] text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 hover:bg-[#0d3f3b] transition-colors"
+            >
+              <span className="text-2xl">+</span>
+              <span>Create Project</span>
+            </button>
+          </div>
         </div>
 
-        <div className="ml-auto">
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="bg-[#0f4f4a] text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 hover:bg-[#0d3f3b] transition-colors"
-          >
-            <span className="text-2xl">+</span>
-            <span>Create Project</span>
-          </button>
-        </div>
-      </div>
+        <div className="mt-6 space-y-4">
+          {/* Search input - full width on mobile */}
+          <div className="w-full">
+            <input
+              className="w-full border rounded-lg px-4 py-3 text-base"
+              placeholder="Search projects..."
+            />
+          </div>
 
-      <div className="mt-6 flex gap-4 items-center">
-        <div className="flex-1">
-          <input
-            className="w-full border rounded-lg px-4 py-3"
-            placeholder="Search projects..."
+          {/* Filters - stacked on mobile, side by side on larger screens */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <select className="border rounded-lg px-4 py-3 text-base flex-1 sm:flex-initial">
+              <option>Newest</option>
+              <option>Oldest</option>
+              <option>Most Popular</option>
+            </select>
+
+            <select className="border rounded-lg px-4 py-3 text-base flex-1 sm:flex-initial">
+              <option>All Projects</option>
+              <option>Web Development</option>
+              <option>Mobile Apps</option>
+              <option>AI/ML</option>
+              <option>Game Development</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {mockProjects.map((p) => (
+            <ProjectCard key={p.id} project={p} />
+          ))}
+        </div>
+
+        {/* Create Project Modal */}
+        {showCreateModal && (
+          <CreateProjectModal
+            onClose={() => setShowCreateModal(false)}
+            onCreateProject={handleCreateProject}
           />
-        </div>
-
-        <select className="border rounded-lg px-4 py-3">
-          <option>Newest</option>
-        </select>
-
-        <select className="border rounded-lg px-4 py-3">
-          <option>All Projects</option>
-        </select>
-      </div>
-
-      <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {mockProjects.map((p) => (
-          <ProjectCard key={p.id} project={p} />
-        ))}
-      </div>
-
-      {/* Create Project Modal */}
-      {showCreateModal && (
-        <CreateProjectModal
-          onClose={() => setShowCreateModal(false)}
-          onCreateProject={handleCreateProject}
-        />
-      )}
-    </main>
+        )}
+      </section>
+    </div>
   );
 }
