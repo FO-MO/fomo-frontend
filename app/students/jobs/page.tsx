@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { HiOutlineBuildingOffice2 } from "react-icons/hi2";
 import { FiMapPin, FiDollarSign, FiCalendar } from "react-icons/fi";
 import { fetchData } from "@/lib/strapi/strapiData";
+import JobDetailsModal from "@/components/student-section/JobDetailsModal";
 
 interface Job {
   id: number;
@@ -68,6 +69,25 @@ const employers = [
 
 export default function JobsPage() {
   const [tab, setTab] = useState<"jobs" | "employers">("jobs");
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleJobClick = (job: Job) => {
+    setSelectedJob(job);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedJob(null);
+  };
+
+  const handleApply = () => {
+    alert(
+      `Application submitted for ${selectedJob?.title} at ${selectedJob?.company}!`
+    );
+    handleCloseModal();
+  };
 
   return (
     <main className="w-full px-6 sm:px-8 pt-8 pb-16">
@@ -101,7 +121,8 @@ export default function JobsPage() {
           {mockJobs.map((job: Job) => (
             <div
               key={job.id}
-              className="bg-white rounded-2xl shadow-sm border border-[#e5e7eb] p-6 flex items-center justify-between hover:shadow-md transition-shadow"
+              className="bg-white rounded-2xl shadow-sm border border-[#e5e7eb] p-6 flex items-center justify-between hover:shadow-md transition-shadow cursor-pointer"
+              onClick={() => handleJobClick(job)}
             >
               <div className="flex items-center gap-5 flex-1">
                 <div className="bg-gray-100 rounded-full w-16 h-16 flex items-center justify-center flex-shrink-0">
@@ -138,8 +159,14 @@ export default function JobsPage() {
                   </div>
                 </div>
               </div>
-              <button className="bg-[#185c5a] hover:bg-[#134846] text-white px-7 py-3 rounded-xl font-semibold text-lg transition-colors flex-shrink-0 ml-4">
-                Apply Now
+              <button
+                className="bg-[#185c5a] hover:bg-[#134846] text-white px-7 py-3 rounded-xl font-semibold text-lg transition-colors flex-shrink-0 ml-4"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleJobClick(job);
+                }}
+              >
+                View Details
               </button>
             </div>
           ))}
@@ -190,6 +217,14 @@ export default function JobsPage() {
           ))}
         </div>
       )}
+
+      {/* Job Details Modal */}
+      <JobDetailsModal
+        job={selectedJob}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onApply={handleApply}
+      />
     </main>
   );
 }

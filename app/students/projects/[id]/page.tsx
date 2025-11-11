@@ -18,7 +18,7 @@ import {
 import Link from "next/link";
 import { fetchData } from "@/lib/strapi/strapiData";
 const BACKEND_URL =
-  process.env.NEXT_PUBLIC_STRAPI_URL ||
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
   "https://tbs9k5m4-1337.inc1.devtunnels.ms";
 const token = localStorage.getItem("fomo_token");
 const res = await fetch(`${BACKEND_URL}/api/project-details?populate=*`, {
@@ -111,7 +111,7 @@ export default function ProjectDetailsPage() {
 
   const func = async () => {
     const response = await fetchData(token, `projects/${projectId}?populate=*`);
-    console.log(response.data.image,projectId);
+    console.log(response.data, projectId);
     const project = response.data.project_detail; // single object
     const formattedProject: ProjectDetails = {
       id: project.documentId,
@@ -124,10 +124,16 @@ export default function ProjectDetailsPage() {
       imageUrl: `${BACKEND_URL}${
         response.data.image.url || project.image?.url || ""
       }`,
-      contributors: project.contributors || [],
+      contributors: (response.data.contributors || []).map(
+        (contributor: any) => ({
+          name: contributor.name,
+          avatarUrl: "/icons/Profile.svg",
+          profileUrl: `/profile?userId=${contributor.studentId}`,
+        })
+      ),
       stats: {
         stars: project.stars || 0,
-        members: project.contributors?.length+1 || 0,
+        members: project.contributors?.length + 1 || 0,
       },
       needHelp:
         project.needHelp?.map((item: any) => ({

@@ -15,8 +15,8 @@ export interface StudentProfile {
   location?: string;
   skills?: string[];
   interests?: string[];
-  followers?: number;
-  following?: number;
+  followers?: any[];
+  following?: any[];
   profilePic?: any;
   backgroundImg?: any;
   createdAt?: string;

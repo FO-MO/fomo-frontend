@@ -1,9 +1,9 @@
 "use client";
-// utils/fetchFromBackend.ts
+
 export async function fetchFromBackend(
   endpoint: string,
   {
-    backendUrl = process.env.NEXT_PUBLIC_STRAPI_URL ||
+    backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ||
       "https://tbs9k5m4-1337.inc1.devtunnels.ms",
     token = localStorage.getItem("fomo_token"),
     options = {},
@@ -36,6 +36,50 @@ export async function fetchFromBackend(
   }
 }
 
+// POST request function for Strapi backend
+export async function postFetchFromBackend(
+  endpoint: string,
+  payload: Record<string, unknown>,
+  {
+    backendUrl = process.env.NEXT_PUBLIC_STRAPI_URL ||
+      "https://tbs9k5m4-1337.inc1.devtunnels.ms",
+    token = localStorage.getItem("fomo_token"),
+  }: {
+    backendUrl?: string;
+    token?: string | null;
+  } = {}
+) {
+  try {
+    console.log(`🚀 POST to ${endpoint}:`, payload);
+
+    const res = await fetch(`${backendUrl}/api/${endpoint}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+    console.log(`📡 Response from ${endpoint}:`, data);
+
+    if (!res.ok) {
+      console.error(`❌ POST failed for ${endpoint}:`, data);
+      throw new Error(
+        data.error?.message ||
+          `Failed to POST to ${endpoint}: ${res.statusText}`
+      );
+    }
+
+    console.log(`✅ Successfully posted to ${endpoint}:`, data.data);
+    return data; // Return full response for POST requests
+  } catch (error) {
+    console.error(`💥 Error posting to ${endpoint}:`, error);
+    throw error;
+  }
+}
+
 export const backendurl =
-  process.env.NEXT_PUBLIC_STRAPI_URL ||
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
   "https://tbs9k5m4-1337.inc1.devtunnels.ms";

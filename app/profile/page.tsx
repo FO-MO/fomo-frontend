@@ -59,15 +59,6 @@ export default function ProfilePage() {
       // Load the profile for the given userId
       const profile = await getStudentProfile(userId, token);
       console.log("Loaded profile data:", profile);
-      //   const data_ = await fetch(
-      //     `${BACKEND_URL}/api/student-profiles?filters[studentId][$eq]=${encodeURIComponent(
-      //       userId
-      //     )}&populate=*`,
-      //     {
-      //       headers: { Authorization: `Bearer ${token}` },
-      //     }
-      //   );
-      //   console.log("Loaded profile data:", data_);
 
       if (!profile) {
         setProfileData(null);
@@ -109,8 +100,8 @@ export default function ProfilePage() {
         profileImageUrl: profile.profilePic?.url
           ? `${BACKEND_URL}${profile.profilePic.url}`
           : null,
-        followers: profile.followers || 0,
-        following: profile.following || 0,
+        followers: profile.followers?.length || 0,
+        following: profile.following?.length || 0,
         institution: profile.college || "Not specified",
         major: profile.course || "Not specified",
         graduationYear: profile.graduationYear || "Not specified",
@@ -135,7 +126,7 @@ export default function ProfilePage() {
           tags: club.tags || [],
           badge: club.badge || null,
         })),
-        internships: profile.internships,
+        internships: profile.internships || [],
       };
 
       setProfileData(data);

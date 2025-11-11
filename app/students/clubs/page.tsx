@@ -37,21 +37,6 @@ export default function ClubsPage() {
           </div>
         </div>
 
-        {/* Tabs Section */}
-        <div className="mt-8 mb-8">
-          <div className="inline-flex items-center gap-1 bg-gray-100 rounded-lg p-1">
-            <button className="bg-white text-gray-900 px-5 py-2 rounded-md text-sm font-medium shadow-sm">
-              Browse Clubs
-            </button>
-            <button
-              // onClick={() => router.push("/students/clubs")}
-              className="text-gray-600 hover:bg-white hover:shadow-sm px-5 py-2 rounded-md text-sm font-medium transition-all"
-            >
-              Club videos
-            </button>
-          </div>
-        </div>
-
         {/* search & filters */}
         <div className="mt-6 flex flex-col sm:flex-row gap-4">
           <div className="flex-1">

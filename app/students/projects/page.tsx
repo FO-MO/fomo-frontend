@@ -6,7 +6,7 @@ import CreateProjectModal from "@/components/student-section/CreateProjectModal"
 import { fetchData } from "@/lib/strapi/strapiData";
 
 const BACKEND_URL =
-  process.env.NEXT_PUBLIC_STRAPI_URL ||
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
   "https://tbs9k5m4-1337.inc1.devtunnels.ms";
 const token = localStorage.getItem("fomo_token");
 const data = await fetchData(token, "projects?populate=*");
@@ -21,7 +21,7 @@ const mockProjects: Project[] = data.data.map((project: any) => {
     skills: project.skills,
     membersCount: project.no_member,
     // joined: project.join,
-    imageUrl: `${BACKEND_URL}` + project.image.url,
+    imageUrl: project.image ? `${BACKEND_URL}${project.image.url}` : null,
     actions: [{ label: "Join Project", href: "#" }],
   };
 });

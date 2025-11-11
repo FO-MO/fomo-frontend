@@ -28,8 +28,8 @@ export default function SearchPage() {
           name: search.name,
           email: search.email || "No email",
           skills: search.skills || [],
-          followersCount: search.followers || 0,
-          followingCount: search.following || 0,
+          followers: search.followers || [],
+          following: search.following || [],
           isFollowing: false,
           avatarUrl: null,
         }));
@@ -56,7 +56,7 @@ export default function SearchPage() {
       filtered = filtered.filter(
         (profile: Profile) =>
           profile.name.toLowerCase().includes(query) ||
-          profile.email.toLowerCase().includes(query) ||
+          profile.email?.toLowerCase().includes(query) ||
           profile.skills?.some((skill: string) =>
             skill.toLowerCase().includes(query)
           )

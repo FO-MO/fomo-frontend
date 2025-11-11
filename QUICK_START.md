@@ -56,7 +56,7 @@
 Check `.env.local` has:
 
 ```env
-NEXT_PUBLIC_STRAPI_URL=https://tbs9k5m4-1337.inc1.devtunnels.ms
+NEXT_PUBLIC_BACKEND_URL=https://tbs9k5m4-1337.inc1.devtunnels.ms
 ```
 
 ### Step 4: Start the App (30 seconds)

@@ -26,9 +26,7 @@ type ClubDetails = {
   videos: Video[];
 };
 
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_STRAPI_URL ||
-  "https://tbs9k5m4-1337.inc1.devtunnels.ms";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function ClubVideosPage() {
   const params = useParams();
@@ -47,14 +45,12 @@ export default function ClubVideosPage() {
         const token = localStorage.getItem("fomo_token");
 
         // Fetch specific club by documentId (clubId from URL)
-        const response = await fetchData(token, `clubs/${clubId}?populate=*`);
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch club data");
-        }
-
-        const result = await response.json();
+        const result = await fetchData(token, `clubs/${clubId}?populate=*`);
         console.log("Fetched club data:", result);
+        console.log(
+          "Fetched club videos:",
+          `${BACKEND_URL}${result.data.videos[0]?.url}`
+        );
 
         // Transform the data to match our ClubDetails type
         const clubData = result.data;
@@ -69,7 +65,7 @@ export default function ClubVideosPage() {
               id: video.id?.toString() || index.toString(),
               title: video.name || video.title || "Video",
               thumbnailUrl: video.thumbnail
-                ? `${BACKEND_URL}${video.thumbnail.url}`
+                ? `${BACKEND_URL}${result.url}`
                 : undefined,
               author: {
                 name: clubData.author || "Unknown",
@@ -201,21 +197,6 @@ export default function ClubVideosPage() {
           <p className="text-gray-500 text-sm">
             Join expert-led clubs to access curated learning resources
           </p>
-        </div>
-
-        {/* Tabs Section */}
-        <div className="mb-8">
-          <div className="inline-flex items-center gap-1 bg-gray-100 rounded-lg p-1">
-            <button
-              onClick={() => router.push("/students/clubs")}
-              className="text-gray-600 hover:bg-white hover:shadow-sm px-5 py-2 rounded-md text-sm font-medium transition-all"
-            >
-              Browse Clubs
-            </button>
-            <button className="bg-white text-gray-900 px-5 py-2 rounded-md text-sm font-medium shadow-sm">
-              Python Videos
-            </button>
-          </div>
         </div>
 
         {/* Back Button and Club Name */}

@@ -197,7 +197,7 @@ In Strapi → Settings → Roles → Authenticated:
 Make sure `.env.local` has:
 
 ```
-NEXT_PUBLIC_STRAPI_URL=https://tbs9k5m4-1337.inc1.devtunnels.ms
+NEXT_PUBLIC_BACKEND_URL=https://tbs9k5m4-1337.inc1.devtunnels.ms
 ```
 
 ### Customize Skills/Interests

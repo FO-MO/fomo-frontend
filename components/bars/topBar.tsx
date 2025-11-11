@@ -88,77 +88,20 @@ export default function TopBar({
         <nav className="flex items-center gap-4" aria-label="Primary">
           {!authenticatedUser ? (
             <>
-              <div className="hidden items-center gap-7 sm:flex">
+              <div className="flex items-center gap-3">
                 <a
-                  className={`${navLinkBase} ${navLinkColor}`}
-                  href="/students"
+                  className="transform rounded-2xl bg-[#d6ff3a] px-4 py-2 font-extrabold text-[#082926] shadow-[0_6px_0_rgba(0,0,0,0.12)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_10px_0_rgba(0,0,0,0.12)]"
+                  href="/auth/login"
                 >
-                  For Students
+                  Login
                 </a>
                 <a
-                  className={`hidden md:inline-block ${navLinkBase} ${navLinkColor}`}
-                  href="/employers/overview"
+                  className="transform rounded-2xl bg-[#d6ff3a] px-4 py-2 font-extrabold text-[#082926] shadow-[0_6px_0_rgba(0,0,0,0.12)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_10px_0_rgba(0,0,0,0.12)]"
+                  href="/auth/signup"
                 >
-                  For Employers
-                </a>
-                <a
-                  className={`hidden lg:inline-block ${navLinkBase} ${navLinkColor}`}
-                  href="/colleges/dashboard"
-                >
-                  For Colleges
+                  Sign Up
                 </a>
               </div>
-
-              <a
-                className="transform rounded-2xl bg-[#d6ff3a] px-4 py-2 font-extrabold text-[#082926] shadow-[0_6px_0_rgba(0,0,0,0.12)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_10px_0_rgba(0,0,0,0.12)]"
-                href="/auth/login"
-              >
-                Login
-              </a>
-
-              <button
-                className={`ml-2 inline-flex items-center justify-center rounded-md p-2 transition-colors duration-200 sm:hidden ${
-                  theme === "black"
-                    ? "text-black hover:bg-black/5"
-                    : "text-white/90 hover:bg-white/10"
-                }`}
-                aria-label="Toggle menu"
-                aria-expanded={open}
-                aria-controls="mobile-menu"
-                onClick={() => setOpen((v) => !v)}
-              >
-                {open ? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 6h16M4 12h16M4 18h16"
-                    />
-                  </svg>
-                )}
-              </button>
             </>
           ) : (
             <div className="flex items-center gap-4">
@@ -180,50 +123,6 @@ export default function TopBar({
           )}
         </nav>
       </div>
-
-      {!isAuthenticated && (
-        <div
-          id="mobile-menu"
-          className={`sm:hidden overflow-hidden transition-max-h duration-300 ease-in-out ${
-            open ? "max-h-60" : "max-h-0"
-          }`}
-        >
-          <div className="border-t border-white/5 bg-[#0f4f4a]/95 px-6 py-4 backdrop-blur-md">
-            <div className="flex flex-col gap-3">
-              <a
-                className={`py-2 font-semibold transition-all duration-200 ${
-                  theme === "black"
-                    ? "text-black hover:text-[#0f4f4a] hover:translate-x-1"
-                    : "text-white/95 hover:text-[#d6ff3a] hover:translate-x-1"
-                }`}
-                href="#"
-              >
-                For Students
-              </a>
-              <a
-                className={`py-2 font-semibold transition-all duration-200 ${
-                  theme === "black"
-                    ? "text-black hover:text-[#0f4f4a] hover:translate-x-1"
-                    : "text-white/95 hover:text-[#d6ff3a] hover:translate-x-1"
-                }`}
-                href="#"
-              >
-                For Employers
-              </a>
-              <a
-                className={`py-2 font-semibold transition-all duration-200 ${
-                  theme === "black"
-                    ? "text-black hover:text-[#0f4f4a] hover:translate-x-1"
-                    : "text-white/95 hover:text-[#d6ff3a] hover:translate-x-1"
-                }`}
-                href="#"
-              >
-                For Colleges
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

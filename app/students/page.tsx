@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 // Access environment variables from .env.local
 const STRAPI_URL =
-  process.env.NEXT_PUBLIC_STRAPI_URL ||
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
   process.env.NEXT_PUBLIC_BACKEND_URL ||
   "https://tbs9k5m4-1337.inc1.devtunnels.ms";
 
@@ -22,155 +22,6 @@ export type HomePageData = {
   postsSectionTitle: string;
   posts: Post[];
 };
-
-/*const homePageData: HomePageData = {
-  user: {
-    name: "Simon Mattekkatt",
-    initials: "S",
-    greetingEmoji: "👋",
-    subtitle: "Share your achievements and connect with your network",
-  },
-  composer: {
-    placeholder: "What's on your mind?",
-    postLabel: "Post",
-  },
-  postsSectionTitle: "Recent Posts",
-  posts: [
-    {
-      id: "1",
-      author: {
-        name: "Sarah Chen",
-        initials: "SC",
-        avatarUrl:
-          "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop",
-        title: "Software Engineering Intern @ Google",
-      },
-      postedAgo: "2 hours ago",
-      message:
-        "Excited to share that I just completed my first major project at Google! 🎉\n\nBuilt a real-time analytics dashboard that processes millions of events per second. Huge thanks to my amazing team for all the support and mentorship.\n\nKey learnings:\n• Scalability matters from day one\n• Code reviews are invaluable\n• Don't be afraid to ask questions\n\nFeeling grateful for this incredible opportunity! 🚀",
-      images: [
-        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop",
-      ],
-      stats: {
-        likes: 127,
-        comments: 23,
-        shares: 8,
-      },
-      isLiked: true,
-    },
-    {
-      id: "2",
-      author: {
-        name: "Alex Rodriguez",
-        initials: "AR",
-        avatarUrl:
-          "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop",
-        title: "CS Student @ MIT | AI Research",
-      },
-      postedAgo: "5 hours ago",
-      message:
-        "Our hackathon team just won 1st place at HackMIT! 🏆\n\nWe built an AI-powered study assistant that helps students learn more effectively. 24 hours of coding, debugging, and way too much caffeine, but totally worth it!\n\nShoutout to my incredible teammates - couldn't have done it without you all! 💪",
-      images: [
-        "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=600&fit=crop",
-        "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=600&fit=crop",
-      ],
-      stats: {
-        likes: 243,
-        comments: 45,
-        shares: 19,
-      },
-    },
-    {
-      id: "3",
-      author: {
-        name: "Priya Sharma",
-        initials: "PS",
-        avatarUrl:
-          "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop",
-        title: "Product Designer | UX Enthusiast",
-      },
-      postedAgo: "1 day ago",
-      message:
-        "Just wrapped up a 3-month design internship at Airbnb! Here are some highlights from my portfolio work.\n\nLearned so much about user research, design systems, and cross-functional collaboration. The experience has been absolutely transformative for my career.\n\nAlways happy to chat about design, internships, or career advice! Feel free to reach out. ✨",
-      images: [
-        "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&h=600&fit=crop",
-        "https://images.unsplash.com/photo-1559028012-481c04fa702d?w=800&h=600&fit=crop",
-        "https://images.unsplash.com/photo-1558655146-d09347e92766?w=800&h=600&fit=crop",
-      ],
-      stats: {
-        likes: 189,
-        comments: 31,
-        shares: 12,
-      },
-    },
-    {
-      id: "4",
-      author: {
-        name: "Marcus Johnson",
-        initials: "MJ",
-        avatarUrl:
-          "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop",
-        title: "Startup Founder | Tech Entrepreneur",
-      },
-      postedAgo: "2 days ago",
-      message:
-        "Big news! Our startup just raised a $2M seed round! 🎊\n\nIt's been an incredible journey from dorm room idea to where we are today. To everyone who believed in us, supported us, and joined us on this ride - thank you from the bottom of my heart.\n\nThis is just the beginning. We're hiring across engineering, product, and marketing. DM me if you're interested in joining our mission to revolutionize education tech!\n\n#StartupLife #SeedRound #EdTech #Hiring",
-      images: [
-        "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&h=600&fit=crop",
-        "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=600&fit=crop",
-        "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&h=600&fit=crop",
-        "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&h=600&fit=crop",
-      ],
-      stats: {
-        likes: 456,
-        comments: 87,
-        shares: 34,
-      },
-      isLiked: true,
-    },
-    {
-      id: "5",
-      author: {
-        name: "Emily Zhang",
-        initials: "EZ",
-        avatarUrl:
-          "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop",
-        title: "Data Science @ Stanford | ML Researcher",
-      },
-      postedAgo: "3 days ago",
-      message:
-        "Just published my first research paper on machine learning for climate prediction! 🌍📊\n\nAfter months of data collection, model training, and countless revisions, it's finally out there. This work could help predict extreme weather events more accurately.\n\nHuge thanks to my advisor and lab mates for their incredible support throughout this journey. Science is truly a team sport!\n\nLink to the paper in comments. Would love to hear your thoughts!",
-      images: [
-        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop",
-        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop",
-        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop",
-        "https://images.unsplash.com/photo-1527474305487-b87b222841cc?w=800&h=600&fit=crop",
-        "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=800&h=600&fit=crop",
-      ],
-      stats: {
-        likes: 312,
-        comments: 56,
-        shares: 28,
-      },
-    },
-    {
-      id: "6",
-      author: {
-        name: "David Kim",
-        initials: "DK",
-        title: "Business Student @ Harvard | Aspiring Entrepreneur",
-      },
-      postedAgo: "5 days ago",
-      message:
-        "Lessons learned from my summer internship at McKinsey:\n\n1. Communication is everything - being able to explain complex ideas simply is a superpower\n2. Always ask 'So what?' - insights without impact are just data\n3. Your network is your net worth - invest in relationships\n4. Embrace feedback - it's the fastest way to grow\n5. Work hard, but don't forget to take care of yourself\n\nTo anyone applying for consulting roles - feel free to reach out! Happy to share more about my experience and help with interview prep. 📈💼",
-      stats: {
-        likes: 98,
-        comments: 15,
-        shares: 6,
-      },
-    },
-  ],
-};*/
 
 export default function StudentsHomePage() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -238,35 +89,40 @@ export default function StudentsHomePage() {
               : null;
 
           // Get images - handle both array and single image
-          let images: string[] = [];
-          if (post.images) {
-            if (Array.isArray(post.images.data)) {
-              images = post.images.data.map(
-                (img: any) => `${STRAPI_URL}${img.attributes?.url || img.url}`
-              );
-            } else if (post.images.data) {
-              images = [
-                `${STRAPI_URL}${
-                  post.images.data.attributes?.url || post.images.data.url
-                }`,
-              ];
-            } else if (Array.isArray(post.images)) {
-              images = post.images.map(
-                (img: any) =>
-                  `${STRAPI_URL}${
-                    img.url || img.attributes?.url || img.formats?.medium?.url
-                  }`
-              );
-            } else {
-              images = [
-                `${STRAPI_URL}${
-                  post.images.url ||
-                  post.images.attributes?.url ||
-                  post.images.formats?.medium?.url
-                }`,
-              ];
-            }
-          }
+          let images: string[] = post.media
+            ? post.media.map((img: any) => `${STRAPI_URL}${img.url}`)
+            : [];
+
+          console.log("post media is", images);
+          // let images: string[] = [];
+          // if (post.media) {
+          //   if (Array.isArray(post.media.data)) {
+          //     images = post.media.data.map(
+          //       (img: any) => `${STRAPI_URL}${img.attributes?.url || img.url}`
+          //     );
+          //   } else if (post.media.data) {
+          //     images = [
+          //       `${STRAPI_URL}${
+          //         post.media.data.attributes?.url || post.media.data.url
+          //       }`,
+          //     ];
+          //   } else if (Array.isArray(post.images)) {
+          //     images = post.images.map(
+          //       (img: any) =>
+          //         `${STRAPI_URL}${
+          //           img.url || img.attributes?.url || img.formats?.medium?.url
+          //         }`
+          //     );
+          //   } else {
+          //     images = [
+          //       `${STRAPI_URL}${
+          //         post.images.url ||
+          //         post.images.attributes?.url ||
+          //         post.images.formats?.medium?.url
+          //       }`,
+          //     ];
+          //   }
+          // }
 
           // Format date
           const createdAt = new Date(
@@ -347,7 +203,7 @@ export default function StudentsHomePage() {
             <section className="bg-white border border-gray-300 rounded-lg shadow-sm p-4">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold text-black">
-                  {nameVal[0] ? nameVal[0].toUpperCase() : "U"}
+                  {nameVal[0]?.toUpperCase() || "X"}
                 </div>
                 <button
                   onClick={() =>
