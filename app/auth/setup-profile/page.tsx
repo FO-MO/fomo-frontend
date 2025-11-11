@@ -542,7 +542,7 @@ export default function SetupProfilePage() {
           uploadImage(
             token,
             "api::student-profile.student-profile",
-            result.id ? result.id - 1 : undefined,
+            result.id ? result.id : undefined,
             "profilePic",
             profilePicFile
           );
@@ -551,7 +551,7 @@ export default function SetupProfilePage() {
           uploadImage(
             token,
             "api::student-profile.student-profile",
-            result.id ? result.id - 1 : undefined,
+            result.id ? result.id : undefined,
             "backgroundImg",
             backgroundImgFile
           );

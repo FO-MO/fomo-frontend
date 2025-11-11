@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { X, Image as ImageIcon, Smile, AtSign } from "lucide-react";
-import { postData } from "@/lib/strapi/strapiData";
+import { postData, uploadImage } from "@/lib/strapi/strapiData";
 
 export default function CreatePostPage() {
   const router = useRouter();
@@ -48,7 +48,6 @@ export default function CreatePostPage() {
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    console.log("Files selected:", files);
 
     if (files && files.length > 0) {
       const filesArray = Array.from(files);
@@ -59,12 +58,6 @@ export default function CreatePostPage() {
 
       // Create preview URLs
       filesArray.forEach((file, index) => {
-        console.log(
-          `Reading file ${index + 1}:`,
-          file.name,
-          file.size,
-          file.type
-        );
         const reader = new FileReader();
         reader.onloadend = () => {
           console.log(`File ${index + 1} loaded`);
@@ -86,68 +79,6 @@ export default function CreatePostPage() {
   const removeImage = (index: number) => {
     setImages(images.filter((_, i) => i !== index));
     setImageFiles(imageFiles.filter((_, i) => i !== index));
-  };
-
-  const uploadImages = async (token: string): Promise<number[]> => {
-    const BACKEND_URL =
-      process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:1337";
-    const uploadedImageIds: number[] = [];
-
-    console.log(
-      `Starting upload of ${imageFiles.length} images to ${BACKEND_URL}/api/upload`
-    );
-
-    for (let i = 0; i < imageFiles.length; i++) {
-      const file = imageFiles[i];
-      console.log(
-        `Uploading image ${i + 1}/${imageFiles.length}:`,
-        file.name,
-        file.size,
-        file.type
-      );
-
-      const formData = new FormData();
-      formData.append("files", file);
-
-      try {
-        const uploadResponse = await fetch(`${BACKEND_URL}/api/upload`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        });
-
-        console.log(
-          `Upload response status for ${file.name}:`,
-          uploadResponse.status
-        );
-
-        if (!uploadResponse.ok) {
-          const errorText = await uploadResponse.text();
-          console.error(`Upload failed for ${file.name}:`, errorText);
-          throw new Error(
-            `Failed to upload image ${file.name}: ${uploadResponse.status} - ${errorText}`
-          );
-        }
-
-        const uploadedFiles = await uploadResponse.json();
-        console.log(`Upload successful for ${file.name}:`, uploadedFiles);
-
-        if (uploadedFiles && uploadedFiles.length > 0) {
-          uploadedImageIds.push(uploadedFiles[0].id);
-          console.log(`Image ID for ${file.name}:`, uploadedFiles[0].id);
-        } else {
-          console.warn(`No files returned in upload response for ${file.name}`);
-        }
-      } catch (error) {
-        console.error(`Error uploading image ${file.name}:`, error);
-        throw error;
-      }
-    }
-
-    console.log("All images uploaded. IDs:", uploadedImageIds);
-    return uploadedImageIds;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -178,38 +109,13 @@ export default function CreatePostPage() {
         userId = user?.documentId || user?.id;
       }
 
-      // Upload images first if there are any
-      let uploadedImageIds: number[] = [];
-      if (imageFiles.length > 0) {
-        console.log(`Attempting to upload ${imageFiles.length} images...`);
-        try {
-          uploadedImageIds = await uploadImages(token);
-          console.log("Successfully uploaded images. IDs:", uploadedImageIds);
-        } catch (error) {
-          console.error("Image upload failed:", error);
-          const errorMessage =
-            error instanceof Error ? error.message : "Unknown error";
-          alert(`Failed to upload images: ${errorMessage}`);
-          setIsSubmitting(false);
-          return;
-        }
-      } else {
-        console.log("No images to upload");
-      }
-
-      // Create the post with uploaded image IDs
+      // Create the post first without images
       const postPayload = {
         data: {
           description: message,
           user: {
             connect: [userId],
           },
-          // Connect uploaded images to the post
-          ...(uploadedImageIds.length > 0 && {
-            images: {
-              connect: uploadedImageIds,
-            },
-          }),
         },
       };
 
@@ -230,6 +136,40 @@ export default function CreatePostPage() {
       }
 
       console.log("Post created successfully:", response);
+
+      // Now upload images if there are any, using the post ID
+      if (imageFiles.length > 0 && response?.data?.id) {
+        console.log(`Uploading ${imageFiles.length} images to post...`);
+        try {
+          // Upload each image and associate it with the post
+          for (let i = 0; i < imageFiles.length; i++) {
+            const file = imageFiles[i];
+            console.log(
+              `Uploading image ${i + 1}/${imageFiles.length}:`,
+              file.name
+            );
+
+            console.log("Calling data id:", response.data.id);
+
+            await uploadImage(
+              token,
+              "api::post.post",
+              response.data.id,
+              "images",
+              file
+            );
+          }
+          console.log("All images uploaded successfully");
+        } catch (error) {
+          console.error("Image upload failed:", error);
+          // Don't fail the post creation if image upload fails
+          // The post is already created, just warn the user
+          alert(
+            "Post created, but some images failed to upload. You can try adding them again by editing the post."
+          );
+        }
+      }
+
       alert("Post created successfully!");
       router.push("/students");
     } catch (error) {
@@ -398,28 +338,44 @@ export default function CreatePostPage() {
         </form>
 
         {/* Tips Section */}
-        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-xl p-6">
-          <h3 className="font-semibold text-blue-900 mb-3">Posting Tips</h3>
-          <ul className="space-y-2 text-sm text-blue-800">
-            <li className="flex items-start gap-2">
-              <span className="text-blue-600 mt-0.5">•</span>
-              <span>
-                Share your achievements, projects, and learning experiences
-              </span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-blue-600 mt-0.5">•</span>
-              <span>Use clear and professional language</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-blue-600 mt-0.5">•</span>
-              <span>Add images to make your post more engaging</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-blue-600 mt-0.5">•</span>
-              <span>Tag relevant people to increase visibility</span>
-            </li>
-          </ul>
+        <div className="mt-8 space-y-4">
+          {images.length > 0 && (
+            <div className="bg-amber-50 border border-amber-300 rounded-xl p-4">
+              <p className="font-semibold text-amber-900 mb-1 flex items-center gap-2">
+                <span className="text-lg">⚠️</span>
+                Image Upload Notice
+              </p>
+              <p className="text-sm text-amber-900">
+                Uploaded images may take a few moments to appear on your post
+                due to processing time. Please be patient and refresh the page
+                if images don't appear immediately.
+              </p>
+            </div>
+          )}
+
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+            <h3 className="font-semibold text-blue-900 mb-3">Posting Tips</h3>
+            <ul className="space-y-2 text-sm text-blue-800">
+              <li className="flex items-start gap-2">
+                <span className="text-blue-600 mt-0.5">•</span>
+                <span>
+                  Share your achievements, projects, and learning experiences
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-blue-600 mt-0.5">•</span>
+                <span>Use clear and professional language</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-blue-600 mt-0.5">•</span>
+                <span>Add images to make your post more engaging</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-blue-600 mt-0.5">•</span>
+                <span>Tag relevant people to increase visibility</span>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>

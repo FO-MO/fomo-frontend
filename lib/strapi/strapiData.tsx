@@ -55,9 +55,10 @@ export async function uploadImage(
     if (file) {
       formData.append("files", file);
     }
-    // formData.append("ref", ref);
-    // formData.append("refId", refId ? refId.toString() : "");
-    // formData.append("field", field);
+    formData.append("ref", ref);
+    formData.append("refId", refId ? refId.toString() : "");
+    formData.append("field", field);
+    // formData.append("publishedAt", new Date().toISOString());
     // formData.append("publishedAt", new Date().toISOString());
 
     // console.log("Uploading image to Strapi:", formData.get("files"));
