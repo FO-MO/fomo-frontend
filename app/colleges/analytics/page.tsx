@@ -5,18 +5,13 @@ import CollegesSideBar from "@/components/bars/collegesSideBar";
 import Navbar from "@/components/bars/Navbar";
 import Link from "next/link";
 import { Pie, PieChart } from "recharts";
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
+import { ChartConfig, ChartContainer } from "@/components/ui/chart";
 
 const applicationData = [
-  { status: "hired", count: 24, fill: "#10b981" },
-  { status: "interview", count: 15, fill: "#f59e0b" },
-  { status: "pending", count: 35, fill: "#9ca3af" },
-  { status: "rejected", count: 8, fill: "#ef4444" },
+  { status: "hired", count: 0, fill: "#10b981" },
+  { status: "interview", count: 0, fill: "#f59e0b" },
+  { status: "pending", count: 999, fill: "#9ca3af" },
+  { status: "rejected", count: 0, fill: "#ef4444" },
 ];
 
 const chartConfig = {
@@ -172,7 +167,7 @@ export default function CollegeAnalytics() {
         </div>
 
         {/* TABS */}
-        <div className="flex bg-white border-1 border-black/5 rounded-full overflow-x-auto gap-2 mb-8 py-1 -mx-4 px-4 sm:mx-0 sm:px-2 scrollbar-hide">
+        {/* <div className="flex bg-white border-1 border-black/5 rounded-full overflow-x-auto gap-2 mb-8 py-1 -mx-4 px-4 sm:mx-0 sm:px-2 scrollbar-hide">
           {tabs.map((tab) => {
             const isActive = pathname === tab.href;
             return (
@@ -189,7 +184,7 @@ export default function CollegeAnalytics() {
               </Link>
             );
           })}
-        </div>
+        </div> */}
 
         {/* Main Title */}
         <h2 className="text-2xl font-bold text-gray-900 mb-6">
@@ -212,10 +207,6 @@ export default function CollegeAnalytics() {
                   className="mx-auto aspect-square max-h-[280px]"
                 >
                   <PieChart>
-                    <ChartTooltip
-                      cursor={false}
-                      content={<ChartTooltipContent hideLabel />}
-                    />
                     <Pie
                       data={applicationData}
                       dataKey="count"
@@ -229,34 +220,34 @@ export default function CollegeAnalytics() {
 
               {/* Legend */}
               <div className="w-full md:w-1/2 space-y-4">
-                <div className="flex items-center justify-between">
+                {/* <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-green-500"></div>
                     <span className="text-gray-700 font-medium">Hired</span>
                   </div>
                   <span className="text-gray-900 font-semibold">24</span>
-                </div>
-                <div className="flex items-center justify-between">
+                </div> */}
+                {/* <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-amber-500"></div>
                     <span className="text-gray-700 font-medium">Interview</span>
                   </div>
                   <span className="text-gray-900 font-semibold">15</span>
-                </div>
+                </div> */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-gray-400"></div>
                     <span className="text-gray-700 font-medium">Pending</span>
                   </div>
-                  <span className="text-gray-900 font-semibold">35</span>
+                  <span className="text-gray-900 font-semibold"></span>
                 </div>
-                <div className="flex items-center justify-between">
+                {/* <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-red-500"></div>
                     <span className="text-gray-700 font-medium">Rejected</span>
                   </div>
                   <span className="text-gray-900 font-semibold">8</span>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

@@ -110,7 +110,7 @@ export default function CollegeEvents() {
         </div>
 
         {/* TABS */}
-        <div className="flex bg-white border-1 border-black/5 rounded-full overflow-x-auto gap-2 mb-8 py-1 -mx-4 px-4 sm:mx-0 sm:px-2 scrollbar-hide">
+        {/* <div className="flex bg-white border-1 border-black/5 rounded-full overflow-x-auto gap-2 mb-8 py-1 -mx-4 px-4 sm:mx-0 sm:px-2 scrollbar-hide">
           {tabs.map((tab) => {
             const isActive = pathname === tab.href;
             return (
@@ -127,7 +127,7 @@ export default function CollegeEvents() {
               </Link>
             );
           })}
-        </div>
+        </div> */}
 
         {/* Events Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
