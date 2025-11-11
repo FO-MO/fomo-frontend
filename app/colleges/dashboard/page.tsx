@@ -114,7 +114,7 @@ export default function CollegeDashboard() {
     { label: "Students", href: "/colleges/students" },
     { label: "Jobs", href: "/colleges/jobs" },
     { label: "Events", href: "/colleges/events" },
-    { label: "Analytics", href: "/colleges/analytics" 
+    { label: "Analytics", href: "/colleges/analytics" },
   ];
 
   // Prevent background scroll when sidebar is open on mobile
