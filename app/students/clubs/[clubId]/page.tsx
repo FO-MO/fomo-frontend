@@ -64,8 +64,8 @@ export default function ClubVideosPage() {
             clubData.videos?.map((video: any, index: number) => ({
               id: video.id?.toString() || index.toString(),
               title: video.name || video.title || "Video",
-              thumbnailUrl: video.thumbnail
-                ? `${BACKEND_URL}${result.url}`
+              thumbnailUrl: result.data.thumbnail[index]
+                ? `${BACKEND_URL}${result.data.thumbnail[index].url}`
                 : undefined,
               author: {
                 name: clubData.author || "Unknown",
@@ -81,7 +81,6 @@ export default function ClubVideosPage() {
               videoUrl: video.url ? `${BACKEND_URL}${video.url}` : undefined,
             })) || [],
         };
-
         setClubDetails(transformedClub);
       } catch (error) {
         console.error("Error fetching club videos:", error);
