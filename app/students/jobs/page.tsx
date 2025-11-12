@@ -95,18 +95,18 @@ export default function JobsPage() {
         <h1 className="text-3xl font-extrabold mb-6">Jobs & Employers</h1>
         <div className="flex gap-2 mb-8">
           <button
-            className={`px-5 py-2 rounded-xl border-2 font-medium shadow-sm focus:outline-none focus:ring-2 ring-offset-2 transition-all duration-100 mr-2 ${
+            className={`px-5 py-2 rounded-xl border-2 font-medium shadow-sm focus:outline-none focus:ring-2 ring-offset-2 transition-all duration-100 ${
               tab === "jobs"
                 ? "bg-white border-[#0f4f4a] text-black"
                 : "bg-white border-[#f1f1f1] text-black"
             }`}
             onClick={() => setTab("jobs")}
           >
-            Job Listings{" "}
+            College Jobs{" "}
             <span className="ml-1 text-gray-500">({mockJobs.length})</span>
           </button>
           <button
-            className={`px-5 py-2 rounded-xl border-2 font-medium shadow-sm focus:outline-none focus:ring-2 ring-offset-2 transition-all duration-100 ml-2 ${
+            className={`px-5 py-2 rounded-xl border-2 font-medium shadow-sm focus:outline-none focus:ring-2 ring-offset-2 transition-all duration-100 ${
               tab === "employers"
                 ? "bg-white border-[#0f4f4a] text-black"
                 : "bg-white border-[#f1f1f1] text-black"

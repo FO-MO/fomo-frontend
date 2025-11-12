@@ -1,12 +1,28 @@
 "use client";
 import PostCard, { Post } from "@/components/student-section/PostCard";
+import JobPostingCard from "@/components/student-section/JobPostingCard";
 import { useEffect, useState } from "react";
+import { title } from "process";
 
 // Access environment variables from .env.local
-const STRAPI_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  "https://tbs9k5m4-1337.inc1.devtunnels.ms";
+const STRAPI_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+interface GlobalJob {
+  id: string;
+  title: string;
+  jobType: string;
+  experience: string;
+  location: string;
+  deadline: string;
+  description: string;
+  skills: string[];
+  requirements: string[];
+  benefits: string[];
+  status: string;
+  companyName?: string;
+  companyLogo?: string;
+  createdAt?: string;
+}
 
 export type HomePageData = {
   user: {
@@ -25,7 +41,11 @@ export type HomePageData = {
 
 export default function StudentsHomePage() {
   const [posts, setPosts] = useState<Post[]>([]);
+  const [globalJobs, setGlobalJobs] = useState<GlobalJob[]>([]);
   const [nameVal, setNameVal] = useState("");
+  const [combinedFeed, setCombinedFeed] = useState<
+    Array<{ type: "post" | "job"; data: Post | GlobalJob; timestamp: number }>
+  >([]);
   //fetching posts
   useEffect(() => {
     // Compute initials from current user's name stored in localStorage
@@ -178,6 +198,105 @@ export default function StudentsHomePage() {
     };
     fetchPosts();
   }, []);
+
+  // Fetch global job postings
+  useEffect(() => {
+    const fetchGlobalJobs = async () => {
+      try {
+        const token = localStorage.getItem("fomo_token");
+        const response = await fetch(
+          `${STRAPI_URL}/api/globaljobpostings?populate=*&sort=createdAt:desc`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const data = await response.json();
+        console.log("Global jobs data:", data.data);
+        const mockJobs: GlobalJob[] = data.data.map((item: any) => ({
+          id: item.id,
+          title: item.data.title,
+          jobType: item.data.jobType,
+          experience: item.data.experience,
+          location: item.data.location,
+          deadline: item.data.deadline,
+          description: item.data.description,
+          skills: item.data.skills,
+          requirements: item.data.requirements,
+          benefits: item.data.benefits,
+          status: item.data.status,
+          companyName: item.data.companyName,
+          createdAt: item.createdAt,
+        }));
+        setGlobalJobs(mockJobs);
+      } catch (error) {
+        console.error("Error fetching global jobs:", error);
+        setGlobalJobs([]);
+      }
+    };
+    fetchGlobalJobs();
+  }, []);
+
+  // Combine posts and jobs, sort by timestamp
+  useEffect(() => {
+    const combined: Array<{
+      type: "post" | "job";
+      data: Post | GlobalJob;
+      timestamp: number;
+    }> = [];
+
+    // Add posts
+    posts.forEach((post) => {
+      // Try to extract timestamp from postedAgo string or use current time
+      let timestamp = Date.now();
+      if (post.postedAgo.includes("just now")) {
+        timestamp = Date.now();
+      } else if (post.postedAgo.includes("minute")) {
+        const minutes = parseInt(post.postedAgo);
+        timestamp = Date.now() - minutes * 60 * 1000;
+      } else if (post.postedAgo.includes("hour")) {
+        const hours = parseInt(post.postedAgo);
+        timestamp = Date.now() - hours * 60 * 60 * 1000;
+      } else if (post.postedAgo.includes("day")) {
+        const days = parseInt(post.postedAgo);
+        timestamp = Date.now() - days * 24 * 60 * 60 * 1000;
+      }
+
+      combined.push({
+        type: "post",
+        data: post,
+        timestamp,
+      });
+    });
+
+    // Add global jobs
+    globalJobs.forEach((job) => {
+      const timestamp = job.createdAt
+        ? new Date(job.createdAt).getTime()
+        : Date.now();
+      combined.push({
+        type: "job",
+        data: job,
+        timestamp,
+      });
+    });
+
+    // Sort by timestamp (most recent first)
+    combined.sort((a, b) => b.timestamp - a.timestamp);
+
+    setCombinedFeed(combined);
+  }, [posts, globalJobs]);
+
+  const handleJobApply = (jobId: string) => {
+    const job = globalJobs.find((j) => j.id === jobId);
+    if (job) {
+      alert(`Application submitted for ${job.title} at ${job.companyName}!`);
+      // TODO: Implement actual application logic
+    }
+  };
+
   console.log(posts);
   return (
     <main className="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-20 bg-white min-h-screen">
@@ -219,14 +338,32 @@ export default function StudentsHomePage() {
 
             {/* Feed Section */}
             <section className="flex flex-col gap-4 mb-8">
-              <h2 className="text-xl font-semibold text-black">Posts</h2>
+              <h2 className="text-xl font-semibold text-black">
+                Feed - Posts & Opportunities
+              </h2>
               <div className="flex flex-col gap-4">
-                {posts.length > 0 ? (
-                  posts.map((post) => (
-                    <PostCard key={post.id} post={post} user={nameVal} />
-                  ))
+                {combinedFeed.length > 0 ? (
+                  combinedFeed.map((item, index) => {
+                    if (item.type === "post") {
+                      return (
+                        <PostCard
+                          key={`post-${item.data.id}`}
+                          post={item.data as Post}
+                          user={nameVal}
+                        />
+                      );
+                    } else {
+                      return (
+                        <JobPostingCard
+                          key={`job-${item.data.id}`}
+                          job={item.data as GlobalJob}
+                          onApply={handleJobApply}
+                        />
+                      );
+                    }
+                  })
                 ) : (
-                  <p className="text-gray-500">No posts yet</p>
+                  <p className="text-gray-500">No posts or opportunities yet</p>
                 )}
               </div>
             </section>
