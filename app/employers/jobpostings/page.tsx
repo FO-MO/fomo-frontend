@@ -5,11 +5,29 @@ import SubBar from '@/components/subBar'
 import { fetchFromBackend, postFetchFromBackend } from '@/lib/tools'
 import axios from 'axios'
 
+// Define types for the job data
+interface JobData {
+  id?: string
+  documentId?: string
+  title: string
+  jobType: string
+  experience: string
+  location: string
+  description: string
+  skills: string[]
+  requirements: string[]
+  benefits: string[]
+  status: string
+  applicants?: number
+  postedDate?: string
+  deadline?: string
+}
+
 export default function JobPostingsPage() {
   const [open, setOpen] = useState(false)
   const [showToast, setShowToast] = useState(false)
   const [toastMessage, setToastMessage] = useState('Job posted successfully!')
-  const [jobs, setJobs] = useState([])
+  const [jobs, setJobs] = useState<Array<Record<string, unknown>>>([])
   const [loading, setLoading] = useState(true)
   const [deleteConfirm, setDeleteConfirm] = useState<{
     isOpen: boolean
@@ -289,7 +307,7 @@ export default function JobPostingsPage() {
               </div>
             ) : jobs.length > 0 ? (
               jobs.map((x: Record<string, unknown>) => {
-                const job = x.data as any
+                const job = x.data as JobData
                 console.log('Job data:', job) // Debug log to see job structure
                 return (
                   <div
@@ -386,11 +404,11 @@ export default function JobPostingsPage() {
                               e.stopPropagation() // Prevent event bubbling
                               console.log(
                                 'Delete button clicked for job:',
-                                job.documentId || job.id,
+                                job.documentId || job.id || 'no-id',
                                 job.title
                               )
                               handleDeleteClick(
-                                job.documentId || job.id,
+                                job.documentId || job.id || 'no-id',
                                 job.title
                               )
                             }}

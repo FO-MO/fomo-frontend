@@ -1,46 +1,46 @@
 // Minimal Strapi auth helper for client-side usage
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL
 
 export async function fetchData(
   token: string | null,
   endpoint: string
-): Promise<any> {
+): Promise<Record<string, unknown>> {
   const res = await fetch(`${BACKEND_URL}/api/${endpoint}`, {
     headers: { Authorization: `Bearer ${token}` },
-  });
-  return res.json();
+  })
+  return res.json()
 }
 
 export async function postData(
   token: string | null,
   endpoint: string,
-  data: any
-): Promise<any> {
+  data: Record<string, unknown>
+): Promise<Record<string, unknown>> {
   const res = await fetch(`${BACKEND_URL}/api/${endpoint}`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(data),
-  });
-  return res.json();
+  })
+  return res.json()
 }
 
 export async function putData(
   token: string | null,
   endpoint: string,
-  data: any
-): Promise<any> {
+  data: Record<string, unknown>
+): Promise<Record<string, unknown>> {
   const res = await fetch(`${BACKEND_URL}/api/${endpoint}`, {
-    method: "PUT",
+    method: 'PUT',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(data),
-  });
-  return res.json();
+  })
+  return res.json()
 }
 
 export async function uploadImage(
@@ -51,13 +51,13 @@ export async function uploadImage(
   file: File | null
 ): Promise<number | null> {
   try {
-    const formData = new FormData();
+    const formData = new FormData()
     if (file) {
-      formData.append("files", file);
+      formData.append('files', file)
     }
-    formData.append("ref", ref);
-    formData.append("refId", refId ? refId.toString() : "");
-    formData.append("field", field);
+    formData.append('ref', ref)
+    formData.append('refId', refId ? refId.toString() : '')
+    formData.append('field', field)
     // formData.append("publishedAt", new Date().toISOString());
     // formData.append("publishedAt", new Date().toISOString());
 
@@ -70,28 +70,28 @@ export async function uploadImage(
     // );
 
     const res = await fetch(`${BACKEND_URL}/api/upload`, {
-      method: "POST",
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
       },
       body: formData,
-    });
-    console.log("Upload done", res);
+    })
+    console.log('Upload done', res)
 
     if (!res.ok) {
-      console.error("Failed to upload image:", await res.text());
-      return null;
+      console.error('Failed to upload image:', await res.text())
+      return null
     }
 
-    const uploadedFiles = await res.json();
-    const imageId = uploadedFiles[0].id;
-    console.log("Uploaded image ID:", imageId);
+    const uploadedFiles = await res.json()
+    const imageId = uploadedFiles[0].id
+    console.log('Uploaded image ID:', imageId)
     if (uploadedFiles && uploadedFiles.length > 0) {
-      return uploadedFiles[0].id;
+      return uploadedFiles[0].id
     }
-    return null;
+    return null
   } catch (error) {
-    console.error("Error uploading image:", error);
-    return null;
+    console.error('Error uploading image:', error)
+    return null
   }
 }
