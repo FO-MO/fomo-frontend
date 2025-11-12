@@ -1,46 +1,96 @@
-"use client";
+'use client'
 
-import React, { useState } from "react";
-import SubBar from "@/components/subBar";
-import { fetchFromBackend, postFetchFromBackend } from "@/lib/tools";
+import React, { useState, useEffect } from 'react'
+import SubBar from '@/components/subBar'
+import { fetchFromBackend, postFetchFromBackend } from '@/lib/tools'
+import axios from 'axios'
 
-const res = await fetchFromBackend("globaljobpostings?populate=*");
 export default function JobPostingsPage() {
-  const [open, setOpen] = useState(false);
-  const [showToast, setShowToast] = useState(false);
+  const [open, setOpen] = useState(false)
+  const [showToast, setShowToast] = useState(false)
+  const [toastMessage, setToastMessage] = useState('Job posted successfully!')
+  const [jobs, setJobs] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    isOpen: boolean
+    jobId: string | null
+    jobTitle: string
+  }>({
+    isOpen: false,
+    jobId: null,
+    jobTitle: '',
+  })
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  // Fetch jobs on component mount
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        setLoading(true)
+        const res = await fetchFromBackend('globaljobpostings?populate=*')
+        console.log('Fetched jobs:', res) // Debug log
+        setJobs(res || [])
+      } catch (error) {
+        console.error('Error fetching jobs:', error)
+        setJobs([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchJobs()
+  }, [])
+
+  // Debug: Check environment on mount
+  useEffect(() => {
+    console.log('Environment check:')
+    console.log('NEXT_PUBLIC_BACKEND_URL:', process.env.NEXT_PUBLIC_BACKEND_URL)
+    console.log(
+      'localStorage fomo_token:',
+      localStorage.getItem('fomo_token') ? 'exists' : 'missing'
+    )
+  }, [])
+
+  // Debug: Monitor deleteConfirm state changes
+  useEffect(() => {
+    console.log('deleteConfirm state changed:', deleteConfirm)
+    if (deleteConfirm.isOpen) {
+      console.log('Delete confirmation modal should be visible now')
+    }
+  }, [deleteConfirm])
 
   //FORM DATA
   const [formData, setFormData] = useState({
-    title: "",
-    jobType: "Full Time",
-    experience: "Entry Level",
-    location: "",
-    deadline: "",
-    description: "",
+    title: '',
+    jobType: 'Full Time',
+    experience: 'Entry Level',
+    location: '',
+    deadline: '',
+    description: '',
     skills: [] as string[],
     requirements: [] as string[],
     benefits: [] as string[],
-  });
+  })
 
-  const [newSkill, setNewSkill] = useState("");
-  const [newReq, setNewReq] = useState("");
-  const [newBen, setNewBen] = useState("");
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [newSkill, setNewSkill] = useState('')
+  const [newReq, setNewReq] = useState('')
+  const [newBen, setNewBen] = useState('')
+  const [errors, setErrors] = useState<{ [key: string]: string }>({})
 
   const validateForm = () => {
-    const newErrors: { [key: string]: string } = {};
+    const newErrors: { [key: string]: string } = {}
     if (formData.title.trim().length < 5)
-      newErrors.title = "Job title must be at least 5 characters";
-    if (!formData.location.trim()) newErrors.location = "Location is required";
+      newErrors.title = 'Job title must be at least 5 characters'
+    if (!formData.location.trim()) newErrors.location = 'Location is required'
     if (formData.description.trim().length < 50)
-      newErrors.description = "Job description must be at least 50 characters";
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+      newErrors.description = 'Job description must be at least 50 characters'
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   //WRITE PAYLOAD
   const handleSubmit = async () => {
-    if (!validateForm()) return;
+    if (!validateForm()) return
 
     // Your Strapi collection only has ONE field called 'data' which is JSON YUUUHH THAS THE POINT
     const payload = {
@@ -56,215 +106,361 @@ export default function JobPostingsPage() {
           skills: formData.skills,
           requirements: formData.requirements,
           benefits: formData.benefits,
-          status: "Active",
+          status: 'Active',
         },
       },
-    };
+    }
 
-    console.log(" Sending to JSON field:", JSON.stringify(payload, null, 2));
+    console.log(' Sending to JSON field:', JSON.stringify(payload, null, 2))
 
     try {
       // Use the new postFetchFromBackend function (FOR POST REQ)
-      const result = await postFetchFromBackend("globaljobpostings", payload);
+      const result = await postFetchFromBackend('globaljobpostings', payload)
 
-      console.log("Job posted successfully:", result);
+      console.log('Job posted successfully:', result)
 
       // Success - close modal and show toast
-      setOpen(false);
-      setShowToast(true);
+      setOpen(false)
+      setToastMessage('Job posted successfully!')
+      setShowToast(true)
 
       // Reset form data
       setFormData({
-        title: "",
-        jobType: "Full Time",
-        experience: "Entry Level",
-        location: "",
-        deadline: "",
-        description: "",
+        title: '',
+        jobType: 'Full Time',
+        experience: 'Entry Level',
+        location: '',
+        deadline: '',
+        description: '',
         skills: [],
         requirements: [],
         benefits: [],
-      });
+      })
 
-      // AUTO-REFRESH: Reload the page to show new job
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000); // Small delay to show success toast first
+      // Refetch jobs to update the list
+      const updatedRes = await fetchFromBackend('globaljobpostings?populate=*')
+      setJobs(updatedRes || [])
     } catch (error) {
-      console.error(" Error posting job:", error);
+      console.error(' Error posting job:', error)
       alert(
         `Failed to post job: ${
           error instanceof Error ? error.message : String(error)
         }`
-      );
+      )
     } finally {
-      setTimeout(() => setShowToast(false), 3000);
+      setTimeout(() => setShowToast(false), 3000)
     }
-  };
+  }
+
+  // Delete confirmation handlers
+  const handleDeleteClick = (jobId: string, jobTitle: string) => {
+    console.log('handleDeleteClick called with:', { jobId, jobTitle })
+    console.log('Setting deleteConfirm state...')
+    setDeleteConfirm({
+      isOpen: true,
+      jobId,
+      jobTitle,
+    })
+    console.log('deleteConfirm state should be updated')
+  }
+
+  const handleDeleteConfirm = async () => {
+    console.log('handleDeleteConfirm called')
+    console.log(
+      'deleteConfirm.jobId (should be documentId):',
+      deleteConfirm.jobId
+    )
+
+    if (!deleteConfirm.jobId) {
+      console.log('No jobId/documentId found, returning early')
+      return
+    }
+
+    console.log('Starting delete process...')
+    setIsDeleting(true)
+
+    try {
+      const token = localStorage.getItem('fomo_token')
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL
+      console.log('Token:', token ? 'Found' : 'Not found')
+      console.log('Backend URL:', backendUrl)
+      console.log(
+        'Delete URL (using documentId):',
+        `${backendUrl}/api/globaljobpostings/${deleteConfirm.jobId}`
+      )
+
+      const deleteResponse = await axios.delete(
+        `${backendUrl}/api/globaljobpostings/${deleteConfirm.jobId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      )
+
+      console.log('Delete response:', deleteResponse)
+      console.log('Job deleted successfully')
+
+      // Close confirmation dialog
+      setDeleteConfirm({
+        isOpen: false,
+        jobId: null,
+        jobTitle: '',
+      })
+
+      // Show success message
+      setToastMessage('Job deleted successfully!')
+      setShowToast(true)
+      setTimeout(() => setShowToast(false), 3000)
+
+      // Refetch jobs to update the list
+      const updatedRes = await fetchFromBackend('globaljobpostings?populate=*')
+      setJobs(updatedRes || [])
+    } catch (error) {
+      console.error('Error deleting job:', error)
+      alert(
+        `Failed to delete job: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      )
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirm({
+      isOpen: false,
+      jobId: null,
+      jobTitle: '',
+    })
+  }
 
   const addItem = (
-    field: "skills" | "requirements" | "benefits",
+    field: 'skills' | 'requirements' | 'benefits',
     value: string
   ) => {
-    if (!value.trim()) return;
-    setFormData({ ...formData, [field]: [...formData[field], value.trim()] });
-    if (field === "skills") setNewSkill("");
-    if (field === "requirements") setNewReq("");
-    if (field === "benefits") setNewBen("");
-  };
+    if (!value.trim()) return
+    setFormData({ ...formData, [field]: [...formData[field], value.trim()] })
+    if (field === 'skills') setNewSkill('')
+    if (field === 'requirements') setNewReq('')
+    if (field === 'benefits') setNewBen('')
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <div className='min-h-screen bg-gradient-to-b from-gray-50 to-white'>
+      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12'>
         <SubBar
           items={[
-            { url: "/employers/overview", name: "Overview", logo: "👤" },
+            { url: '/employers/overview', name: 'Overview', logo: '👤' },
             {
-              url: "/employers/applications",
-              name: "Applications",
-              logo: "📈",
+              url: '/employers/applications',
+              name: 'Applications',
+              logo: '📈',
             },
             {
-              url: "/employers/partnerships",
-              name: "College Partnerships",
-              logo: "🎓",
+              url: '/employers/partnerships',
+              name: 'College Partnerships',
+              logo: '🎓',
             },
-            { url: "/employers/jobpostings", name: "Job Postings", logo: "🧳" },
+            { url: '/employers/jobpostings', name: 'Job Postings', logo: '🧳' },
             // { url: "/employers/analytics", name: "Analytics", logo: "📊" },
           ]}
-          className="mb-10"
+          className='mb-10'
         />
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold">Your Job Postings</h1>
+        <div className='p-4 sm:p-6'>
+          <div className='flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6'>
+            <h1 className='text-xl sm:text-2xl font-bold'>Your Job Postings</h1>
             <button
               onClick={() => setOpen(true)}
-              className="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition flex items-center gap-2"
+              className='px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition flex items-center justify-center gap-2 text-sm sm:text-base'
             >
               +<span>Post New Job</span>
             </button>
           </div>
 
           {/* Job Listings */}
-          <div className="grid gap-6">
-            {res.map((x) => {
-              const job = x.data;
-              return (
-                <div
-                  key={job.id}
-                  className="bg-white border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="text-xl font-semibold text-gray-900">
-                        {job.title}
-                      </h3>
-                      <div className="flex gap-4 text-sm text-gray-500 mt-1">
-                        <span>{job.jobType}</span>
-                        <span>•</span>
-                        <span>{job.experience}</span>
-                        <span>•</span>
-                        <span>{job.location}</span>
+          <div className='grid gap-4 sm:gap-6'>
+            {loading ? (
+              <div className='col-span-full text-center py-12'>
+                <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto'></div>
+                <p className='text-gray-500 mt-4'>Loading jobs...</p>
+              </div>
+            ) : jobs.length > 0 ? (
+              jobs.map((x: Record<string, unknown>) => {
+                const job = x.data as any
+                console.log('Job data:', job) // Debug log to see job structure
+                return (
+                  <div
+                    key={job.id}
+                    className='bg-white border rounded-lg p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden'
+                  >
+                    {/* Header Section */}
+                    <div className='flex flex-col space-y-3 mb-4'>
+                      <div className='flex items-start justify-between gap-3'>
+                        <div className='flex-1 min-w-0'>
+                          <h3 className='text-base sm:text-lg font-semibold text-gray-900 line-clamp-2 leading-tight'>
+                            {job.title}
+                          </h3>
+                        </div>
+                        <span
+                          className={`px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
+                            job.status === 'Active'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}
+                        >
+                          {job.status}
+                        </span>
+                      </div>
+
+                      {/* Job Details */}
+                      <div className='flex flex-wrap items-center gap-2 text-xs sm:text-sm text-gray-500'>
+                        <span className='bg-gray-50 px-2 py-1 rounded'>
+                          {job.jobType}
+                        </span>
+                        <span className='bg-gray-50 px-2 py-1 rounded'>
+                          {job.experience}
+                        </span>
+                        <span className='bg-gray-50 px-2 py-1 rounded truncate max-w-[200px]'>
+                          {job.location}
+                        </span>
                       </div>
                     </div>
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        job.status === "Active"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      {job.status}
-                    </span>
-                  </div>
 
-                  <p className="text-gray-700 mb-4 line-clamp-2">
-                    {job.description}
-                  </p>
+                    {/* Description */}
+                    <p className='text-sm text-gray-700 mb-4 line-clamp-3 leading-relaxed'>
+                      {job.description}
+                    </p>
 
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {job.skills.slice(0, 5).map((skill) => (
-                      <span
-                        key={skill}
-                        className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs"
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                    {job.skills.length > 5 && (
-                      <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
-                        +{job.skills.length - 5} more
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex justify-between items-center text-sm text-gray-500">
-                    <div className="flex gap-4">
-                      <span>{job.applicants} applicants</span>
-                      <span>
-                        Posted {new Date(job.postedDate).toLocaleDateString()}
-                      </span>
-                      {job.deadline && (
-                        <span>
-                          Deadline {new Date(job.deadline).toLocaleDateString()}
-                        </span>
-                      )}
+                    {/* Skills */}
+                    <div className='mb-4'>
+                      <div className='flex flex-wrap gap-1.5'>
+                        {job.skills
+                          .slice(0, 4)
+                          .map((skill: string, index: number) => (
+                            <span
+                              key={index}
+                              className='px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium border border-blue-100'
+                            >
+                              {skill}
+                            </span>
+                          ))}
+                        {job.skills.length > 4 && (
+                          <span className='px-2 py-1 bg-gray-50 text-gray-600 rounded text-xs font-medium border'>
+                            +{job.skills.length - 4} more
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <button className="text-blue-600 hover:text-blue-800">
-                        View
-                      </button>
-                      <button className="text-gray-600 hover:text-gray-800">
-                        Edit
-                      </button>
-                      <button className="text-red-600 hover:text-red-800">
-                        Delete
-                      </button>
+
+                    {/* Footer */}
+                    <div className='pt-3 border-t border-gray-100'>
+                      <div className='flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3'>
+                        <div className='flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500'>
+                          <span className='font-medium'>
+                            {job.applicants || 0} applicants
+                          </span>
+                          <span>
+                            Posted{' '}
+                            {new Date(
+                              job.postedDate || Date.now()
+                            ).toLocaleDateString()}
+                          </span>
+                          {job.deadline && (
+                            <span className='text-orange-600'>
+                              Due {new Date(job.deadline).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
+                        <div className='flex items-center gap-5'>
+                          {/* <button className='text-xs sm:text-sm text-blue-600 hover:text-blue-800 font-medium px-2 py-1 rounded hover:bg-blue-50 transition-colors'>
+                          View
+                        </button> */}
+                          <button className='text-xs sm:text-sm text-gray-600 hover:text-gray-800 font-medium px-2 py-1 rounded hover:bg-gray-50 transition-colors'>
+                            Edit
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation() // Prevent event bubbling
+                              console.log(
+                                'Delete button clicked for job:',
+                                job.documentId || job.id,
+                                job.title
+                              )
+                              handleDeleteClick(
+                                job.documentId || job.id,
+                                job.title
+                              )
+                            }}
+                            className='text-xs sm:text-sm text-red-600 hover:text-red-800 font-medium px-2 py-1 rounded hover:bg-red-50 transition-colors'
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                )
+              })
+            ) : (
+              <div className='col-span-full text-center py-12'>
+                <h3 className='text-lg font-semibold text-gray-900 mb-2'>
+                  No job postings found
+                </h3>
+                <p className='text-gray-600'>
+                  Create your first job posting to get started.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Modal */}
           {open && (
-            <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 relative overflow-y-auto max-h-[90vh]">
+            <div className='fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4'>
+              <div className='bg-white rounded-lg shadow-lg w-full max-w-2xl p-4 sm:p-6 relative overflow-y-auto max-h-[90vh]'>
                 <button
-                  className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+                  className='absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl sm:text-base'
                   onClick={() => setOpen(false)}
                 >
                   ✕
                 </button>
-                <h2 className="text-xl font-semibold mb-1">Post a New Job</h2>
-                <p className="text-sm text-gray-500 mb-4">
+                <h2 className='text-lg sm:text-xl font-semibold mb-1 pr-8'>
+                  Post a New Job
+                </h2>
+                <p className='text-xs sm:text-sm text-gray-500 mb-4'>
                   Fill out the details below to post a new job opening.
                 </p>
 
                 {/* Job Title */}
-                <div className="mb-4">
-                  <label className="text-sm font-medium">Job Title</label>
+                <div className='mb-4'>
+                  <label className='text-xs sm:text-sm font-medium'>
+                    Job Title
+                  </label>
                   <input
-                    type="text"
-                    placeholder="e.g., Software Engineer, Product Manager"
-                    className="mt-1 w-full border rounded-md p-2"
+                    type='text'
+                    placeholder='e.g., Software Engineer, Product Manager'
+                    className='mt-1 w-full border rounded-md p-2 text-sm'
                     value={formData.title}
                     onChange={(e) =>
                       setFormData({ ...formData, title: e.target.value })
                     }
                   />
                   {errors.title && (
-                    <p className="text-red-500 text-xs mt-1">{errors.title}</p>
+                    <p className='text-red-500 text-xs mt-1'>{errors.title}</p>
                   )}
                 </div>
 
                 {/* Job Type / Experience */}
-                <div className="flex gap-4 mb-4">
-                  <div className="flex-1">
-                    <label className="text-sm font-medium">Job Type</label>
+                {/* Job Type / Experience */}
+                <div className='flex flex-col sm:flex-row gap-4 mb-4'>
+                  <div className='flex-1'>
+                    <label className='text-xs sm:text-sm font-medium'>
+                      Job Type
+                    </label>
                     <select
-                      className="mt-1 w-full border rounded-md p-2"
+                      className='mt-1 w-full border rounded-md p-2 text-sm'
                       value={formData.jobType}
                       onChange={(e) =>
                         setFormData({ ...formData, jobType: e.target.value })
@@ -276,12 +472,12 @@ export default function JobPostingsPage() {
                       <option>Contract</option>
                     </select>
                   </div>
-                  <div className="flex-1">
-                    <label className="text-sm font-medium">
+                  <div className='flex-1'>
+                    <label className='text-xs sm:text-sm font-medium'>
                       Experience Level
                     </label>
                     <select
-                      className="mt-1 w-full border rounded-md p-2"
+                      className='mt-1 w-full border rounded-md p-2 text-sm'
                       value={formData.experience}
                       onChange={(e) =>
                         setFormData({ ...formData, experience: e.target.value })
@@ -295,31 +491,33 @@ export default function JobPostingsPage() {
                 </div>
 
                 {/* Location / Deadline */}
-                <div className="flex gap-4 mb-4">
-                  <div className="flex-1">
-                    <label className="text-sm font-medium">Location</label>
+                <div className='flex flex-col sm:flex-row gap-4 mb-4'>
+                  <div className='flex-1'>
+                    <label className='text-xs sm:text-sm font-medium'>
+                      Location
+                    </label>
                     <input
-                      type="text"
-                      placeholder="e.g., San Francisco, CA or Remote"
-                      className="mt-1 w-full border rounded-md p-2"
+                      type='text'
+                      placeholder='e.g., San Francisco, CA or Remote'
+                      className='mt-1 w-full border rounded-md p-2 text-sm'
                       value={formData.location}
                       onChange={(e) =>
                         setFormData({ ...formData, location: e.target.value })
                       }
                     />
                     {errors.location && (
-                      <p className="text-red-500 text-xs mt-1">
+                      <p className='text-red-500 text-xs mt-1'>
                         {errors.location}
                       </p>
                     )}
                   </div>
-                  <div className="flex-1">
-                    <label className="text-sm font-medium">
+                  <div className='flex-1'>
+                    <label className='text-xs sm:text-sm font-medium'>
                       Application Deadline (Optional)
                     </label>
                     <input
-                      type="date"
-                      className="mt-1 w-full border rounded-md p-2"
+                      type='date'
+                      className='mt-1 w-full border rounded-md p-2 text-sm'
                       value={formData.deadline}
                       onChange={(e) =>
                         setFormData({ ...formData, deadline: e.target.value })
@@ -329,48 +527,50 @@ export default function JobPostingsPage() {
                 </div>
 
                 {/* Job Description */}
-                <div className="mb-4">
-                  <label className="text-sm font-medium">Job Description</label>
+                <div className='mb-4'>
+                  <label className='text-xs sm:text-sm font-medium'>
+                    Job Description
+                  </label>
                   <textarea
-                    placeholder="Describe the role, responsibilities, and what you’re looking for in a candidate..."
-                    className="mt-1 w-full border rounded-md p-2 h-24"
+                    placeholder="Describe the role, responsibilities, and what you're looking for in a candidate..."
+                    className='mt-1 w-full border rounded-md p-2 h-20 sm:h-24 text-sm'
                     value={formData.description}
                     onChange={(e) =>
                       setFormData({ ...formData, description: e.target.value })
                     }
                   />
                   {errors.description && (
-                    <p className="text-red-500 text-xs mt-1">
+                    <p className='text-red-500 text-xs mt-1'>
                       {errors.description}
                     </p>
                   )}
                 </div>
 
                 {/* Skills */}
-                <div className="mb-4">
-                  <label className="text-sm font-medium">
+                <div className='mb-4'>
+                  <label className='text-sm font-medium'>
                     Skills Required (Optional)
                   </label>
-                  <div className="flex gap-2 mt-1">
+                  <div className='flex gap-2 mt-1'>
                     <input
-                      type="text"
-                      placeholder="Add a skill..."
-                      className="flex-1 border rounded-md p-2"
+                      type='text'
+                      placeholder='Add a skill...'
+                      className='flex-1 border rounded-md p-2'
                       value={newSkill}
                       onChange={(e) => setNewSkill(e.target.value)}
                     />
                     <button
-                      onClick={() => addItem("skills", newSkill)}
-                      className="px-3 py-2 border rounded-md hover:bg-gray-100"
+                      onClick={() => addItem('skills', newSkill)}
+                      className='px-3 py-2 border rounded-md hover:bg-gray-100'
                     >
                       +
                     </button>
                   </div>
-                  <div className="flex flex-wrap gap-2 mt-2">
+                  <div className='flex flex-wrap gap-2 mt-2'>
                     {formData.skills.map((skill, i) => (
                       <span
                         key={i}
-                        className="bg-gray-200 px-2 py-1 rounded text-sm"
+                        className='bg-gray-200 px-2 py-1 rounded text-sm'
                       >
                         {skill}
                       </span>
@@ -379,30 +579,30 @@ export default function JobPostingsPage() {
                 </div>
 
                 {/* Requirements */}
-                <div className="mb-4">
-                  <label className="text-sm font-medium">
+                <div className='mb-4'>
+                  <label className='text-sm font-medium'>
                     Requirements (Optional)
                   </label>
-                  <div className="flex gap-2 mt-1">
+                  <div className='flex gap-2 mt-1'>
                     <input
-                      type="text"
-                      placeholder="Add a requirement..."
-                      className="flex-1 border rounded-md p-2"
+                      type='text'
+                      placeholder='Add a requirement...'
+                      className='flex-1 border rounded-md p-2'
                       value={newReq}
                       onChange={(e) => setNewReq(e.target.value)}
                     />
                     <button
-                      onClick={() => addItem("requirements", newReq)}
-                      className="px-3 py-2 border rounded-md hover:bg-gray-100"
+                      onClick={() => addItem('requirements', newReq)}
+                      className='px-3 py-2 border rounded-md hover:bg-gray-100'
                     >
                       +
                     </button>
                   </div>
-                  <div className="flex flex-wrap gap-2 mt-2">
+                  <div className='flex flex-wrap gap-2 mt-2'>
                     {formData.requirements.map((req, i) => (
                       <span
                         key={i}
-                        className="bg-gray-200 px-2 py-1 rounded text-sm"
+                        className='bg-gray-200 px-2 py-1 rounded text-sm'
                       >
                         {req}
                       </span>
@@ -411,30 +611,30 @@ export default function JobPostingsPage() {
                 </div>
 
                 {/* Benefits */}
-                <div className="mb-6">
-                  <label className="text-sm font-medium">
+                <div className='mb-6'>
+                  <label className='text-sm font-medium'>
                     Benefits (Optional)
                   </label>
-                  <div className="flex gap-2 mt-1">
+                  <div className='flex gap-2 mt-1'>
                     <input
-                      type="text"
-                      placeholder="Add a benefit..."
-                      className="flex-1 border rounded-md p-2"
+                      type='text'
+                      placeholder='Add a benefit...'
+                      className='flex-1 border rounded-md p-2'
                       value={newBen}
                       onChange={(e) => setNewBen(e.target.value)}
                     />
                     <button
-                      onClick={() => addItem("benefits", newBen)}
-                      className="px-3 py-2 border rounded-md hover:bg-gray-100"
+                      onClick={() => addItem('benefits', newBen)}
+                      className='px-3 py-2 border rounded-md hover:bg-gray-100'
                     >
                       +
                     </button>
                   </div>
-                  <div className="flex flex-wrap gap-2 mt-2">
+                  <div className='flex flex-wrap gap-2 mt-2'>
                     {formData.benefits.map((ben, i) => (
                       <span
                         key={i}
-                        className="bg-gray-200 px-2 py-1 rounded text-sm"
+                        className='bg-gray-200 px-2 py-1 rounded text-sm'
                       >
                         {ben}
                       </span>
@@ -443,16 +643,16 @@ export default function JobPostingsPage() {
                 </div>
 
                 {/* Buttons */}
-                <div className="flex justify-end gap-2">
+                <div className='flex flex-col sm:flex-row justify-end gap-2'>
                   <button
-                    className="px-4 py-2 border rounded-md hover:bg-gray-100"
+                    className='px-4 py-2 border rounded-md hover:bg-gray-100 text-sm order-2 sm:order-1'
                     onClick={() => setOpen(false)}
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleSubmit}
-                    className="px-4 py-2 bg-green-700 text-white rounded-md hover:bg-green-800"
+                    className='px-4 py-2 bg-green-700 text-white rounded-md hover:bg-green-800 text-sm order-1 sm:order-2'
                   >
                     Post Job
                   </button>
@@ -461,14 +661,72 @@ export default function JobPostingsPage() {
             </div>
           )}
 
+          {/* Delete Confirmation Modal */}
+          {deleteConfirm.isOpen && (
+            <div className='fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4'>
+              <div className='bg-white rounded-lg shadow-xl w-full max-w-md p-6'>
+                <div className='text-center'>
+                  <div className='mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4'>
+                    <svg
+                      className='h-6 w-6 text-red-600'
+                      fill='none'
+                      viewBox='0 0 24 24'
+                      strokeWidth='1.5'
+                      stroke='currentColor'
+                    >
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        d='M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z'
+                      />
+                    </svg>
+                  </div>
+                  <h3 className='text-lg font-semibold text-gray-900 mb-2'>
+                    Delete Job Posting
+                  </h3>
+                  <p className='text-sm text-gray-600 mb-6'>
+                    Are you sure you want to delete &quot;
+                    {deleteConfirm.jobTitle}&quot;? This action cannot be
+                    undone.
+                  </p>
+                  <div className='flex flex-col sm:flex-row gap-3 justify-center'>
+                    <button
+                      onClick={handleDeleteCancel}
+                      disabled={isDeleting}
+                      className='px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50'
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => {
+                        console.log('Delete confirmation button clicked')
+                        handleDeleteConfirm()
+                      }}
+                      disabled={isDeleting}
+                      className='px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 min-w-[100px]'
+                    >
+                      {isDeleting ? (
+                        <div className='flex items-center justify-center'>
+                          <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
+                        </div>
+                      ) : (
+                        'Delete'
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Toast */}
           {showToast && (
-            <div className="fixed bottom-5 right-5 bg-green-600 text-white px-4 py-2 rounded-md shadow-md">
-              Job posted successfully!
+            <div className='fixed bottom-5 right-5 bg-green-600 text-white px-4 py-2 rounded-md shadow-md'>
+              {toastMessage}
             </div>
           )}
         </div>
       </div>
     </div>
-  );
+  )
 }
