@@ -124,12 +124,15 @@ export default function CreatePostPage() {
         JSON.stringify(postPayload, null, 2)
       )
 
-      const response = await postData(token, 'posts', postPayload)
+      const response = (await postData(token, 'posts', postPayload)) as {
+        data?: { id: number | string; [key: string]: unknown }
+        error?: { message?: string; [key: string]: unknown }
+      }
 
       if (response?.error) {
         console.error('Error creating post:', response.error)
         alert(
-          `Failed to create post: ${response.error.message || 'Unknown error'}`
+          `Failed to create post: ${response.error?.message || 'Unknown error'}`
         )
         setIsSubmitting(false)
         return
@@ -154,7 +157,7 @@ export default function CreatePostPage() {
             await uploadImage(
               token,
               'api::post.post',
-              response.data.id,
+              Number(response.data.id),
               'images',
               file
             )

@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import {
   MoreHorizontal,
   ThumbsUp,
@@ -10,16 +10,16 @@ import {
 } from 'lucide-react'
 
 // Helper functions (moved outside component for consistency)
-const getInitials = (name) => {
+const getInitials = (name: string) => {
   return name
     ? name
         .split(/\s+/)
-        .map((n) => n[0])
+        .map((n: string) => n[0])
         .join('')
     : '??'
 }
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string) => {
   const date = new Date(dateString)
   return date.toLocaleDateString('en-US', {
     month: 'short',
@@ -78,7 +78,21 @@ type CommentData = {
 }
 
 // Function to map the deeply nested Strapi API response into a flattened structure
-const mapStrapiComment = (strapiComment) => {
+const mapStrapiComment = (strapiComment: {
+  id: string | number
+  attributes: {
+    user?: {
+      data?: {
+        attributes?: {
+          username?: string
+          email?: string
+        }
+      }
+    }
+    content?: string
+    sentAt?: string
+  }
+}) => {
   if (!strapiComment || !strapiComment.attributes) return null
 
   const { id, attributes } = strapiComment
@@ -113,7 +127,11 @@ const mapStrapiComment = (strapiComment) => {
 
 // --- SUB COMPONENTS ---
 
-const UserAvatar = ({ user }) =>
+const UserAvatar = ({
+  user,
+}: {
+  user: { avatarUrl?: string | null; name: string; initials: string }
+}) =>
   user.avatarUrl ? (
     <img
       src={user.avatarUrl}
@@ -254,7 +272,7 @@ export default function PostCard({ post, user }: Props) {
       // Map the nested Strapi data to a flatter structure for the UI
       const mappedComments = json.data
         .map(mapStrapiComment)
-        .filter((c) => c !== null)
+        .filter((c: unknown) => c !== null)
 
       setPostComments(mappedComments)
     } catch (err) {
