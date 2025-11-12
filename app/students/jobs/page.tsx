@@ -1,164 +1,175 @@
-"use client";
-import React, { useState } from "react";
-import { HiOutlineBuildingOffice2 } from "react-icons/hi2";
-import { FiMapPin, FiDollarSign, FiCalendar } from "react-icons/fi";
-import { fetchData } from "@/lib/strapi/strapiData";
-import JobDetailsModal from "@/components/student-section/JobDetailsModal";
+'use client'
+import React, { useState } from 'react'
+import { HiOutlineBuildingOffice2 } from 'react-icons/hi2'
+import { FiMapPin, FiDollarSign, FiCalendar } from 'react-icons/fi'
+import { fetchData } from '@/lib/strapi/strapiData'
+import JobDetailsModal from '@/components/student-section/JobDetailsModal'
 
 interface Job {
-  id: number;
-  title: string;
-  company: string;
-  location: string;
-  salary: string;
-  postedDate: string;
-  description: string;
-  tags: string[];
-  type: string;
+  id: number
+  title: string
+  company: string
+  location: string
+  salary: string
+  postedDate: string
+  description: string
+  tags: string[]
+  type: string
 }
 
-const token = localStorage.getItem("fomo_token");
-const data = await fetchData(token, "jobs?populate=*");
+const token = localStorage.getItem('fomo_token')
+const data = (await fetchData(token, 'jobs?populate=*')) as {
+  data?: Array<{
+    id?: number
+    title?: string
+    company?: string
+    location?: string
+    date?: string
+    description?: string
+    salary?: string
+    skill?: string[]
+  }>
+}
 
-const mockJobs: Job[] = data.data.map((job: any) => {
+const mockJobs: Job[] = (data.data || []).map((job) => {
   return {
-    id: job.id,
-    title: job.title,
-    company: job.company,
-    location: job.location,
-    postedDate: job.date,
-    description: job.description,
-    salary: job.salary,
-    tags: job.skill,
-    type: "internship",
-  };
-});
+    id: job.id || 0,
+    title: job.title || 'Unknown Job',
+    company: job.company || 'Unknown Company',
+    location: job.location || 'Unknown Location',
+    postedDate: job.date || 'Unknown Date',
+    description: job.description || 'No description',
+    salary: job.salary || 'Not specified',
+    tags: job.skill || [],
+    type: 'internship',
+  }
+})
 
-console.log("Fetched jobs:", mockJobs);
+console.log('Fetched jobs:', mockJobs)
 
 const employers = [
   {
-    name: "Connect",
-    joined: "Sep 12, 2025",
-    description: "",
+    name: 'Connect',
+    joined: 'Sep 12, 2025',
+    description: '',
     tag: null,
     website: null,
   },
   {
-    name: "uplyfto pvt ltd",
-    joined: "Sep 12, 2025",
-    description: "",
+    name: 'uplyfto pvt ltd',
+    joined: 'Sep 12, 2025',
+    description: '',
     tag: null,
     website: null,
   },
   {
-    name: "Connect",
-    joined: "Aug 3, 2025",
-    description: "AI that automates in upskilling and networking",
-    tag: "ed tech",
+    name: 'Connect',
+    joined: 'Aug 3, 2025',
+    description: 'AI that automates in upskilling and networking',
+    tag: 'ed tech',
     website: null,
   },
   {
-    name: "FOOMO",
-    joined: "Jul 28, 2025",
-    description: "AI that automates in upskilling and networking",
+    name: 'FOOMO',
+    joined: 'Jul 28, 2025',
+    description: 'AI that automates in upskilling and networking',
     tag: null,
-    website: "#",
+    website: '#',
   },
-];
+]
 
 export default function JobsPage() {
-  const [tab, setTab] = useState<"jobs" | "employers">("jobs");
-  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [tab, setTab] = useState<'jobs' | 'employers'>('jobs')
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const handleJobClick = (job: Job) => {
-    setSelectedJob(job);
-    setIsModalOpen(true);
-  };
+    setSelectedJob(job)
+    setIsModalOpen(true)
+  }
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedJob(null);
-  };
+    setIsModalOpen(false)
+    setSelectedJob(null)
+  }
 
   const handleApply = () => {
     alert(
       `Application submitted for ${selectedJob?.title} at ${selectedJob?.company}!`
-    );
-    handleCloseModal();
-  };
+    )
+    handleCloseModal()
+  }
 
   return (
-    <div className="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-20 bg-white min-h-screen">
-      <section className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-extrabold mb-6">Jobs & Employers</h1>
-        <div className="flex gap-2 mb-8">
+    <div className='w-full px-4 sm:px-6 lg:px-8 pt-6 pb-20 bg-white min-h-screen'>
+      <section className='max-w-6xl mx-auto'>
+        <h1 className='text-3xl font-extrabold mb-6'>Jobs & Employers</h1>
+        <div className='flex gap-2 mb-8'>
           <button
             className={`px-5 py-2 rounded-xl border-2 font-medium shadow-sm focus:outline-none focus:ring-2 ring-offset-2 transition-all duration-100 ${
-              tab === "jobs"
-                ? "bg-white border-[#0f4f4a] text-black"
-                : "bg-white border-[#f1f1f1] text-black"
+              tab === 'jobs'
+                ? 'bg-white border-[#0f4f4a] text-black'
+                : 'bg-white border-[#f1f1f1] text-black'
             }`}
-            onClick={() => setTab("jobs")}
+            onClick={() => setTab('jobs')}
           >
-            College Jobs{" "}
-            <span className="ml-1 text-gray-500">({mockJobs.length})</span>
+            College Jobs{' '}
+            <span className='ml-1 text-gray-500'>({mockJobs.length})</span>
           </button>
           <button
             className={`px-5 py-2 rounded-xl border-2 font-medium shadow-sm focus:outline-none focus:ring-2 ring-offset-2 transition-all duration-100 ${
-              tab === "employers"
-                ? "bg-white border-[#0f4f4a] text-black"
-                : "bg-white border-[#f1f1f1] text-black"
+              tab === 'employers'
+                ? 'bg-white border-[#0f4f4a] text-black'
+                : 'bg-white border-[#f1f1f1] text-black'
             }`}
-            onClick={() => setTab("employers")}
+            onClick={() => setTab('employers')}
           >
-            Employers <span className="ml-1">(4)</span>
+            Employers <span className='ml-1'>(4)</span>
           </button>
         </div>
 
-        {tab === "jobs" && (
-          <div className="space-y-4">
+        {tab === 'jobs' && (
+          <div className='space-y-4'>
             {mockJobs.map((job: Job) => (
               <div
                 key={job.id}
-                className="bg-white rounded-2xl shadow-sm border border-[#e5e7eb] p-4 sm:p-6 hover:shadow-md transition-shadow cursor-pointer"
+                className='bg-white rounded-2xl shadow-sm border border-[#e5e7eb] p-4 sm:p-6 hover:shadow-md transition-shadow cursor-pointer'
                 onClick={() => handleJobClick(job)}
               >
                 {/* Desktop Layout */}
-                <div className="hidden sm:flex items-center justify-between">
-                  <div className="flex items-center gap-5 flex-1">
-                    <div className="bg-gray-100 rounded-full w-16 h-16 flex items-center justify-center flex-shrink-0">
-                      <HiOutlineBuildingOffice2 className="text-3xl text-gray-400" />
+                <div className='hidden sm:flex items-center justify-between'>
+                  <div className='flex items-center gap-5 flex-1'>
+                    <div className='bg-gray-100 rounded-full w-16 h-16 flex items-center justify-center flex-shrink-0'>
+                      <HiOutlineBuildingOffice2 className='text-3xl text-gray-400' />
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xl font-semibold">
+                    <div className='flex-1'>
+                      <div className='flex items-center gap-2 mb-1'>
+                        <span className='text-xl font-semibold'>
                           {job.title}
                         </span>
-                        <span className="text-gray-500 text-sm">
+                        <span className='text-gray-500 text-sm'>
                           {job.company}
                         </span>
                       </div>
-                      <div className="flex items-center gap-4 text-gray-500 text-sm mb-2 flex-wrap">
-                        <span className="flex items-center gap-1">
+                      <div className='flex items-center gap-4 text-gray-500 text-sm mb-2 flex-wrap'>
+                        <span className='flex items-center gap-1'>
                           <FiMapPin /> {job.location}
                         </span>
-                        <span className="flex items-center gap-1">
-                          {"₹" + job.salary}
+                        <span className='flex items-center gap-1'>
+                          {'₹' + job.salary}
                         </span>
-                        <span className="flex items-center gap-1">
+                        <span className='flex items-center gap-1'>
                           <FiCalendar /> Posted {job.postedDate}
                         </span>
                       </div>
-                      <div className="mb-2 text-black line-clamp-2">
+                      <div className='mb-2 text-black line-clamp-2'>
                         {job.description}
                       </div>
-                      <div className="flex gap-2 flex-wrap">
+                      <div className='flex gap-2 flex-wrap'>
                         {job.tags.map((tag: string) => (
                           <span
                             key={tag}
-                            className="bg-gray-100 text-gray-700 rounded-full px-3 py-1 text-xs font-medium"
+                            className='bg-gray-100 text-gray-700 rounded-full px-3 py-1 text-xs font-medium'
                           >
                             {tag}
                           </span>
@@ -167,10 +178,10 @@ export default function JobsPage() {
                     </div>
                   </div>
                   <button
-                    className="bg-[#185c5a] hover:bg-[#134846] text-white px-7 py-3 rounded-xl font-semibold text-lg transition-colors flex-shrink-0 ml-4"
+                    className='bg-[#185c5a] hover:bg-[#134846] text-white px-7 py-3 rounded-xl font-semibold text-lg transition-colors flex-shrink-0 ml-4'
                     onClick={(e) => {
-                      e.stopPropagation();
-                      handleJobClick(job);
+                      e.stopPropagation()
+                      handleJobClick(job)
                     }}
                   >
                     View Details
@@ -178,48 +189,48 @@ export default function JobsPage() {
                 </div>
 
                 {/* Mobile Layout */}
-                <div className="sm:hidden">
-                  <div className="flex items-start gap-3 mb-3">
-                    <div className="bg-gray-100 rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0">
-                      <HiOutlineBuildingOffice2 className="text-2xl text-gray-400" />
+                <div className='sm:hidden'>
+                  <div className='flex items-start gap-3 mb-3'>
+                    <div className='bg-gray-100 rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0'>
+                      <HiOutlineBuildingOffice2 className='text-2xl text-gray-400' />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-1 truncate">
+                    <div className='flex-1 min-w-0'>
+                      <h3 className='text-lg font-semibold text-gray-900 mb-1 truncate'>
                         {job.title}
                       </h3>
-                      <p className="text-sm text-gray-600 mb-2">
+                      <p className='text-sm text-gray-600 mb-2'>
                         {job.company}
                       </p>
-                      <div className="flex flex-col gap-1 text-xs text-gray-500 mb-2">
-                        <span className="flex items-center gap-1">
-                          <FiMapPin className="w-3 h-3" /> {job.location}
+                      <div className='flex flex-col gap-1 text-xs text-gray-500 mb-2'>
+                        <span className='flex items-center gap-1'>
+                          <FiMapPin className='w-3 h-3' /> {job.location}
                         </span>
-                        <span className="flex items-center gap-1">
-                          {"₹" + job.salary}
+                        <span className='flex items-center gap-1'>
+                          {'₹' + job.salary}
                         </span>
-                        <span className="flex items-center gap-1">
-                          <FiCalendar className="w-3 h-3" /> Posted{" "}
+                        <span className='flex items-center gap-1'>
+                          <FiCalendar className='w-3 h-3' /> Posted{' '}
                           {job.postedDate}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="mb-3">
-                    <p className="text-sm text-gray-700 line-clamp-2 mb-2">
+                  <div className='mb-3'>
+                    <p className='text-sm text-gray-700 line-clamp-2 mb-2'>
                       {job.description}
                     </p>
-                    <div className="flex gap-1 flex-wrap">
+                    <div className='flex gap-1 flex-wrap'>
                       {job.tags.slice(0, 3).map((tag: string) => (
                         <span
                           key={tag}
-                          className="bg-gray-100 text-gray-700 rounded-full px-2 py-1 text-xs font-medium"
+                          className='bg-gray-100 text-gray-700 rounded-full px-2 py-1 text-xs font-medium'
                         >
                           {tag}
                         </span>
                       ))}
                       {job.tags.length > 3 && (
-                        <span className="bg-gray-100 text-gray-700 rounded-full px-2 py-1 text-xs font-medium">
+                        <span className='bg-gray-100 text-gray-700 rounded-full px-2 py-1 text-xs font-medium'>
                           +{job.tags.length - 3} more
                         </span>
                       )}
@@ -227,10 +238,10 @@ export default function JobsPage() {
                   </div>
 
                   <button
-                    className="w-full bg-[#185c5a] hover:bg-[#134846] text-white py-3 rounded-lg font-medium text-sm transition-colors"
+                    className='w-full bg-[#185c5a] hover:bg-[#134846] text-white py-3 rounded-lg font-medium text-sm transition-colors'
                     onClick={(e) => {
-                      e.stopPropagation();
-                      handleJobClick(job);
+                      e.stopPropagation()
+                      handleJobClick(job)
                     }}
                   >
                     View Details
@@ -241,32 +252,32 @@ export default function JobsPage() {
           </div>
         )}
 
-        {tab === "employers" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {tab === 'employers' && (
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
             {employers.map((emp, idx) => (
               <div
                 key={emp.name + idx}
-                className="bg-white rounded-2xl shadow-sm border border-[#e5e7eb] p-6 flex flex-col min-h-[180px] justify-between"
+                className='bg-white rounded-2xl shadow-sm border border-[#e5e7eb] p-6 flex flex-col min-h-[180px] justify-between'
               >
-                <div className="flex items-center gap-5 mb-2">
-                  <div className="bg-gray-100 rounded-full w-16 h-16 flex items-center justify-center">
-                    <HiOutlineBuildingOffice2 className="text-3xl text-gray-400" />
+                <div className='flex items-center gap-5 mb-2'>
+                  <div className='bg-gray-100 rounded-full w-16 h-16 flex items-center justify-center'>
+                    <HiOutlineBuildingOffice2 className='text-3xl text-gray-400' />
                   </div>
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-lg font-semibold">{emp.name}</span>
+                    <div className='flex items-center gap-2 mb-1'>
+                      <span className='text-lg font-semibold'>{emp.name}</span>
                       {emp.tag && (
-                        <span className="bg-gray-100 text-gray-700 rounded-full px-3 py-1 text-xs font-medium ml-2">
+                        <span className='bg-gray-100 text-gray-700 rounded-full px-3 py-1 text-xs font-medium ml-2'>
                           {emp.tag}
                         </span>
                       )}
                     </div>
                     {emp.description && (
-                      <div className="text-black text-sm mb-1">
+                      <div className='text-black text-sm mb-1'>
                         {emp.description}
                       </div>
                     )}
-                    <div className="text-gray-500 text-sm">
+                    <div className='text-gray-500 text-sm'>
                       Joined {emp.joined}
                     </div>
                   </div>
@@ -274,9 +285,9 @@ export default function JobsPage() {
                 {emp.website && (
                   <a
                     href={emp.website}
-                    className="mt-4 inline-block px-6 py-2 rounded-xl border border-[#e5e7eb] bg-white text-black font-semibold text-base text-center hover:bg-gray-50 transition"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    className='mt-4 inline-block px-6 py-2 rounded-xl border border-[#e5e7eb] bg-white text-black font-semibold text-base text-center hover:bg-gray-50 transition'
+                    target='_blank'
+                    rel='noopener noreferrer'
                   >
                     Visit Website
                   </a>
@@ -295,5 +306,5 @@ export default function JobsPage() {
         />
       </section>
     </div>
-  );
+  )
 }

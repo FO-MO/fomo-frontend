@@ -20,16 +20,31 @@ export default function SearchPage() {
       try {
         setLoading(true)
         const token = localStorage.getItem('fomo_token')
-        const data = await fetchData(token, 'student-profiles?populate=*')
+        const data = (await fetchData(
+          token,
+          'student-profiles?populate=*'
+        )) as {
+          data?: Array<{
+            id?: string | number
+            documentId?: string
+            studentId?: string
+            name?: string
+            email?: string
+            skills?: string[]
+            followers?: unknown[]
+            following?: unknown[]
+          }>
+        }
 
-        const fetchedProfiles: Profile[] = data.data.map((search: any) => ({
-          id: search.id,
-          documentId: search.studentId,
-          name: search.name,
+        const fetchedProfiles: Profile[] = (data.data || []).map((search) => ({
+          id: Number(search.id) || 0,
+          documentId: search.documentId?.toString(),
+          studentId: search.studentId || 'unknown',
+          name: search.name || 'Unknown User',
           email: search.email || 'No email',
           skills: search.skills || [],
-          followers: search.followers || [],
-          following: search.following || [],
+          followers: (search.followers || []).map(String),
+          following: (search.following || []).map(String),
           isFollowing: false,
           avatarUrl: null,
         }))
