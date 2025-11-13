@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import PartnershipCard from '@/components/employee-section/PartnershipCard'
 import SubBar from '@/components/subBar'
-import { fetchFromBackend } from '@/lib/tools'
+import { fetchFromBackend, postFetchFromBackend } from '@/lib/tools'
 
 interface Partnership {
   id: string
@@ -91,6 +91,122 @@ export default function PartnershipsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [tierFilter, setTierFilter] = useState('All Tiers')
   const [locationFilter, setLocationFilter] = useState('All Locations')
+
+  // Modal state for job posting
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showToast, setShowToast] = useState(false)
+  const [toastMessage, setToastMessage] = useState('')
+  const [selectedCollege, setSelectedCollege] = useState<{
+    name: string
+    id: string
+  } | null>(null)
+
+  // Form state
+  const [formData, setFormData] = useState({
+    title: '',
+    jobType: 'Full Time',
+    experience: 'Entry Level',
+    deadline: '',
+    description: '',
+    skills: [] as string[],
+    requirements: [] as string[],
+    benefits: [] as string[],
+  })
+
+  const [newSkill, setNewSkill] = useState('')
+  const [newReq, setNewReq] = useState('')
+  const [newBen, setNewBen] = useState('')
+  const [errors, setErrors] = useState<{ [key: string]: string }>({})
+
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {}
+    if (formData.title.trim().length < 5)
+      newErrors.title = 'Job title must be at least 5 characters'
+    if (formData.description.trim().length < 50)
+      newErrors.description = 'Job description must be at least 50 characters'
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const addItem = (
+    field: 'skills' | 'requirements' | 'benefits',
+    value: string
+  ) => {
+    if (!value.trim()) return
+    setFormData({ ...formData, [field]: [...formData[field], value.trim()] })
+    if (field === 'skills') setNewSkill('')
+    if (field === 'requirements') setNewReq('')
+    if (field === 'benefits') setNewBen('')
+  }
+
+  const handlePostJobClick = (college: { name: string; id: string }) => {
+    setSelectedCollege(college)
+    setIsModalOpen(true)
+  }
+
+  const handleFormSubmit = () => {
+    if (!validateForm()) return
+    setIsConfirmOpen(true)
+  }
+
+  const handleConfirmSubmit = async () => {
+    setIsSubmitting(true)
+
+    const payload = {
+      data: {
+        data: {
+          title: formData.title,
+          jobType: formData.jobType,
+          experience: formData.experience,
+          deadline: formData.deadline || null,
+          description: formData.description,
+          skills: formData.skills,
+          requirements: formData.requirements,
+          benefits: formData.benefits,
+          status: 'Active',
+        },
+      },
+    }
+
+    try {
+      await postFetchFromBackend('collegejobpostings', payload)
+
+      // Success
+      setIsConfirmOpen(false)
+      setIsModalOpen(false)
+      setToastMessage(`Job posted successfully to ${selectedCollege?.name}!`)
+      setShowToast(true)
+
+      // Reset form
+      setFormData({
+        title: '',
+        jobType: 'Full Time',
+        experience: 'Entry Level',
+        deadline: '',
+        description: '',
+        skills: [],
+        requirements: [],
+        benefits: [],
+      })
+
+      setTimeout(() => setShowToast(false), 3000)
+    } catch (error) {
+      console.error('Error posting job:', error)
+      alert(
+        `Failed to post job: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleCancelConfirm = () => {
+    setIsConfirmOpen(false)
+  }
 
   if (loading) {
     return (
@@ -277,7 +393,11 @@ export default function PartnershipsPage() {
         {/* Partnership Cards Grid */}
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
           {filteredPartnerships.map((partnership) => (
-            <PartnershipCard key={partnership.id} {...partnership} />
+            <PartnershipCard
+              key={partnership.id}
+              {...partnership}
+              onPostJobClick={handlePostJobClick}
+            />
           ))}
         </div>
 
@@ -307,6 +427,290 @@ export default function PartnershipsPage() {
           </div>
         )}
       </div>
+
+      {/* Job Posting Modal */}
+      {isModalOpen && (
+        <div className='fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4'>
+          <div className='bg-white rounded-lg shadow-lg w-full max-w-2xl p-4 sm:p-6 relative overflow-y-auto max-h-[90vh]'>
+            <button
+              className='absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl sm:text-base'
+              onClick={() => setIsModalOpen(false)}
+            >
+              ✕
+            </button>
+            <h2 className='text-lg sm:text-xl font-semibold mb-1 pr-8'>
+              Post Job to {selectedCollege?.name}
+            </h2>
+            <p className='text-xs sm:text-sm text-gray-500 mb-4'>
+              Fill out the details below to post a new job opening to this
+              college.
+            </p>
+
+            {/* Job Title */}
+            <div className='mb-4'>
+              <label className='text-xs sm:text-sm font-medium'>
+                Job Title
+              </label>
+              <input
+                type='text'
+                placeholder='e.g., Software Engineer, Product Manager'
+                className='mt-1 w-full border rounded-md p-2 text-sm'
+                value={formData.title}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
+              />
+              {errors.title && (
+                <p className='text-red-500 text-xs mt-1'>{errors.title}</p>
+              )}
+            </div>
+
+            {/* Job Type / Experience */}
+            <div className='flex flex-col sm:flex-row gap-4 mb-4'>
+              <div className='flex-1'>
+                <label className='text-xs sm:text-sm font-medium'>
+                  Job Type
+                </label>
+                <select
+                  className='mt-1 w-full border rounded-md p-2 text-sm'
+                  value={formData.jobType}
+                  onChange={(e) =>
+                    setFormData({ ...formData, jobType: e.target.value })
+                  }
+                >
+                  <option>Full Time</option>
+                  <option>Part Time</option>
+                  <option>Internship</option>
+                  <option>Contract</option>
+                </select>
+              </div>
+              <div className='flex-1'>
+                <label className='text-xs sm:text-sm font-medium'>
+                  Experience Level
+                </label>
+                <select
+                  className='mt-1 w-full border rounded-md p-2 text-sm'
+                  value={formData.experience}
+                  onChange={(e) =>
+                    setFormData({ ...formData, experience: e.target.value })
+                  }
+                >
+                  <option>Entry Level</option>
+                  <option>Mid Level</option>
+                  <option>Senior Level</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Application Deadline */}
+            <div className='mb-4'>
+              <label className='text-xs sm:text-sm font-medium'>
+                Application Deadline (Optional)
+              </label>
+              <input
+                type='date'
+                className='mt-1 w-full border rounded-md p-2 text-sm'
+                value={formData.deadline}
+                onChange={(e) =>
+                  setFormData({ ...formData, deadline: e.target.value })
+                }
+              />
+            </div>
+
+            {/* Job Description */}
+            <div className='mb-4'>
+              <label className='text-xs sm:text-sm font-medium'>
+                Job Description
+              </label>
+              <textarea
+                placeholder="Describe the role, responsibilities, and what you're looking for in a candidate..."
+                className='mt-1 w-full border rounded-md p-2 h-20 sm:h-24 text-sm'
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+              />
+              {errors.description && (
+                <p className='text-red-500 text-xs mt-1'>
+                  {errors.description}
+                </p>
+              )}
+            </div>
+
+            {/* Skills */}
+            <div className='mb-4'>
+              <label className='text-sm font-medium'>
+                Skills Required (Optional)
+              </label>
+              <div className='flex gap-2 mt-1'>
+                <input
+                  type='text'
+                  placeholder='Add a skill...'
+                  className='flex-1 border rounded-md p-2'
+                  value={newSkill}
+                  onChange={(e) => setNewSkill(e.target.value)}
+                />
+                <button
+                  onClick={() => addItem('skills', newSkill)}
+                  className='px-3 py-2 border rounded-md hover:bg-gray-100'
+                >
+                  +
+                </button>
+              </div>
+              <div className='flex flex-wrap gap-2 mt-2'>
+                {formData.skills.map((skill, i) => (
+                  <span
+                    key={i}
+                    className='bg-gray-200 px-2 py-1 rounded text-sm'
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Requirements */}
+            <div className='mb-4'>
+              <label className='text-sm font-medium'>
+                Requirements (Optional)
+              </label>
+              <div className='flex gap-2 mt-1'>
+                <input
+                  type='text'
+                  placeholder='Add a requirement...'
+                  className='flex-1 border rounded-md p-2'
+                  value={newReq}
+                  onChange={(e) => setNewReq(e.target.value)}
+                />
+                <button
+                  onClick={() => addItem('requirements', newReq)}
+                  className='px-3 py-2 border rounded-md hover:bg-gray-100'
+                >
+                  +
+                </button>
+              </div>
+              <div className='flex flex-wrap gap-2 mt-2'>
+                {formData.requirements.map((req, i) => (
+                  <span
+                    key={i}
+                    className='bg-gray-200 px-2 py-1 rounded text-sm'
+                  >
+                    {req}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Benefits */}
+            <div className='mb-6'>
+              <label className='text-sm font-medium'>Benefits (Optional)</label>
+              <div className='flex gap-2 mt-1'>
+                <input
+                  type='text'
+                  placeholder='Add a benefit...'
+                  className='flex-1 border rounded-md p-2'
+                  value={newBen}
+                  onChange={(e) => setNewBen(e.target.value)}
+                />
+                <button
+                  onClick={() => addItem('benefits', newBen)}
+                  className='px-3 py-2 border rounded-md hover:bg-gray-100'
+                >
+                  +
+                </button>
+              </div>
+              <div className='flex flex-wrap gap-2 mt-2'>
+                {formData.benefits.map((ben, i) => (
+                  <span
+                    key={i}
+                    className='bg-gray-200 px-2 py-1 rounded text-sm'
+                  >
+                    {ben}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Buttons */}
+            <div className='flex flex-col sm:flex-row justify-end gap-2'>
+              <button
+                className='px-4 py-2 border rounded-md hover:bg-gray-100 text-sm order-2 sm:order-1'
+                onClick={() => setIsModalOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleFormSubmit}
+                className='px-4 py-2 bg-teal-700 text-white rounded-md hover:bg-teal-800 text-sm order-1 sm:order-2'
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {isConfirmOpen && (
+        <div className='fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4'>
+          <div className='bg-white rounded-lg shadow-xl w-full max-w-md p-6'>
+            <div className='text-center'>
+              <div className='mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 mb-4'>
+                <svg
+                  className='h-6 w-6 text-yellow-600'
+                  fill='none'
+                  viewBox='0 0 24 24'
+                  strokeWidth='1.5'
+                  stroke='currentColor'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    d='M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z'
+                  />
+                </svg>
+              </div>
+              <h3 className='text-lg font-semibold text-gray-900 mb-2'>
+                Confirm Job Posting
+              </h3>
+              <p className='text-sm text-gray-600 mb-6'>
+                This job posting will be sent to {selectedCollege?.name} and{' '}
+                <strong>cannot be edited</strong> after submission. Are you sure
+                you want to continue?
+              </p>
+              <div className='flex flex-col sm:flex-row gap-3 justify-center'>
+                <button
+                  onClick={handleCancelConfirm}
+                  disabled={isSubmitting}
+                  className='px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50'
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmSubmit}
+                  disabled={isSubmitting}
+                  className='px-4 py-2 bg-teal-700 text-white rounded-md hover:bg-teal-800 transition-colors disabled:opacity-50 min-w-[100px]'
+                >
+                  {isSubmitting ? (
+                    <div className='flex items-center justify-center'>
+                      <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
+                    </div>
+                  ) : (
+                    'Confirm'
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast */}
+      {showToast && (
+        <div className='fixed bottom-5 right-5 bg-teal-700 text-white px-4 py-2 rounded-md shadow-md z-50'>
+          {toastMessage}
+        </div>
+      )}
     </div>
   )
 }

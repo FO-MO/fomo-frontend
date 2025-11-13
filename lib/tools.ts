@@ -1,38 +1,37 @@
-"use client";
+'use client'
+import axios from 'axios'
 
+//JSON---->
 export async function fetchFromBackend(
   endpoint: string,
   {
     backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ||
-      "https://tbs9k5m4-1337.inc1.devtunnels.ms",
-    token = localStorage.getItem("fomo_token"),
+      'https://tbs9k5m4-1337.inc1.devtunnels.ms',
+    token = localStorage.getItem('fomo_token'),
     options = {},
   }: {
-    backendUrl?: string;
-    token?: string | null;
-    options?: RequestInit;
+    backendUrl?: string
+    token?: string | null
+    options?: Record<string, unknown>
   } = {}
 ) {
   try {
-    const res = await fetch(`${backendUrl}/api/${endpoint}`, {
+    const config = {
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-        ...(options.headers || {}),
+        'Content-Type': 'application/json',
+        ...((options.headers as Record<string, string>) || {}),
       },
       ...options,
-    });
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch ${endpoint}: ${res.statusText}`);
     }
 
-    const data = await res.json();
-    console.log(`Fetched ${endpoint}:`, data.data);
-    return data.data;
+    const response = await axios.get(`${backendUrl}/api/${endpoint}`, config)
+
+    console.log(`Fetched ${endpoint}:`, response.data.data)
+    return response.data.data
   } catch (error) {
-    console.error(`Error fetching ${endpoint}:`, error);
-    throw error;
+    console.error(`Error fetching ${endpoint}:`, error)
+    throw error
   }
 }
 
@@ -42,44 +41,121 @@ export async function postFetchFromBackend(
   payload: Record<string, unknown>,
   {
     backendUrl = process.env.NEXT_PUBLIC_STRAPI_URL ||
-      "https://tbs9k5m4-1337.inc1.devtunnels.ms",
-    token = localStorage.getItem("fomo_token"),
+      'https://tbs9k5m4-1337.inc1.devtunnels.ms',
+    token = localStorage.getItem('fomo_token'),
   }: {
-    backendUrl?: string;
-    token?: string | null;
+    backendUrl?: string
+    token?: string | null
   } = {}
 ) {
   try {
-    console.log(`🚀 POST to ${endpoint}:`, payload);
+    console.log(`🚀 POST to ${endpoint}:`, payload)
 
-    const res = await fetch(`${backendUrl}/api/${endpoint}`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+    const response = await axios.post(
+      `${backendUrl}/api/${endpoint}`,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    )
 
-    const data = await res.json();
-    console.log(`📡 Response from ${endpoint}:`, data);
-
-    if (!res.ok) {
-      console.error(`❌ POST failed for ${endpoint}:`, data);
-      throw new Error(
-        data.error?.message ||
-          `Failed to POST to ${endpoint}: ${res.statusText}`
-      );
-    }
-
-    console.log(`✅ Successfully posted to ${endpoint}:`, data.data);
-    return data; // Return full response for POST requests
+    console.log(`📡 Response from ${endpoint}:`, response.data)
+    console.log(`✅ Successfully posted to ${endpoint}:`, response.data.data)
+    return response.data // Return full response for POST requests
   } catch (error) {
-    console.error(`💥 Error posting to ${endpoint}:`, error);
-    throw error;
+    console.error(`💥 Error posting to ${endpoint}:`, error)
+    throw error
+  }
+}
+
+// DELETE request for college job application...
+export async function deletecollegejobposting(id: string) {
+  const token = localStorage.getItem('fomo_token')
+  try {
+    const response = await axios.delete(
+      `${backendurl}/collegejobpostings/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+    console.log('Deleted:', response.data)
+  } catch (err) {
+    console.log(err)
+  }
+}
+
+// DELETE request for global job application..
+export async function deleteglobaljobposting(id: string) {
+  const token = localStorage.getItem('fomo_token')
+
+  // Try both possible endpoints
+  const endpoints = [`${backendurl}/api/globaljobpostings/${id}`]
+
+  for (const endpoint of endpoints) {
+    try {
+      console.log('Attempting to delete global job posting with ID:', id)
+      console.log('Using URL:', endpoint)
+      console.log('Token exists:', token ? 'yes' : 'no')
+
+      const response = await axios.delete(endpoint, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      console.log('Delete response:', response.data)
+      return response.data
+    } catch (err) {
+      console.log(`Failed with endpoint ${endpoint}:`, err)
+      if (axios.isAxiosError(err)) {
+        console.log('Status:', err.response?.status)
+        console.log('Response data:', err.response?.data)
+      }
+
+      // If this is the last endpoint, throw the error
+      if (endpoint === endpoints[endpoints.length - 1]) {
+        throw err
+      }
+    }
+  }
+}
+
+//PUT request for global job application..
+export async function putglobaljobposting(
+  id: string,
+  payload: Record<string, unknown>
+) {
+  const token = localStorage.getItem('fomo_token')
+  try {
+    console.log(`🔄 PUT to globaljobpostings/${id}:`, payload)
+
+    const response = await axios.put(
+      `${backendurl}/api/globaljobpostings/${id}`,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+
+    console.log(`📡 PUT Response:`, response.data)
+    return response.data
+  } catch (err) {
+    console.error('Error updating global job posting:', err)
+    if (axios.isAxiosError(err)) {
+      console.log('Status:', err.response?.status)
+      console.log('Response data:', err.response?.data)
+    }
+    throw err
   }
 }
 
 export const backendurl =
   process.env.NEXT_PUBLIC_BACKEND_URL ||
-  "https://tbs9k5m4-1337.inc1.devtunnels.ms";
+  'https://tbs9k5m4-1337.inc1.devtunnels.ms'

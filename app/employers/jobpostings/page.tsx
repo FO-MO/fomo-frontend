@@ -2,8 +2,12 @@
 
 import React, { useState, useEffect } from 'react'
 import SubBar from '@/components/subBar'
-import { fetchFromBackend, postFetchFromBackend } from '@/lib/tools'
-import axios from 'axios'
+import {
+  fetchFromBackend,
+  postFetchFromBackend,
+  deleteglobaljobposting,
+  putglobaljobposting,
+} from '@/lib/tools'
 
 // Define types for the job data
 interface JobData {
@@ -31,14 +35,18 @@ export default function JobPostingsPage() {
   const [loading, setLoading] = useState(true)
   const [deleteConfirm, setDeleteConfirm] = useState<{
     isOpen: boolean
-    jobId: string | null
+    jobId: string
     jobTitle: string
   }>({
     isOpen: false,
-    jobId: null,
+    jobId: '',
     jobTitle: '',
   })
   const [isDeleting, setIsDeleting] = useState(false)
+
+  // Edit state
+  const [isEditing, setIsEditing] = useState(false)
+  const [editingJobId, setEditingJobId] = useState<string>('')
 
   // Fetch jobs on component mount
   useEffect(() => {
@@ -47,7 +55,8 @@ export default function JobPostingsPage() {
         setLoading(true)
         const res = await fetchFromBackend('globaljobpostings?populate=*')
         console.log('Fetched jobs:', res) // Debug log
-        setJobs(res || [])
+        const sortedJobs = sortJobsByIdDesc(res || [])
+        setJobs(sortedJobs)
       } catch (error) {
         console.error('Error fetching jobs:', error)
         setJobs([])
@@ -76,6 +85,15 @@ export default function JobPostingsPage() {
       console.log('Delete confirmation modal should be visible now')
     }
   }, [deleteConfirm])
+
+  // Helper function to sort jobs by decreasing ID
+  const sortJobsByIdDesc = (jobsArray: Array<Record<string, unknown>>) => {
+    return jobsArray.sort((a, b) => {
+      const aId = Number(a.id) || 0
+      const bId = Number(b.id) || 0
+      return bId - aId // Descending order (newest first)
+    })
+  }
 
   //FORM DATA
   const [formData, setFormData] = useState({
@@ -111,6 +129,9 @@ export default function JobPostingsPage() {
     if (!validateForm()) return
 
     // Your Strapi collection only has ONE field called 'data' which is JSON YUUUHH THAS THE POINT
+
+    //every payload has a data field, and that contains all the data of fields you made...
+    //Here data is a json field you made..your just dumping some data in it
     const payload = {
       data: {
         data: {
@@ -132,14 +153,26 @@ export default function JobPostingsPage() {
     console.log(' Sending to JSON field:', JSON.stringify(payload, null, 2))
 
     try {
-      // Use the new postFetchFromBackend function (FOR POST REQ)
-      const result = await postFetchFromBackend('globaljobpostings', payload)
+      let result
 
-      console.log('Job posted successfully:', result)
+      if (isEditing) {
+        // Use PUT request for editing existing job
+        console.log('Updating job with ID:', editingJobId)
+        result = await putglobaljobposting(editingJobId, payload)
+        console.log('Job updated successfully:', result)
+      } else {
+        // Use POST request for creating new job
+        result = await postFetchFromBackend('globaljobpostings', payload)
+        console.log('Job posted successfully:', result)
+      }
 
       // Success - close modal and show toast
       setOpen(false)
-      setToastMessage('Job posted successfully!')
+      setIsEditing(false)
+      setEditingJobId('')
+      setToastMessage(
+        isEditing ? 'Job updated successfully!' : 'Job posted successfully!'
+      )
       setShowToast(true)
 
       // Reset form data
@@ -157,11 +190,15 @@ export default function JobPostingsPage() {
 
       // Refetch jobs to update the list
       const updatedRes = await fetchFromBackend('globaljobpostings?populate=*')
-      setJobs(updatedRes || [])
+      const sortedUpdatedJobs = sortJobsByIdDesc(updatedRes || [])
+      setJobs(sortedUpdatedJobs)
     } catch (error) {
-      console.error(' Error posting job:', error)
+      console.error(
+        isEditing ? ' Error updating job:' : ' Error posting job:',
+        error
+      )
       alert(
-        `Failed to post job: ${
+        `Failed to ${isEditing ? 'update' : 'post'} job: ${
           error instanceof Error ? error.message : String(error)
         }`
       )
@@ -184,46 +221,26 @@ export default function JobPostingsPage() {
 
   const handleDeleteConfirm = async () => {
     console.log('handleDeleteConfirm called')
-    console.log(
-      'deleteConfirm.jobId (should be documentId):',
-      deleteConfirm.jobId
-    )
+    console.log('deleteConfirm state:', deleteConfirm)
 
     if (!deleteConfirm.jobId) {
-      console.log('No jobId/documentId found, returning early')
+      console.log('No job ID found, aborting delete')
       return
     }
 
-    console.log('Starting delete process...')
+    console.log('Starting delete process for job ID:', deleteConfirm.jobId)
     setIsDeleting(true)
 
     try {
-      const token = localStorage.getItem('fomo_token')
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL
-      console.log('Token:', token ? 'Found' : 'Not found')
-      console.log('Backend URL:', backendUrl)
-      console.log(
-        'Delete URL (using documentId):',
-        `${backendUrl}/api/globaljobpostings/${deleteConfirm.jobId}`
-      )
+      const result = await deleteglobaljobposting(deleteConfirm.jobId)
+      console.log('Delete function returned:', result)
 
-      const deleteResponse = await axios.delete(
-        `${backendUrl}/api/globaljobpostings/${deleteConfirm.jobId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      )
-
-      console.log('Delete response:', deleteResponse)
       console.log('Job deleted successfully')
 
       // Close confirmation dialog
       setDeleteConfirm({
         isOpen: false,
-        jobId: null,
+        jobId: '',
         jobTitle: '',
       })
 
@@ -234,7 +251,8 @@ export default function JobPostingsPage() {
 
       // Refetch jobs to update the list
       const updatedRes = await fetchFromBackend('globaljobpostings?populate=*')
-      setJobs(updatedRes || [])
+      const sortedUpdatedJobs = sortJobsByIdDesc(updatedRes || [])
+      setJobs(sortedUpdatedJobs)
     } catch (error) {
       console.error('Error deleting job:', error)
       alert(
@@ -250,9 +268,45 @@ export default function JobPostingsPage() {
   const handleDeleteCancel = () => {
     setDeleteConfirm({
       isOpen: false,
-      jobId: null,
+      jobId: '',
       jobTitle: '',
     })
+  }
+
+  // Edit job handler
+  const handleEditClick = (jobData: Record<string, unknown>) => {
+    const job = jobData.data as JobData
+    const jobId = jobData.documentId as string
+
+    console.log('Edit clicked for job:', job.title, 'ID:', jobId)
+
+    // Set editing state
+    setIsEditing(true)
+    setEditingJobId(String(jobId))
+
+    // Pre-fill form with existing job data
+    setFormData({
+      title: job.title || '',
+      jobType: job.jobType || 'Full Time',
+      experience: job.experience || 'Entry Level',
+      location: job.location || '',
+      deadline: job.deadline || '',
+      description: job.description || '',
+      skills: Array.isArray(job.skills) ? job.skills : [],
+      requirements: Array.isArray(job.requirements) ? job.requirements : [],
+      benefits: Array.isArray(job.benefits) ? job.benefits : [],
+    })
+
+    // Open the modal
+    setOpen(true)
+  }
+
+  // Helper function to close modal and reset editing state
+  const closeModal = () => {
+    setOpen(false)
+    setIsEditing(false)
+    setEditingJobId('')
+    setErrors({})
   }
 
   const addItem = (
@@ -291,7 +345,22 @@ export default function JobPostingsPage() {
           <div className='flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6'>
             <h1 className='text-xl sm:text-2xl font-bold'>Your Job Postings</h1>
             <button
-              onClick={() => setOpen(true)}
+              onClick={() => {
+                setIsEditing(false)
+                setEditingJobId('')
+                setFormData({
+                  title: '',
+                  jobType: 'Full Time',
+                  experience: 'Entry Level',
+                  location: '',
+                  deadline: '',
+                  description: '',
+                  skills: [],
+                  requirements: [],
+                  benefits: [],
+                })
+                setOpen(true)
+              }}
               className='px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition flex items-center justify-center gap-2 text-sm sm:text-base'
             >
               +<span>Post New Job</span>
@@ -307,8 +376,8 @@ export default function JobPostingsPage() {
               </div>
             ) : jobs.length > 0 ? (
               jobs.map((x: Record<string, unknown>) => {
+                //x contains id
                 const job = x.data as JobData
-                console.log('Job data:', job) // Debug log to see job structure
                 return (
                   <div
                     key={job.id}
@@ -396,23 +465,34 @@ export default function JobPostingsPage() {
                           {/* <button className='text-xs sm:text-sm text-blue-600 hover:text-blue-800 font-medium px-2 py-1 rounded hover:bg-blue-50 transition-colors'>
                           View
                         </button> */}
-                          <button className='text-xs sm:text-sm text-gray-600 hover:text-gray-800 font-medium px-2 py-1 rounded hover:bg-gray-50 transition-colors'>
+                          <button
+                            onClick={() => handleEditClick(x)}
+                            className='text-xs sm:text-sm text-gray-600 hover:text-gray-800 font-medium px-2 py-1 rounded hover:bg-gray-50 transition-colors'
+                          >
                             Edit
                           </button>
                           <button
                             onClick={(e) => {
                               e.stopPropagation() // Prevent event bubbling
-                              console.log(
-                                'Delete button clicked for job:',
-                                job.documentId || job.id || 'no-id',
-                                job.title
-                              )
-                              handleDeleteClick(
-                                job.documentId || job.id || 'no-id',
-                                job.title
-                              )
+                              const jobId = x.documentId || x.id
+                              console.log('Delete button clicked:')
+                              console.log('Raw x.documentId:', x.documentId)
+                              console.log('Raw x.id:', x.id)
+                              console.log('Using jobId:', jobId)
+                              console.log('Job data x:', x)
+                              console.log('Job data job:', job)
+                              console.log('Job title:', job.title)
+                              handleDeleteClick(String(jobId), job.title)
                             }}
                             className='text-xs sm:text-sm text-red-600 hover:text-red-800 font-medium px-2 py-1 rounded hover:bg-red-50 transition-colors'
+                            onMouseEnter={() =>
+                              console.log(
+                                'DocumentId:',
+                                x.documentId,
+                                'Id:',
+                                x.id
+                              )
+                            }
                           >
                             Delete
                           </button>
@@ -440,15 +520,17 @@ export default function JobPostingsPage() {
               <div className='bg-white rounded-lg shadow-lg w-full max-w-2xl p-4 sm:p-6 relative overflow-y-auto max-h-[90vh]'>
                 <button
                   className='absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl sm:text-base'
-                  onClick={() => setOpen(false)}
+                  onClick={closeModal}
                 >
                   ✕
                 </button>
                 <h2 className='text-lg sm:text-xl font-semibold mb-1 pr-8'>
-                  Post a New Job
+                  {isEditing ? 'Edit Job' : 'Post a New Job'}
                 </h2>
                 <p className='text-xs sm:text-sm text-gray-500 mb-4'>
-                  Fill out the details below to post a new job opening.
+                  {isEditing
+                    ? 'Update the job details below.'
+                    : 'Fill out the details below to post a new job opening.'}
                 </p>
 
                 {/* Job Title */}
@@ -664,7 +746,7 @@ export default function JobPostingsPage() {
                 <div className='flex flex-col sm:flex-row justify-end gap-2'>
                   <button
                     className='px-4 py-2 border rounded-md hover:bg-gray-100 text-sm order-2 sm:order-1'
-                    onClick={() => setOpen(false)}
+                    onClick={closeModal}
                   >
                     Cancel
                   </button>
@@ -672,7 +754,7 @@ export default function JobPostingsPage() {
                     onClick={handleSubmit}
                     className='px-4 py-2 bg-green-700 text-white rounded-md hover:bg-green-800 text-sm order-1 sm:order-2'
                   >
-                    Post Job
+                    {isEditing ? 'Update Job' : 'Post Job'}
                   </button>
                 </div>
               </div>
