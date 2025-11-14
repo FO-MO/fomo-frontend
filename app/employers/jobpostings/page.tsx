@@ -45,9 +45,9 @@ export default function JobPostingsPage() {
     const fetchJobs = async () => {
       try {
         setLoading(true);
-        const res = await fetchFromBackend("globaljobpostings?populate=*");
-        console.log("Fetched jobs:", res); // Debug log
-        setJobs(res || []);
+        const res = await fetchFromBackend("employer-profiles/snc25a7at88l2rb59r924wg1?populate=*");
+        console.log("Fetched jobs:", res.globaljobpostings); // Debug log
+        setJobs(res.globaljobpostings || []);
       } catch (error) {
         console.error("Error fetching jobs:", error);
         setJobs([]);

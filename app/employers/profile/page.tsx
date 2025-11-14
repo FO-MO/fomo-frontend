@@ -27,96 +27,43 @@ export default function EmployerProfilePage() {
         return;
       }
 
-      // Get user ID from localStorage
-      let employerId: string | null = null;
+      // Get user data from API
+      let employerProfile: any = null;
       let userEmail = "company@example.com";
       try {
-        const userStr = localStorage.getItem("fomo_user");
-        if (userStr) {
-          const user = JSON.parse(userStr);
-          employerId = user?.documentId || user?.id || null;
-          userEmail = user?.email || userEmail;
+        const data = await fetchMe(token);
+        console.log('data', data);
+        if (data && data.employer_profile) {
+          employerProfile = data.employer_profile;
+          userEmail = data?.email || userEmail;
         }
       } catch (err) {
-        console.error("Failed to parse user data:", err);
+        console.error("Failed to fetch user data:", err);
       }
 
-      if (!employerId) {
+      if (!employerProfile) {
         router.push("/auth/employerlogin");
         return;
       }
 
-      // Fetch employer profiles
-      const employerProfileRes = await fetch(
-        `${BACKEND_URL}/api/employer-profiles?populate=*`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (!employerProfileRes.ok) {
-        console.error("Failed to fetch employer profiles");
-        setLoading(false);
-        return;
-      }
-
-      const employerProfileData = await employerProfileRes.json();
-      console.log("Fetched employer profiles:", employerProfileData);
-      console.log("Current employerId:", employerId);
-      
-      
-      // Find the profile that matches current user
-      // The API might link via user field or we need to match by documentId/id
-      const userProfile = employerProfileData?.data?.find(
-        (profile: any) => 
-          profile.user?.documentId === 'aomijdmo3076nt7nudjed8gu' || 
-          profile.user?.id === 'aomijdmo3076nt7nudjed8gu' ||
-          profile.documentId === 'aomijdmo3076nt7nudjed8gu' ||
-          profile.id === 'aomijdmo3076nt7nudjed8gu'
-      );
-      
-      // If no profile found by user relationship, try to get via the getEmployerProfile function
-      let employerInfo: any = {};
-      if (userProfile) {
-        employerInfo = {
-          name: userProfile.name || "Company Name",
-          description: userProfile.description || "No description yet",
-          website: userProfile.website || "Not specified",
-          industry: userProfile.industry || "Not specified",
-          location: userProfile.location || "Not specified",
-          phone: userProfile.phoneNumber || userProfile.phone || "N/A",
-          email: userProfile.email || "N/A",
-          noOfEmployers: userProfile.noOfEmployers || 0,
-          specialties: userProfile.specialties || "Not specified",
-          profileImageUrl: userProfile.profilePic?.url
-            ? `${BACKEND_URL}${userProfile.profilePic.url}`
-            : null,
-          backgroundImageUrl: userProfile.backgroundImg?.url
-            ? `${BACKEND_URL}${userProfile.backgroundImg.url}`
-            : null,
-        };
-      } else {
-        // Fallback: try to get from employer-profiles using getEmployerProfile
-        const profile = await getEmployerProfile(employerId, token);
-        if (profile) {
-          employerInfo = {
-            name: profile.name || "Company Name",
-            description: profile.description || "No description yet",
-            website: profile.website || "Not specified",
-            industry: profile.industry || "Not specified",
-            location: profile.location || "Not specified",
-            phone: profile.phoneNumber || profile.phone || "Not specified",
-            noOfEmployers: profile.noOfEmployers || 0,
-            specialties: profile.specialties || "Not specified",
-            profileImageUrl: profile.profilePic?.url
-              ? `${BACKEND_URL}${profile.profilePic.url}`
-              : null,
-            backgroundImageUrl: profile.backgroundImg?.url
-              ? `${BACKEND_URL}${profile.backgroundImg.url}`
-              : null,
-          };
-        }
-      }      // Transform profile data
+      // Transform profile data directly from employer_profile
+      let employerInfo: any = {
+        name: employerProfile.name || "Company Name",
+        description: employerProfile.description || "No description yet",
+        website: employerProfile.website || "Not specified",
+        industry: employerProfile.industry || "Not specified",
+        location: employerProfile.location || "Not specified",
+        phone: employerProfile.phoneNumber || employerProfile.phone || "N/A",
+        email: employerProfile.email || userEmail,
+        noOfEmployers: employerProfile.noOfEmployers || 0,
+        specialties: employerProfile.specialties || "Not specified",
+        profileImageUrl: employerProfile.profilePic?.url
+          ? `${BACKEND_URL}${employerProfile.profilePic.url}`
+          : null,
+        backgroundImageUrl: employerProfile.backgroundImg?.url
+          ? `${BACKEND_URL}${employerProfile.backgroundImg.url}`
+          : null,
+      };      // Transform profile data
       const data = {
         name: employerInfo.name || "Company Name",
         email: userEmail,

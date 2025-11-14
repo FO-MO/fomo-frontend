@@ -28,6 +28,8 @@ interface UserMeResponse {
   documentId?: string;
   blocked?: boolean;
   confirmed?: boolean;
+  employer_profile?: any;
+  profile?: any;
 }
 
 export async function strapiLogin(
@@ -69,7 +71,7 @@ export function getAuthToken(): string | null {
 }
 
 export async function fetchMe(token: string): Promise<UserMeResponse> {
-  const res = await fetch(`${STRAPI_URL}/api/users/me`, {
+  const res = await fetch(`${STRAPI_URL}/api/users/me?populate=*`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return res.json();
