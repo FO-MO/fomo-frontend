@@ -1,41 +1,33 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { fetchFromBackend } from '@/lib/tools'
 
-const res = await fetchFromBackend('overview-card3s?populate=*')
+interface CollegeData {
+  data: {
+    name: string
+    location: string
+    placementRate: string
+    initial: string
+    color: string
+  }
+}
 
 export default function OverviewCards3() {
-  const colleges = [
-    {
-      name: 'Indian Institute of Technology Delhi',
-      location: 'New Delhi',
-      placementRate: '95.5%',
-      initial: 'I',
-      color: 'bg-teal-700',
-    },
-    {
-      name: 'Indian Institute of Technology Bombay',
-      location: 'Mumbai',
-      placementRate: '97.2%',
-      initial: 'I',
-      color: 'bg-teal-700',
-    },
-    {
-      name: 'Birla Institute of Technology and Science',
-      location: 'Pilani',
-      placementRate: '94.1%',
-      initial: 'B',
-      color: 'bg-teal-700',
-    },
-    {
-      name: 'National Institute of Technology Trichy',
-      location: 'Tiruchirappalli',
-      placementRate: '92.8%',
-      initial: 'N',
-      color: 'bg-teal-700',
-    },
-  ]
+  const [data, setData] = useState<CollegeData[]>([])
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetchFromBackend('overview-card3s?populate=*')
+        setData(res)
+      } catch (error) {
+        console.error('Error fetching colleges data:', error)
+      }
+    }
+
+    fetchData()
+  }, [])
 
   return (
     <div className='bg-white  shadow-[0px_0px_3px_#0006]  rounded-2xl  p-6'>
@@ -56,7 +48,7 @@ export default function OverviewCards3() {
 
       {/* Colleges List */}
       <div className='space-y-4 opacity-0'>
-        {res.slice(0, 4).map((college, index) => {
+        {data.slice(0, 4).map((college: CollegeData, index: number) => {
           const y = college.data
           return (
             <div

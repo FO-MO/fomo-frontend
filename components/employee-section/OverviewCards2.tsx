@@ -1,11 +1,33 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { fetchFromBackend } from '@/lib/tools'
 
-const res = await fetchFromBackend('overview-card2s?populate=*')
+interface OverviewCardItem {
+  data: {
+    label: string
+    change?: string
+    percentage: number
+    color: string
+  }
+}
 
 export default function OverviewCards2() {
+  const [data, setData] = useState<OverviewCardItem[]>([])
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetchFromBackend('overview-card2s?populate=*')
+        setData(res)
+      } catch (error) {
+        console.error('Error fetching overview cards data:', error)
+      }
+    }
+
+    fetchData()
+  }, [])
+
   return (
     <div className='bg-white rounded-2xl shadow-[0px_0px_3px_#0006] p-6'>
       {/* Header */}
@@ -31,7 +53,7 @@ export default function OverviewCards2() {
 
       {/* Performance Metrics */}
       <div className='space-y-6'>
-        {res.map((item, index) => (
+        {data.map((item: OverviewCardItem, index: number) => (
           <div key={index} className='opacity-0'>
             <div className='flex items-center justify-between mb-2'>
               <span className='text-sm font-medium text-gray-700'>
@@ -43,7 +65,7 @@ export default function OverviewCards2() {
                     {item.data.change}
                   </span>
                 )}
-                {!item.change && (
+                {!item.data.change && (
                   <span className='text-sm font-bold text-gray-900'>
                     {item.data.percentage}%
                   </span>

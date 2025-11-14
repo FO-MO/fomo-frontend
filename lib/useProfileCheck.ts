@@ -1,9 +1,9 @@
-"use client";
+'use client'
 
-import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { getAuthToken } from "@/lib/strapi/auth";
-import { getStudentProfile } from "@/lib/strapi/profile";
+import { useEffect, useState } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
+import { getAuthToken } from '@/lib/strapi/auth'
+import { getStudentProfile } from '@/lib/strapi/profile'
 
 /**
  * Hook to check if user has completed their profile
@@ -11,53 +11,53 @@ import { getStudentProfile } from "@/lib/strapi/profile";
  * @param redirectIfIncomplete - Whether to redirect if profile is incomplete (default: true)
  */
 export function useProfileCheck(redirectIfIncomplete: boolean = true) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasProfile, setHasProfile] = useState(false);
+  const router = useRouter()
+  const pathname = usePathname()
+  const [isLoading, setIsLoading] = useState(true)
+  const [hasProfile, setHasProfile] = useState(false)
 
   useEffect(() => {
     const checkProfile = async () => {
       // Don't check on auth pages or setup-profile page
-      const isAuthPage = pathname?.startsWith("/auth");
+      const isAuthPage = pathname?.startsWith('/auth')
       if (isAuthPage) {
-        setIsLoading(false);
-        return;
+        setIsLoading(false)
+        return
       }
 
-      const token = getAuthToken();
+      const token = getAuthToken()
       if (!token) {
         // Not authenticated, redirect to login
         if (redirectIfIncomplete) {
-          router.push("/auth/login");
+          router.push('/auth/login')
         }
-        setIsLoading(false);
-        return;
+        setIsLoading(false)
+        return
       }
 
       // Get user ID from cookies
-      let studentId: string | null = null;
+      let studentId: string | null = null
       try {
-        const { getUserCookie } = await import("@/lib/cookies");
-        const user = getUserCookie();
+        const { getUserCookie } = await import('@/lib/cookies')
+        const user = getUserCookie()
         if (user) {
-          studentId = user?.documentId || user?.id || null;
+          studentId = user?.documentId || null
         }
       } catch (err) {
-        console.error("Failed to get user data:", err);
+        console.error('Failed to get user data:', err)
       }
 
       if (!studentId) {
-        setIsLoading(false);
-        setHasProfile(false);
+        setIsLoading(false)
+        setHasProfile(false)
         if (redirectIfIncomplete) {
-          router.push("/auth/setup-profile");
+          router.push('/auth/setup-profile')
         }
-        return;
+        return
       }
 
       // Check if profile exists and is complete
-      const profile = await getStudentProfile(studentId, token);
+      const profile = await getStudentProfile(studentId, token)
 
       const isComplete = !!(
         profile &&
@@ -66,21 +66,21 @@ export function useProfileCheck(redirectIfIncomplete: boolean = true) {
         profile.course &&
         profile.graduationYear &&
         profile.about
-      );
+      )
 
-      setHasProfile(isComplete);
-      setIsLoading(false);
+      setHasProfile(isComplete)
+      setIsLoading(false)
 
       // Redirect to setup if incomplete
       if (!isComplete && redirectIfIncomplete) {
-        router.push("/auth/setup-profile");
+        router.push('/auth/setup-profile')
       }
-    };
+    }
 
-    checkProfile();
-  }, [pathname, router, redirectIfIncomplete]);
+    checkProfile()
+  }, [pathname, router, redirectIfIncomplete])
 
-  return { isLoading, hasProfile };
+  return { isLoading, hasProfile }
 }
 
 /**
@@ -91,7 +91,7 @@ export async function checkProfileExists(
   token: string
 ): Promise<boolean> {
   try {
-    const profile = await getStudentProfile(studentId, token);
+    const profile = await getStudentProfile(studentId, token)
     return !!(
       profile &&
       profile.name &&
@@ -99,9 +99,9 @@ export async function checkProfileExists(
       profile.course &&
       profile.graduationYear &&
       profile.about
-    );
+    )
   } catch (err) {
-    console.error("Failed to check profile:", err);
-    return false;
+    console.error('Failed to check profile:', err)
+    return false
   }
 }
