@@ -70,7 +70,7 @@ export function getAuthToken(): string | null {
   return getAuthTokenCookie();
 }
 
-export async function fetchMe(token: string): Promise<UserMeResponse> {
+export async function fetchMe(token: string=getAuthTokenCookie() || ''): Promise<UserMeResponse> {
   const res = await fetch(`${STRAPI_URL}/api/users/me?populate=*`, {
     headers: { Authorization: `Bearer ${token}` },
   });

@@ -1,3 +1,5 @@
+import { getAuthTokenCookie } from '../cookies'
+
 // Strapi profile helper functions
 const STRAPI_URL =
   process.env.BACKEND_URL || 'https://tbs9k5m4-1337.inc1.devtunnels.ms'
@@ -251,7 +253,7 @@ export interface CreateEmployerProfileData {
  */
 export async function getEmployerProfile(
   employerId: string,
-  token: string
+  token: string = getAuthTokenCookie() || ''
 ): Promise<EmployerProfile | null> {
   try {
     const res = await fetch(
