@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = 'force-dynamic'
+
 import "../globals.css";
 import SideBar from "@/components/bars/sideBar";
 import Navbar from "@/components/bars/Navbar";

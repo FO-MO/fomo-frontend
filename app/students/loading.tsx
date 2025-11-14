@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 export default function StudentsLoading() {
   return (
     <div className="flex h-[calc(100vh-5rem)] w-full items-center justify-center">

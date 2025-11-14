@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import React, { useState, useRef, useEffect } from 'react'
 import { Send, Bot, User, Sparkles, Settings } from 'lucide-react'
 import { useRouter } from 'next/navigation'

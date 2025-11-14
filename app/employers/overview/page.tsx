@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import React from 'react'
 import OverviewCards1 from '@/components/employee-section/OverviewCards1'
 import OverviewCards2 from '@/components/employee-section/OverviewCards2'

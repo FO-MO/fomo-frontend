@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 'use client'
 
 import { X, GraduationCap, Briefcase, ArrowRight } from 'lucide-react'

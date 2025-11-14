@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 // Minimal Strapi auth helper for client-side usage
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL
 

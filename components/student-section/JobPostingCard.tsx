@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import React from "react";
 import { Briefcase, MapPin, Clock, Calendar, TrendingUp } from "lucide-react";
 

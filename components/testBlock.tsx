@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 export default function TestBlock({ height }: { height: number }) {
   return (
     <div style={{ height }} className="bg-gray-200">

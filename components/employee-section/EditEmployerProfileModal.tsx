@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 'use client'
 
 import { X } from 'lucide-react'
