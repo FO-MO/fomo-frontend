@@ -204,20 +204,6 @@ export default function EmployerLogin() {
               Create Account
             </button>
           </form>
-          <div className="mt-6 flex items-center">
-            <div className="flex-grow border-t border-gray-300"></div>
-            <span className="mx-4 text-gray-500 text-sm">
-              Don't have an account?
-            </span>
-            <div className="flex-grow border-t border-gray-300"></div>
-          </div>
-
-          <Link
-            href="/Signup"
-            className="mt-4 w-full inline-block text-center border border-teal-900 text-teal-700 bg-white py-2 rounded-md hover:bg-teal-900 hover:text-white transition-colors duration-200"
-          >
-            Sign Up
-          </Link>
         </div>
       </div>
     </div>

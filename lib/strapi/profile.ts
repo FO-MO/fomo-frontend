@@ -194,3 +194,128 @@ export async function hasCompletedProfile(
     profile.about
   );
 }
+
+// ============= EMPLOYER PROFILE FUNCTIONS =============
+
+export interface EmployerProfile {
+  documentId?: string;
+  id?: number;
+  employerId: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  phoneNumber?: string;
+  country_code?: string;
+  description?: string;
+  website?: string;
+  industry?: string;
+  location?: string;
+  noOfEmployers?: number;
+  specialties?: string;
+  profilePic?: any;
+  backgroundImg?: any;
+  createdAt?: string;
+  updatedAt?: string;
+  user?: any;
+}
+
+export interface CreateEmployerProfileData {
+  employerId: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  description?: string;
+  website?: string;
+  industry?: string;
+  location?: string;
+  noOfEmployers?: number;
+  specialties?: string;
+  profilePic?: number; // Media ID
+  backgroundImg?: number; // Media ID
+}
+
+/**
+ * Fetch employer profile by employerId (user's documentId or id)
+ */
+export async function getEmployerProfile(
+  employerId: string,
+  token: string
+): Promise<EmployerProfile | null> {
+  try {
+    const res = await fetch(
+      `${STRAPI_URL}/api/employer-profiles?filters[employerId][$eq]=${encodeURIComponent(
+        employerId
+      )}&populate=*`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    if (!res.ok) return null;
+    const json = await res.json();
+    console.log("Fetched employer profile:", json);
+    return json?.data?.[0] || null;
+  } catch (err) {
+    console.error("Failed to fetch employer profile:", err);
+    return null;
+  }
+}
+
+/**
+ * Create a new employer profile
+ */
+export async function createEmployerProfile(
+  data: CreateEmployerProfileData,
+  token: string
+): Promise<EmployerProfile | null> {
+  try {
+    const res = await fetch(`${STRAPI_URL}/api/employer-profiles`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ data }),
+    });
+    if (!res.ok) {
+      console.error("Failed to create employer profile:", await res.text());
+      return null;
+    }
+    const json = await res.json();
+    return json?.data || null;
+  } catch (err) {
+    console.error("Failed to create employer profile:", err);
+    return null;
+  }
+}
+
+/**
+ * Update an existing employer profile
+ */
+export async function updateEmployerProfile(
+  documentId: string,
+  data: Partial<CreateEmployerProfileData>,
+  token: string
+): Promise<EmployerProfile | null> {
+  try {
+    const res = await fetch(
+      `${STRAPI_URL}/api/employer-profiles/${documentId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ data }),
+      }
+    );
+    if (!res.ok) {
+      console.error("Failed to update employer profile:", await res.text());
+      return null;
+    }
+    const json = await res.json();
+    return json?.data || null;
+  } catch (err) {
+    console.error("Failed to update employer profile:", err);
+    return null;
+  }
+}
