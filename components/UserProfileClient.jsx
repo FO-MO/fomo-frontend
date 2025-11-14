@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { getAuthToken, fetchMe, removeAuthToken } from "@/lib/strapi/auth";
+import { clearAuthCookies } from "@/lib/cookies";
 import { useRouter } from "next/navigation";
 
 export default function UserProfileClient() {
@@ -29,10 +30,7 @@ export default function UserProfileClient() {
   }, []);
 
   const handleSignOut = () => {
-    removeAuthToken();
-    try {
-      localStorage.removeItem("fomo_user");
-    } catch {}
+    clearAuthCookies();
     router.push("/");
     router.refresh();
   };

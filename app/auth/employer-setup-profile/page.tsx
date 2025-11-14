@@ -11,6 +11,7 @@ import {
   Briefcase,
   Tag,
 } from "lucide-react";
+import { uploadImage } from "@/lib/strapi/strapiData";
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -79,6 +80,9 @@ export default function EmployerSetupProfile() {
     location: "",
     noOfEmployers: "",
     specialties: [] as string[],
+    email: "",
+    phoneNumber: "",
+    country_code: "+91",
   });
 
   const [profilePicPreview, setProfilePicPreview] = useState<string | null>(
@@ -93,12 +97,25 @@ export default function EmployerSetupProfile() {
   const [specialtySearch, setSpecialtySearch] = useState("");
   const [showSpecialtyDropdown, setShowSpecialtyDropdown] = useState(false);
 
-  // Check if user is authenticated
+  // Check if user is authenticated and populate email
   useEffect(() => {
-    const token = localStorage.getItem("fomo_token");
-    if (!token) {
-      router.push("/auth/employerlogin");
-    }
+    const checkAuth = async () => {
+      const { getAuthTokenCookie, getUserCookie } = await import(
+        "@/lib/cookies"
+      );
+      const token = getAuthTokenCookie();
+      if (!token) {
+        router.push("/auth/employerlogin");
+        return;
+      }
+
+      // Populate email from user data if available
+      const user = getUserCookie();
+      if (user?.email) {
+        setFormData((prev) => ({ ...prev, email: user.email }));
+      }
+    };
+    checkAuth();
   }, [router]);
 
   // Handle profile picture upload
@@ -174,6 +191,11 @@ export default function EmployerSetupProfile() {
       if (!formData.location.trim()) {
         newErrors.location = "Location is required";
       }
+      if (!formData.email.trim()) {
+        newErrors.email = "Email is required";
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        newErrors.email = "Please enter a valid email address";
+      }
     }
 
     if (step === 2) {
@@ -204,33 +226,6 @@ export default function EmployerSetupProfile() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Upload image to Strapi
-  const uploadImage = async (
-    token: string,
-    contentType: string,
-    entityId: string,
-    field: string,
-    file: File
-  ): Promise<void> => {
-    const formData = new FormData();
-    formData.append("files", file);
-    formData.append("ref", contentType);
-    formData.append("refId", entityId);
-    formData.append("field", field);
-
-    const response = await fetch(`${STRAPI_URL}/api/upload`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to upload ${field}`);
-    }
-  };
-
   // Submit profile
   const handleSubmit = async () => {
     if (!validateStep(2)) return;
@@ -238,7 +233,8 @@ export default function EmployerSetupProfile() {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem("fomo_token");
+      const { getAuthTokenCookie } = await import("@/lib/cookies");
+      const token = getAuthTokenCookie();
       if (!token) {
         throw new Error("No authentication token found");
       }
@@ -256,7 +252,7 @@ export default function EmployerSetupProfile() {
 
       const userData = await userResponse.json();
 
-      // Create employer profile
+      // Create employer profile (matching the schema)
       const profileData = {
         data: {
           name: formData.name,
@@ -268,6 +264,13 @@ export default function EmployerSetupProfile() {
             ? parseInt(formData.noOfEmployers)
             : null,
           specialties: formData.specialties.join(", "),
+          email: formData.email,
+          phoneNumber: formData.phoneNumber
+            ? parseInt(formData.phoneNumber)
+            : null,
+          country_code: formData.country_code
+            ? parseInt(formData.country_code.replace("+", ""))
+            : null,
           user: userData.id,
         },
       };
@@ -291,50 +294,58 @@ export default function EmployerSetupProfile() {
 
       const createdProfile = await profileResponse.json();
       const profileId = createdProfile.data.documentId;
+      console.log("Profile created:", createdProfile);
 
-      // Upload images if provided
+      // Upload images if provided (using the same pattern as student profile)
       if (profilePicFile) {
-        try {
-          await uploadImage(
-            token,
-            "api::employer-profile.employer-profile",
-            profileId,
-            "profilePic",
-            profilePicFile
-          );
-        } catch (error) {
+        console.log("Uploading profile picture...");
+        uploadImage(
+          token,
+          "api::employer-profile.employer-profile",
+          profileId,
+          "profilePic",
+          profilePicFile
+        ).catch((error) => {
           console.error("Failed to upload profile picture:", error);
-        }
+        });
       }
 
       if (backgroundImgFile) {
-        try {
-          await uploadImage(
-            token,
-            "api::employer-profile.employer-profile",
-            profileId,
-            "backgroundImg",
-            backgroundImgFile
-          );
-        } catch (error) {
+        console.log("Uploading background image...");
+        uploadImage(
+          token,
+          "api::employer-profile.employer-profile",
+          profileId,
+          "backgroundImg",
+          backgroundImgFile
+        ).catch((error) => {
           console.error("Failed to upload background image:", error);
-        }
+        });
       }
 
       // Update user with hasProfile flag
-      await fetch(`${STRAPI_URL}/api/users/${userData.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          hasProfile: true,
-        }),
-      });
+      try {
+        await fetch(`${STRAPI_URL}/api/users/${userData.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            hasProfile: true,
+          }),
+        });
+      } catch (error) {
+        console.error("Failed to update user profile flag:", error);
+      }
 
-      // Redirect to employer dashboard
-      router.push("/employers/overview");
+      // Show success message and redirect
+      console.log("Profile setup complete, redirecting to dashboard...");
+
+      // Small delay to allow image uploads to start
+      setTimeout(() => {
+        router.push("/employers/overview");
+      }, 500);
     } catch (error) {
       console.error("Error creating profile:", error);
       alert(
@@ -499,6 +510,58 @@ export default function EmployerSetupProfile() {
                   placeholder="https://www.example.com"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                 />
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Company Email <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                  placeholder="contact@company.com"
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                    errors.email ? "border-red-500" : "border-gray-300"
+                  }`}
+                />
+                {errors.email && (
+                  <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                )}
+              </div>
+
+              {/* Phone Number */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Company Phone Number
+                </label>
+                <div className="flex gap-2">
+                  <select
+                    value={formData.country_code}
+                    onChange={(e) =>
+                      setFormData({ ...formData, country_code: e.target.value })
+                    }
+                    className="w-24 px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  >
+                    <option value="+91">+91</option>
+                    <option value="+1">+1</option>
+                    <option value="+44">+44</option>
+                    <option value="+971">+971</option>
+                    <option value="+65">+65</option>
+                  </select>
+                  <input
+                    type="tel"
+                    value={formData.phoneNumber}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phoneNumber: e.target.value })
+                    }
+                    placeholder="9876543210"
+                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -742,12 +805,30 @@ export default function EmployerSetupProfile() {
                 </div>
               </div>
 
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mt-6">
-                <p className="text-sm text-amber-800">
-                  <strong>Note:</strong> Images are optional but recommended.
-                  They help make your profile more attractive to students and
-                  can be added or changed later.
-                </p>
+              <div className="space-y-3 mt-6">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-sm text-blue-800">
+                    <strong>💡 Tip:</strong> Images are optional but
+                    recommended. They help make your profile more attractive to
+                    students and can be added or changed later from your profile
+                    settings.
+                  </p>
+                </div>
+
+                <div className="bg-amber-50 border border-amber-300 rounded-lg p-4">
+                  <p className="text-sm text-amber-900">
+                    <strong className="flex items-center gap-2">
+                      <span className="text-lg">⚠️</span>
+                      Important Notice
+                    </strong>
+                  </p>
+                  <p className="text-sm text-amber-900 mt-1">
+                    Uploaded images may take a few moments to appear on your
+                    profile due to processing time. Please be patient and
+                    refresh your profile page if images don&apos;t appear
+                    immediately.
+                  </p>
+                </div>
               </div>
             </div>
           )}

@@ -61,15 +61,19 @@ export default function JobPostingsPage() {
 
   // Debug: Check environment on mount
   useEffect(() => {
-    console.log("Environment check:");
-    console.log(
-      "NEXT_PUBLIC_BACKEND_URL:",
-      process.env.NEXT_PUBLIC_BACKEND_URL
-    );
-    console.log(
-      "localStorage fomo_token:",
-      localStorage.getItem("fomo_token") ? "exists" : "missing"
-    );
+    const checkEnv = async () => {
+      const { getAuthTokenCookie } = await import("@/lib/cookies");
+      console.log("Environment check:");
+      console.log(
+        "NEXT_PUBLIC_BACKEND_URL:",
+        process.env.NEXT_PUBLIC_BACKEND_URL
+      );
+      console.log(
+        "cookie fomo_token:",
+        getAuthTokenCookie() ? "exists" : "missing"
+      );
+    };
+    checkEnv();
   }, []);
 
   // Debug: Monitor deleteConfirm state changes
@@ -201,7 +205,8 @@ export default function JobPostingsPage() {
     setIsDeleting(true);
 
     try {
-      const token = localStorage.getItem("fomo_token");
+      const { getAuthTokenCookie } = await import("@/lib/cookies");
+      const token = getAuthTokenCookie();
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
       console.log("Token:", token ? "Found" : "Not found");
       console.log("Backend URL:", backendUrl);

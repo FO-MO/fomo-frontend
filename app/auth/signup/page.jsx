@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { strapiRegister, setAuthToken } from "@/lib/strapi/auth";
+import { setUserCookie } from "@/lib/cookies";
 
 export default function Signup() {
   const [name, setName] = React.useState("");
@@ -124,9 +125,7 @@ export default function Signup() {
       } else if (result?.jwt) {
         // Immediately set token and redirect to profile setup
         setAuthToken(result.jwt);
-        try {
-          localStorage.setItem("fomo_user", JSON.stringify(result.user));
-        } catch {}
+        setUserCookie(result.user);
         setSuccess(true);
         window.location.href = "/auth/setup-profile";
       } else {

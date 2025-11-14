@@ -11,35 +11,38 @@ export default function Navbar() {
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    // Compute initials from current user's name stored in localStorage
-    try {
-      const raw = localStorage.getItem("fomo_user");
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        // Try common fields for name
-        const name =
-          (parsed && (parsed.name || parsed.username || parsed.email)) ||
-          "User";
-        // If email, strip domain
-        const cleanedName =
-          typeof name === "string" && name.includes("@")
-            ? name.split("@")[0]
-            : name;
-        const words = String(cleanedName).trim().split(/\s+/).filter(Boolean);
-        let computed = "U";
-        if (words.length >= 2) {
-          computed = `${words[0][0] || ""}${words[1][0] || ""}`.toUpperCase();
-        } else if (words.length === 1) {
-          // Fallback: use first two characters of the single word (or single char if short)
-          const w = words[0];
-          computed =
-            (w[0] || "").toUpperCase() + ((w[1] || "").toUpperCase() || "");
+    // Compute initials from current user's name stored in cookies
+    const fetchUser = async () => {
+      try {
+        const { getUserCookie } = await import("@/lib/cookies");
+        const parsed = getUserCookie();
+        if (parsed) {
+          // Try common fields for name
+          const name =
+            (parsed && (parsed.name || parsed.username || parsed.email)) ||
+            "User";
+          // If email, strip domain
+          const cleanedName =
+            typeof name === "string" && name.includes("@")
+              ? name.split("@")[0]
+              : name;
+          const words = String(cleanedName).trim().split(/\s+/).filter(Boolean);
+          let computed = "U";
+          if (words.length >= 2) {
+            computed = `${words[0][0] || ""}${words[1][0] || ""}`.toUpperCase();
+          } else if (words.length === 1) {
+            // Fallback: use first two characters of the single word (or single char if short)
+            const w = words[0];
+            computed =
+              (w[0] || "").toUpperCase() + ((w[1] || "").toUpperCase() || "");
+          }
+          if (computed) setInitials(computed);
         }
-        if (computed) setInitials(computed);
+      } catch {
+        // ignore and keep fallback
       }
-    } catch {
-      // ignore and keep fallback
-    }
+    };
+    fetchUser();
 
     const handleClickOutside = (event: MouseEvent) => {
       if (

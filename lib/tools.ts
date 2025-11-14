@@ -1,11 +1,13 @@
 "use client";
 
+import { getAuthTokenCookie } from "./cookies";
+
 export async function fetchFromBackend(
   endpoint: string,
   {
     backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ||
       "https://tbs9k5m4-1337.inc1.devtunnels.ms",
-    token = localStorage.getItem("fomo_token"),
+    token = getAuthTokenCookie(),
     options = {},
   }: {
     backendUrl?: string;
@@ -43,7 +45,7 @@ export async function postFetchFromBackend(
   {
     backendUrl = process.env.NEXT_PUBLIC_STRAPI_URL ||
       "https://tbs9k5m4-1337.inc1.devtunnels.ms",
-    token = localStorage.getItem("fomo_token"),
+    token = getAuthTokenCookie(),
   }: {
     backendUrl?: string;
     token?: string | null;
