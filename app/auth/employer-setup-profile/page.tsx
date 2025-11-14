@@ -2,15 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import {
-  Building2,
-  Upload,
-  Globe,
-  MapPin,
-  Users,
-  Briefcase,
-  Tag,
-} from 'lucide-react'
+import { Building2, Upload, Globe, MapPin, Users, Tag } from 'lucide-react'
 import { uploadImage } from '@/lib/strapi/strapiData'
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_BACKEND_URL
@@ -112,7 +104,7 @@ export default function EmployerSetupProfile() {
       // Populate email from user data if available
       const user = getUserCookie()
       if (user?.email) {
-        setFormData((prev) => ({ ...prev, email: user.email }))
+        setFormData((prev) => ({ ...prev, email: user.email || '' }))
       }
     }
     checkAuth()
