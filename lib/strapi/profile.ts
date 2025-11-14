@@ -211,41 +211,53 @@ export async function hasCompletedProfile(
 
 // ============= EMPLOYER PROFILE FUNCTIONS =============
 
+interface MediaFile {
+  id: number
+  url: string
+  name: string
+}
+
+interface UserInfo {
+  id: number
+  email: string
+  username: string
+}
+
 export interface EmployerProfile {
-  documentId?: string;
-  id?: number;
-  employerId: string;
-  name: string;
-  email?: string;
-  phone?: string;
-  phoneNumber?: string;
-  country_code?: string;
-  description?: string;
-  website?: string;
-  industry?: string;
-  location?: string;
-  noOfEmployers?: number;
-  specialties?: string;
-  profilePic?: any;
-  backgroundImg?: any;
-  createdAt?: string;
-  updatedAt?: string;
-  user?: any;
+  documentId?: string
+  id?: number
+  employerId: string
+  name: string
+  email?: string
+  phone?: string
+  phoneNumber?: string
+  country_code?: string
+  description?: string
+  website?: string
+  industry?: string
+  location?: string
+  noOfEmployers?: number
+  specialties?: string
+  profilePic?: MediaFile
+  backgroundImg?: MediaFile
+  createdAt?: string
+  updatedAt?: string
+  user?: UserInfo
 }
 
 export interface CreateEmployerProfileData {
-  employerId: string;
-  name: string;
-  email?: string;
-  phone?: string;
-  description?: string;
-  website?: string;
-  industry?: string;
-  location?: string;
-  noOfEmployers?: number;
-  specialties?: string;
-  profilePic?: number; // Media ID
-  backgroundImg?: number; // Media ID
+  employerId: string
+  name: string
+  email?: string
+  phone?: string
+  description?: string
+  website?: string
+  industry?: string
+  location?: string
+  noOfEmployers?: number
+  specialties?: string
+  profilePic?: number // Media ID
+  backgroundImg?: number // Media ID
 }
 
 /**
@@ -263,14 +275,14 @@ export async function getEmployerProfile(
       {
         headers: { Authorization: `Bearer ${token}` },
       }
-    );
-    if (!res.ok) return null;
-    const json = await res.json();
-    console.log("Fetched employer profile:", json);
-    return json?.data?.[0] || null;
+    )
+    if (!res.ok) return null
+    const json = await res.json()
+    console.log('Fetched employer profile:', json)
+    return json?.data?.[0] || null
   } catch (err) {
-    console.error("Failed to fetch employer profile:", err);
-    return null;
+    console.error('Failed to fetch employer profile:', err)
+    return null
   }
 }
 
@@ -283,22 +295,22 @@ export async function createEmployerProfile(
 ): Promise<EmployerProfile | null> {
   try {
     const res = await fetch(`${STRAPI_URL}/api/employer-profiles`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ data }),
-    });
+    })
     if (!res.ok) {
-      console.error("Failed to create employer profile:", await res.text());
-      return null;
+      console.error('Failed to create employer profile:', await res.text())
+      return null
     }
-    const json = await res.json();
-    return json?.data || null;
+    const json = await res.json()
+    return json?.data || null
   } catch (err) {
-    console.error("Failed to create employer profile:", err);
-    return null;
+    console.error('Failed to create employer profile:', err)
+    return null
   }
 }
 
@@ -314,22 +326,22 @@ export async function updateEmployerProfile(
     const res = await fetch(
       `${STRAPI_URL}/api/employer-profiles/${documentId}`,
       {
-        method: "PUT",
+        method: 'PUT',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ data }),
       }
-    );
+    )
     if (!res.ok) {
-      console.error("Failed to update employer profile:", await res.text());
-      return null;
+      console.error('Failed to update employer profile:', await res.text())
+      return null
     }
-    const json = await res.json();
-    return json?.data || null;
+    const json = await res.json()
+    return json?.data || null
   } catch (err) {
-    console.error("Failed to update employer profile:", err);
-    return null;
+    console.error('Failed to update employer profile:', err)
+    return null
   }
 }
