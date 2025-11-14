@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import React, { useState, useEffect } from 'react'
 import PartnershipCard from '@/components/employee-section/PartnershipCard'
 import SubBar from '@/components/subBar'

@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import React, { useState, useEffect } from 'react'
 import SubBar from '@/components/subBar'
 import {
@@ -8,8 +10,8 @@ import {
   deleteglobaljobposting,
   putglobaljobposting,
 } from '@/lib/tools'
-import {getEmployerProfile} from '@/lib/strapi/profile'
-import { getAuthToken, fetchMe} from "@/lib/strapi/auth";
+import { getEmployerProfile } from '@/lib/strapi/profile'
+import { getAuthToken, fetchMe } from '@/lib/strapi/auth'
 
 // Define types for the job data
 interface JobData {
@@ -54,11 +56,13 @@ export default function JobPostingsPage() {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        setLoading(true);
+        setLoading(true)
         // const user = await fetchMe();
         // const test = getEmployerProfile(user.employer_profile);
-        const res = await fetchFromBackend("employer-profiles/snc25a7at88l2rb59r924wg1?populate=*");
-        console.log("Fetched jobs:", res.globaljobpostings); // Debug log
+        const res = await fetchFromBackend(
+          'employer-profiles/snc25a7at88l2rb59r924wg1?populate=*'
+        )
+        console.log('Fetched jobs:', res.globaljobpostings) // Debug log
         const sortedJobs = sortJobsByIdDesc(res.globaljobpostings || [])
         setJobs(sortedJobs)
         // setJobs(res.globaljobpostings || []);

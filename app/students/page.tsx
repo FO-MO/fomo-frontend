@@ -1,4 +1,7 @@
 'use client'
+
+export const dynamic = 'force-dynamic'
+
 import PostCard, { Post } from '@/components/student-section/PostCard'
 import JobPostingCard from '@/components/student-section/JobPostingCard'
 import { useEffect, useState } from 'react'

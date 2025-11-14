@@ -1,4 +1,7 @@
 'use client'
+
+export const dynamic = 'force-dynamic'
+
 import React from 'react'
 import ClubCard, { Club } from '@/components/student-section/ClubCard'
 import { getAuthToken } from '@/lib/strapi/auth'

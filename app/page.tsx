@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import TopBar from '@/components/bars/topBar'
 import Hero1 from '@/components/hero/Hero1'
 import Hero2 from '@/components/hero/Hero2'

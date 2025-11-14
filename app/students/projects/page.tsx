@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import React, { useState } from 'react'
 import ProjectCard, { Project } from '@/components/student-section/ProjectCard'
 import CreateProjectModal from '@/components/student-section/CreateProjectModal'
