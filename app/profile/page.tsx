@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import ProfileProjectCard from '@/components/student-section/ProfileProjectCard'
 import ProfileClubCard from '@/components/student-section/ProfileClubCard'
@@ -49,7 +49,7 @@ interface ProfileData {
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL
 
-export default function ProfilePage() {
+function ProfileContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const userId = searchParams.get('userId') // Get userId from URL query
@@ -61,6 +61,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     loadProfile()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]) // Reload when userId changes
 
   const loadProfile = async () => {
@@ -603,5 +604,22 @@ export default function ProfilePage() {
         />
       )}
     </div>
+  )
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className='w-full min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center'>
+          <div className='text-center'>
+            <div className='w-16 h-16 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
+            <p className='text-gray-600 font-medium'>Loading profile...</p>
+          </div>
+        </div>
+      }
+    >
+      <ProfileContent />
+    </Suspense>
   )
 }
