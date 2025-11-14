@@ -1,6 +1,5 @@
-export const dynamic = 'force-dynamic'
-
 'use client'
+export const dynamic = 'force-dynamic'
 
 import { X, GraduationCap, Briefcase, ArrowRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
