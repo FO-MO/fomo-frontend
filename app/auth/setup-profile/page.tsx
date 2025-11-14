@@ -13,7 +13,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { getAuthToken } from "@/lib/strapi/auth";
-import { createStudentProfile } from "@/lib/strapi/profile";
+import { createStudentProfile, CreateProfileData } from "@/lib/strapi/profile";
 import Link from "next/link";
 import { uploadImage } from "@/lib/strapi/strapiData";
 
@@ -355,21 +355,24 @@ export default function SetupProfilePage() {
       return;
     }
 
-    // Get user info from localStorage
-    try {
-      const userStr = localStorage.getItem("fomo_user");
-      if (userStr) {
-        const user = JSON.parse(userStr);
-        if (user.username) {
-          setName(user.username);
+    // Get user info from cookies
+    const fetchUser = async () => {
+      try {
+        const { getUserCookie } = await import("@/lib/cookies");
+        const user = getUserCookie();
+        if (user) {
+          if (user.username) {
+            setName(user.username);
+          }
+          if (user.email) {
+            setEmail(user.email);
+          }
         }
-        if (user.email) {
-          setEmail(user.email);
-        }
+      } catch (err) {
+        console.error("Failed to get user data:", err);
       }
-    } catch (err) {
-      console.error("Failed to parse user data:", err);
-    }
+    };
+    fetchUser();
   }, [router]);
 
   const toggleSkill = (skill: string) => {
@@ -497,9 +500,9 @@ export default function SetupProfilePage() {
       // Get student ID from stored user
       let studentId: string | null = null;
       try {
-        const userStr = localStorage.getItem("fomo_user");
-        if (userStr) {
-          const user = JSON.parse(userStr);
+        const { getUserCookie } = await import("@/lib/cookies");
+        const user = getUserCookie();
+        if (user) {
           studentId = user?.documentId || user?.id || null;
         }
       } catch (err) {
@@ -513,8 +516,8 @@ export default function SetupProfilePage() {
       }
 
       // Create profile
-      const profileData: any = {
-        studentId,
+      const profileData: CreateProfileData = {
+        studentId: studentId as string,
         name,
         email,
         about: bio,
@@ -524,9 +527,6 @@ export default function SetupProfilePage() {
         location,
         skills: selectedSkills,
         interests: selectedInterests,
-        user: {
-          connect: [studentId],
-        },
         // ...(profilePicId && { profilePic: profilePicId }),
         // ...(backgroundImgId && { backgroundImage: backgroundImgId }),
       };
@@ -875,7 +875,7 @@ export default function SetupProfilePage() {
                       })
                     ) : (
                       <div className="w-full text-center py-4 text-gray-500 text-sm">
-                        No skills found matching "{skillSearch}"
+                        No skills found matching &quot;{skillSearch}&quot;
                       </div>
                     )}
                   </div>
@@ -942,7 +942,7 @@ export default function SetupProfilePage() {
                       })
                     ) : (
                       <div className="w-full text-center py-4 text-gray-500 text-sm">
-                        No interests found matching "{interestSearch}"
+                        No interests found matching &quot;{interestSearch}&quot;
                       </div>
                     )}
                   </div>
@@ -1104,7 +1104,7 @@ export default function SetupProfilePage() {
                 <p>
                   Uploaded images may take a few moments to appear on your
                   profile due to processing time. Please be patient and refresh
-                  your profile page if images don't appear immediately.
+                  your profile page if images don&apos;t appear immediately.
                 </p>
               </div>
             </div>

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   MoreHorizontal,
   ThumbsUp,
@@ -10,16 +10,16 @@ import {
 } from "lucide-react";
 
 // Helper functions (moved outside component for consistency)
-const getInitials = (name) => {
+const getInitials = (name: string) => {
   return name
     ? name
         .split(/\s+/)
-        .map((n) => n[0])
+        .map((n: string) => n[0])
         .join("")
     : "??";
 };
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   return date.toLocaleDateString("en-US", {
     month: "short",
@@ -78,7 +78,21 @@ type CommentData = {
 };
 
 // Function to map the deeply nested Strapi API response into a flattened structure
-const mapStrapiComment = (strapiComment) => {
+const mapStrapiComment = (strapiComment: {
+  id: string | number;
+  attributes: {
+    user?: {
+      data?: {
+        attributes?: {
+          username?: string;
+          email?: string;
+        };
+      };
+    };
+    content?: string;
+    sentAt?: string;
+  };
+}) => {
   if (!strapiComment || !strapiComment.attributes) return null;
 
   const { id, attributes } = strapiComment;
@@ -113,7 +127,11 @@ const mapStrapiComment = (strapiComment) => {
 
 // --- SUB COMPONENTS ---
 
-const UserAvatar = ({ user }) =>
+const UserAvatar = ({
+  user,
+}: {
+  user: { avatarUrl?: string | null; name: string; initials: string };
+}) =>
   user.avatarUrl ? (
     <img
       src={user.avatarUrl}
@@ -129,22 +147,32 @@ const UserAvatar = ({ user }) =>
 // --- MAIN COMPONENT ---
 
 export default function PostCard({ post, user }: Props) {
-  // Get userId and token from localStorage (Changed from studentId to userId)
-  let userId: string | number | null = null;
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("fomo_token") : null;
+  // Get userId and token from cookies (Changed from localStorage to cookies)
+  const [userId, setUserId] = useState<string | number | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
-  try {
-    const userStr =
-      typeof window !== "undefined" ? localStorage.getItem("fomo_user") : null;
-    if (userStr) {
-      const parsedUser = JSON.parse(userStr);
-      // PULLING DEFAULT STRAPI USER ID: This assumes the user ID is stored in parsedUser.id
-      userId = parsedUser.id || null;
-    }
-  } catch (err) {
-    console.error("Failed to parse user data:", err);
-  }
+  useEffect(() => {
+    const fetchAuth = async () => {
+      if (typeof window !== "undefined") {
+        const { getAuthTokenCookie, getUserCookie } = await import(
+          "@/lib/cookies"
+        );
+        const authToken = getAuthTokenCookie();
+        setToken(authToken);
+
+        try {
+          const parsedUser = getUserCookie();
+          if (parsedUser) {
+            // PULLING DEFAULT STRAPI USER ID: This assumes the user ID is stored in parsedUser.id
+            setUserId(parsedUser.id || null);
+          }
+        } catch (err) {
+          console.error("Failed to parse user data:", err);
+        }
+      }
+    };
+    fetchAuth();
+  }, []);
 
   const { id, author, postedAgo, message, images, stats, likedBy } = post;
   const initialLikes = Number(stats.likes);
@@ -223,7 +251,7 @@ export default function PostCard({ post, user }: Props) {
   const showComments = useCallback(async () => {
     // Toggle collapse state first
     setIsCommentsExpanded((prev) => !prev);
-    // If we're collapsing or already loading, stop here
+    // If we&apos;re collapsing or already loading, stop here
     if (isCommentsExpanded || isLoadingComments) return;
 
     setIsLoadingComments(true);
@@ -254,7 +282,7 @@ export default function PostCard({ post, user }: Props) {
       // Map the nested Strapi data to a flatter structure for the UI
       const mappedComments = json.data
         .map(mapStrapiComment)
-        .filter((c) => c !== null);
+        .filter((c: unknown) => c !== null);
 
       setPostComments(mappedComments);
     } catch (err) {

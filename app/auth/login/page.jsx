@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { strapiLogin, setAuthToken } from "@/lib/strapi/auth";
+import { setUserCookie } from "@/lib/cookies";
 
 export default function Login() {
   const [email, setEmail] = React.useState("");
@@ -23,9 +24,7 @@ export default function Login() {
         console.error("Login error:", result);
       } else if (result?.jwt) {
         setAuthToken(result.jwt);
-        try {
-          localStorage.setItem("fomo_user", JSON.stringify(result.user));
-        } catch {}
+        setUserCookie(result.user);
         // force full reload to ensure server components pick up cookies if needed
         window.location.href = "/students";
       } else {
@@ -113,7 +112,7 @@ export default function Login() {
           <div className="mt-6 flex items-center">
             <div className="flex-grow border-t border-gray-300"></div>
             <span className="mx-4 text-gray-500 text-sm">
-              Don't have an account?
+              Don&apos;t have an account?
             </span>
             <div className="flex-grow border-t border-gray-300"></div>
           </div>

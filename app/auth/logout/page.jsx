@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { removeAuthToken } from "@/lib/strapi/auth";
+import { clearAuthCookies } from "@/lib/cookies";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -11,10 +12,7 @@ export default function LogoutPage() {
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
-    removeAuthToken();
-    try {
-      localStorage.removeItem("fomo_user");
-    } catch {}
+    clearAuthCookies();
 
     // Add a small delay for better UX
     setTimeout(() => {

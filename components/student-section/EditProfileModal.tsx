@@ -127,12 +127,14 @@ export default function EditProfileModal({
       // Get studentId from stored user
       let studentId: string | null = null;
       try {
-        const raw = localStorage.getItem("fomo_user");
-        if (raw) {
-          const parsed = JSON.parse(raw as string) as any;
-          studentId = parsed?.documentId ?? parsed?.id ?? null;
+        const { getUserCookie } = await import("@/lib/cookies");
+        const parsed = getUserCookie();
+        if (parsed) {
+          studentId = (parsed?.documentId ?? parsed?.id ?? null) as
+            | string
+            | null;
         }
-      } catch (err) {
+      } catch {
         // ignore parse errors
       }
 
@@ -155,7 +157,7 @@ export default function EditProfileModal({
       }
 
       // Build payload for Strapi (do NOT include email to prevent changes)
-      const payload: any = {
+      const payload: Record<string, unknown> = {
         name,
         about: bio,
         college: institution,

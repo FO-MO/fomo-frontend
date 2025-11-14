@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import ProfileProjectCard from "@/components/student-section/ProfileProjectCard";
 import ProfileClubCard from "@/components/student-section/ProfileClubCard";
@@ -11,6 +11,52 @@ import { getStudentProfile } from "@/lib/strapi/profile";
 
 type TabKey = "projects" | "clubs" | "internships";
 
+interface FollowerProfile {
+  id: string;
+  name: string;
+  avatarUrl: string;
+  institution: string;
+  course: string;
+  skills: string[];
+  profileUrl: string;
+}
+
+interface ProfileData {
+  name: string;
+  email: string;
+  initials: string;
+  backgroundImageUrl: string | null;
+  profileImageUrl: string | null;
+  followers: FollowerProfile[];
+  following: FollowerProfile[];
+  institution: string;
+  major: string;
+  graduationYear: string;
+  location: string;
+  bio: string;
+  skills: string[];
+  interests: string[];
+  tabs: Array<{ key: TabKey; label: string }>;
+  projects: Array<{
+    title: string;
+    description: string;
+    status: string;
+    tags: string[];
+  }>;
+  clubs: Array<{
+    name: string;
+    description: string;
+    tags: string[];
+    badge?: string;
+  }>;
+  internships: Array<{
+    role: string;
+    timeline: string;
+    location: string;
+    status: string;
+  }>;
+}
+
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function ProfilePage() {
@@ -18,13 +64,9 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<TabKey>("projects");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [profileData, setProfileData] = useState<any>(null);
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
 
-  useEffect(() => {
-    loadProfile();
-  }, []);
-
-  const loadProfile = async () => {
+  const loadProfile = useCallback(async () => {
     try {
       const token = getAuthToken();
       if (!token) {
@@ -32,16 +74,18 @@ export default function ProfilePage() {
         return;
       }
 
-      // Get user ID from localStorage
+      // Get user ID from cookies
       let studentId: string | null = null;
+      let userEmail = "user@example.com";
       try {
-        const userStr = localStorage.getItem("fomo_user");
-        if (userStr) {
-          const user = JSON.parse(userStr);
+        const { getUserCookie } = await import("@/lib/cookies");
+        const user = getUserCookie();
+        if (user) {
           studentId = user?.documentId || user?.id || null;
+          userEmail = user?.email || userEmail;
         }
       } catch (err) {
-        console.error("Failed to parse user data:", err);
+        console.error("Failed to get user data:", err);
       }
 
       if (!studentId) {
@@ -56,18 +100,6 @@ export default function ProfilePage() {
         router.push("/auth/setup-profile");
         return;
       }
-
-      // Get user email from stored user data
-      let userEmail = "user@example.com";
-      try {
-        const userStr = localStorage.getItem("fomo_user");
-        if (userStr) {
-          const user = JSON.parse(userStr);
-          userEmail = user?.email || userEmail;
-        }
-      } catch (err) {
-        console.error("Failed to get user email:", err);
-      }
       // Transform profile data
       const data = {
         name: profile.name || "User",
@@ -75,7 +107,7 @@ export default function ProfilePage() {
         initials: profile.name
           ? profile.name
               .split(" ")
-              .map((n: any) => n[0])
+              .map((n: string) => n[0])
               .join("")
               .toUpperCase()
               .slice(0, 2)
@@ -86,32 +118,8 @@ export default function ProfilePage() {
         profileImageUrl: profile.profilePic?.url
           ? `${BACKEND_URL}${profile.profilePic.url}`
           : null,
-        followers: Array.isArray(profile.followers)
-          ? profile.followers?.map((follower: any) => ({
-              id: follower.documentId,
-              name: follower.name,
-              avatarUrl: follower.profilePic?.url
-                ? `${BACKEND_URL}${follower.profilePic.url}`
-                : "/icons/Profile.svg",
-              institution: follower.college || "Not specified",
-              course: follower.course || "Not specified",
-              skills: follower.skills || [],
-              profileUrl: `/students/profile/${follower.studentId}`,
-            }))
-          : [],
-        following: Array.isArray(profile.following)
-          ? profile.following?.map((following: any) => ({
-              id: following.documentId,
-              name: following.name,
-              avatarUrl: following.profilePic?.url
-                ? `${BACKEND_URL}${following.profilePic.url}`
-                : "/icons/Profile.svg",
-              institution: following.college || "Not specified",
-              course: following.course || "Not specified",
-              skills: following.skills || [],
-              profileUrl: `/students/profile/${following.studentId}`,
-            }))
-          : [],
+        followers: [],
+        following: [],
         institution: profile.college || "Not specified",
         major: profile.course || "Not specified",
         graduationYear: profile.graduationYear || "Not specified",
@@ -124,19 +132,28 @@ export default function ProfilePage() {
           { key: "clubs" as TabKey, label: "Clubs" },
           { key: "internships" as TabKey, label: "Internships" },
         ],
-        projects: profile.projects.map((proj: any) => ({
-          title: proj.title,
-          description: proj.description,
-          status: "Active",
-          tags: proj.tags,
+        projects: (profile.projects || []).map(
+          (proj: Record<string, unknown>) => ({
+            title: (proj.title as string) || "",
+            description: (proj.description as string) || "",
+            status: "Active",
+            tags: (proj.tags as string[]) || [],
+          })
+        ),
+        clubs: (profile.clubs || []).map((club: Record<string, unknown>) => ({
+          name: (club.title as string) || "",
+          description: (club.description as string) || "",
+          tags: (club.tags as string[]) || [],
+          badge: (club.badge as string) || undefined,
         })),
-        clubs: profile.clubs.map((club: any) => ({
-          name: club.title,
-          description: club.description,
-          tags: club.tags || [],
-          badge: club.badge || null,
-        })),
-        internships: profile.internships,
+        internships: (profile.internships || []).map(
+          (internship: Record<string, unknown>) => ({
+            role: (internship.role as string) || "",
+            timeline: (internship.timeline as string) || "",
+            location: (internship.location as string) || "",
+            status: (internship.status as string) || "",
+          })
+        ),
       };
 
       setProfileData(data);
@@ -145,19 +162,13 @@ export default function ProfilePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
 
-  const handleSaveProfile = async (data: {
-    name: string;
-    email: string;
-    institution: string;
-    major: string;
-    graduationYear: string;
-    location: string;
-    bio: string;
-    skills: string[];
-    interests: string[];
-  }) => {
+  useEffect(() => {
+    loadProfile();
+  }, [loadProfile]);
+
+  const handleSaveProfile = async () => {
     // The EditProfileModal already handles the save, so we just need to reload
     await loadProfile();
     setIsEditModalOpen(false);
@@ -171,7 +182,7 @@ export default function ProfilePage() {
         return (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {profileData.projects.length > 0 ? (
-              profileData.projects.map((project: any, index: number) => (
+              profileData.projects.map((project) => (
                 <div
                   key={project.title}
                   className="transform transition-all duration-300 hover:-translate-y-1"
@@ -195,7 +206,7 @@ export default function ProfilePage() {
         return (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {profileData.clubs.length > 0 ? (
-              profileData.clubs.map((club: any, index: number) => (
+              profileData.clubs.map((club) => (
                 <div
                   key={club.name}
                   className="transform transition-all duration-300 hover:-translate-y-1"
@@ -219,7 +230,7 @@ export default function ProfilePage() {
         return (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {profileData.internships && profileData.internships.length > 0 ? (
-              profileData.internships.map((internship: any, index: number) => (
+              profileData.internships.map((internship) => (
                 <div
                   key={internship.role}
                   className="transform transition-all duration-300 hover:-translate-y-1"
@@ -504,7 +515,7 @@ export default function ProfilePage() {
         {/* Tabs */}
         <div className="mb-8">
           <div className="inline-flex gap-1 bg-white rounded-xl p-1.5 shadow-md border border-gray-200">
-            {profileData.tabs.map((tab: any) => (
+            {profileData.tabs.map((tab) => (
               <button
                 key={tab.key}
                 type="button"

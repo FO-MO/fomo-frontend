@@ -35,16 +35,16 @@ export function useProfileCheck(redirectIfIncomplete: boolean = true) {
         return;
       }
 
-      // Get user ID from localStorage
+      // Get user ID from cookies
       let studentId: string | null = null;
       try {
-        const userStr = localStorage.getItem("fomo_user");
-        if (userStr) {
-          const user = JSON.parse(userStr);
+        const { getUserCookie } = await import("@/lib/cookies");
+        const user = getUserCookie();
+        if (user) {
           studentId = user?.documentId || user?.id || null;
         }
       } catch (err) {
-        console.error("Failed to parse user data:", err);
+        console.error("Failed to get user data:", err);
       }
 
       if (!studentId) {

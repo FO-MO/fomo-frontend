@@ -1,10 +1,39 @@
 // Minimal Strapi auth helper for client-side usage
+import {
+  setAuthTokenCookie,
+  getAuthTokenCookie,
+  removeAuthTokenCookie,
+} from "@/lib/cookies";
+
 const STRAPI_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+interface AuthResponse {
+  jwt?: string;
+  user?: {
+    id: number;
+    username: string;
+    email: string;
+    documentId?: string;
+  };
+  error?: {
+    message: string;
+    status: number;
+  };
+}
+
+interface UserMeResponse {
+  id: number;
+  username: string;
+  email: string;
+  documentId?: string;
+  blocked?: boolean;
+  confirmed?: boolean;
+}
 
 export async function strapiLogin(
   identifier: string,
   password: string
-): Promise<any> {
+): Promise<AuthResponse> {
   const res = await fetch(`${STRAPI_URL}/api/auth/local`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -16,9 +45,8 @@ export async function strapiLogin(
 export async function strapiRegister(
   username: string,
   email: string,
-  password: string,
-  usertype: string
-): Promise<any> {
+  password: string
+): Promise<AuthResponse> {
   const res = await fetch(`${STRAPI_URL}/api/auth/local/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -28,32 +56,19 @@ export async function strapiRegister(
   return res.json();
 }
 
-export function setAuthToken(token: string, maxAge = 60 * 60 * 24 * 7): void {
-  // Set a cookie accessible to client (not HttpOnly). For production consider setting cookies from server with HttpOnly.
-  document.cookie = `fomo_token=${token}; path=/; max-age=${maxAge}; samesite=lax`;
-  try {
-    localStorage.setItem("fomo_token", token);
-  } catch {}
+export function setAuthToken(token: string): void {
+  setAuthTokenCookie(token);
 }
 
 export function removeAuthToken(): void {
-  document.cookie = `fomo_token=; path=/; max-age=0; samesite=lax`;
-  try {
-    localStorage.removeItem("fomo_token");
-  } catch {}
+  removeAuthTokenCookie();
 }
 
 export function getAuthToken(): string | null {
-  try {
-    // Prefer localStorage for ease
-    const t = localStorage.getItem("fomo_token");
-    if (t) return t;
-  } catch {}
-  const match = document.cookie.match(new RegExp("(^| )fomo_token=([^;]+)"));
-  return match ? match[2] : null;
+  return getAuthTokenCookie();
 }
 
-export async function fetchMe(token: string): Promise<any> {
+export async function fetchMe(token: string): Promise<UserMeResponse> {
   const res = await fetch(`${STRAPI_URL}/api/users/me`, {
     headers: { Authorization: `Bearer ${token}` },
   });

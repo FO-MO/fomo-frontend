@@ -15,29 +15,32 @@ export default function CreatePostPage() {
   const [charCount, setCharCount] = useState(0);
   const maxChars = 3000;
 
-  // Get user info from localStorage
+  // Get user info from cookies
   const [userName, setUserName] = useState("User");
   const [userInitials, setUserInitials] = useState("U");
 
   React.useEffect(() => {
-    try {
-      const userStr = localStorage.getItem("fomo_user");
-      if (userStr) {
-        const user = JSON.parse(userStr);
-        const name = user?.username || "User";
-        setUserName(name);
-        setUserInitials(
-          name
-            .split(" ")
-            .map((n: string) => n[0])
-            .join("")
-            .toUpperCase()
-            .slice(0, 2)
-        );
+    const fetchUser = async () => {
+      try {
+        const { getUserCookie } = await import("@/lib/cookies");
+        const user = getUserCookie();
+        if (user) {
+          const name = user?.username || "User";
+          setUserName(name);
+          setUserInitials(
+            name
+              .split(" ")
+              .map((n: string) => n[0])
+              .join("")
+              .toUpperCase()
+              .slice(0, 2)
+          );
+        }
+      } catch (err) {
+        console.error("Failed to get user data:", err);
       }
-    } catch (err) {
-      console.error("Failed to get user data:", err);
-    }
+    };
+    fetchUser();
   }, []);
 
   const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -92,7 +95,10 @@ export default function CreatePostPage() {
     setIsSubmitting(true);
 
     try {
-      const token = localStorage.getItem("fomo_token");
+      const { getAuthTokenCookie, getUserCookie } = await import(
+        "@/lib/cookies"
+      );
+      const token = getAuthTokenCookie();
 
       if (!token) {
         alert("You must be logged in to create a post");
@@ -102,10 +108,9 @@ export default function CreatePostPage() {
       }
 
       // Get current user info for the post
-      const userStr = localStorage.getItem("fomo_user");
+      const user = getUserCookie();
       let userId = null;
-      if (userStr) {
-        const user = JSON.parse(userStr);
+      if (user) {
         userId = user?.documentId || user?.id;
       }
 
@@ -124,12 +129,15 @@ export default function CreatePostPage() {
         JSON.stringify(postPayload, null, 2)
       );
 
-      const response = await postData(token, "posts", postPayload);
+      const response = (await postData(token, "posts", postPayload)) as {
+        data?: { id: number | string; [key: string]: unknown };
+        error?: { message?: string; [key: string]: unknown };
+      };
 
       if (response?.error) {
         console.error("Error creating post:", response.error);
         alert(
-          `Failed to create post: ${response.error.message || "Unknown error"}`
+          `Failed to create post: ${response.error?.message || "Unknown error"}`
         );
         setIsSubmitting(false);
         return;
@@ -154,7 +162,7 @@ export default function CreatePostPage() {
             await uploadImage(
               token,
               "api::post.post",
-              response.data.id,
+              Number(response.data.id),
               "images",
               file
             );
@@ -162,7 +170,7 @@ export default function CreatePostPage() {
           console.log("All images uploaded successfully");
         } catch (error) {
           console.error("Image upload failed:", error);
-          // Don't fail the post creation if image upload fails
+          // Don&apos;t fail the post creation if image upload fails
           // The post is already created, just warn the user
           alert(
             "Post created, but some images failed to upload. You can try adding them again by editing the post."
@@ -348,7 +356,7 @@ export default function CreatePostPage() {
               <p className="text-sm text-amber-900">
                 Uploaded images may take a few moments to appear on your post
                 due to processing time. Please be patient and refresh the page
-                if images don't appear immediately.
+                if images don&apos;t appear immediately.
               </p>
             </div>
           )}

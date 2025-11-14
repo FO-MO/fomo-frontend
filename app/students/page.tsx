@@ -48,31 +48,35 @@ export default function StudentsHomePage() {
   >([]);
   //fetching posts
   useEffect(() => {
-    // Compute initials from current user's name stored in localStorage
-    try {
-      const raw = localStorage.getItem("fomo_user");
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        // Try common fields for name
-        const name =
-          (parsed && (parsed.name || parsed.username || parsed.email)) ||
-          "User";
-        // If email, strip domain
-        const cleanedName =
-          typeof name === "string" && name.includes("@")
-            ? name.split("@")[0]
-            : name;
-        setNameVal(cleanedName);
+    // Compute initials from current user's name stored in cookies
+    const fetchUser = async () => {
+      try {
+        const { getUserCookie } = await import("@/lib/cookies");
+        const parsed = getUserCookie();
+        if (parsed) {
+          // Try common fields for name
+          const name =
+            (parsed && (parsed.name || parsed.username || parsed.email)) ||
+            "User";
+          // If email, strip domain
+          const cleanedName =
+            typeof name === "string" && name.includes("@")
+              ? name.split("@")[0]
+              : name;
+          setNameVal(cleanedName);
+        }
+      } catch {
+        setNameVal("Something");
       }
-    } catch {
-      setNameVal("Something");
-    }
+    };
+    fetchUser();
   }, []);
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const token = localStorage.getItem("fomo_token");
+        const { getAuthTokenCookie } = await import("@/lib/cookies");
+        const token = getAuthTokenCookie();
         const response = await fetch(
           `${STRAPI_URL}/api/posts?populate=*&sort=createdAt:desc`,
           {
@@ -91,104 +95,154 @@ export default function StudentsHomePage() {
         const rawPosts = data.data || [];
 
         // Transform Strapi posts to match Post type
-        const transformedPosts: Post[] = rawPosts.map((post: any) => {
-          // Get user data
-          const user = post.user || post.author || {};
-          const userName = user.name || user.username || "Unknown User";
-          const userInitials = userName
-            .split(" ")
-            .map((n: string) => n[0])
-            .join("")
-            .toUpperCase()
-            .slice(0, 2);
+        const transformedPosts: Post[] = rawPosts.map(
+          (post: {
+            user?: {
+              name?: string;
+              username?: string;
+              avatar?: { url?: string };
+              profilePic?: { url?: string };
+              title?: string;
+              bio?: string;
+              course?: string;
+            };
+            author?: {
+              name?: string;
+              username?: string;
+              avatar?: { url?: string };
+              profilePic?: { url?: string };
+              title?: string;
+              bio?: string;
+              course?: string;
+            };
+            images?: Array<{ url?: string }>;
+            title?: string;
+            content?: string;
+            description?: string;
+            documentId?: string | number;
+            id?: string | number;
+            createdAt?: string;
+            publishedAt?: string;
+            likes?: Array<unknown>;
+            comments?: Array<unknown>;
+            likesCount?: number;
+            commentsCount?: number;
+            shares?: Array<unknown>;
+            sharesCount?: number;
+            isLiked?: boolean;
+            likedBy?: Array<unknown>;
+          }) => {
+            // Get user data
+            const user = (post.user || post.author || {}) as {
+              name?: string;
+              username?: string;
+              avatar?: { url?: string };
+              profilePic?: { url?: string };
+              title?: string;
+              bio?: string;
+              course?: string;
+            };
+            const userName = (user.name ||
+              user.username ||
+              "Unknown User") as string;
+            const userInitials = userName
+              .split(" ")
+              .map((n: string) => n[0])
+              .join("")
+              .toUpperCase()
+              .slice(0, 2);
 
-          // Get avatar URL
-          const avatarUrl =
-            user.avatar?.url || user.profilePic?.url
-              ? `${STRAPI_URL}${user.avatar?.url || user.profilePic?.url}`
-              : null;
+            // Get avatar URL
+            const avatarUrl =
+              user.avatar?.url || user.profilePic?.url
+                ? `${STRAPI_URL}${user.avatar?.url || user.profilePic?.url}`
+                : null;
 
-          // Get images - handle both array and single image
-          let images: string[] = post.images
-            ? post.images.map((img: any) => `${STRAPI_URL}${img.url}`)
-            : [];
+            // Get images - handle both array and single image
+            const images: string[] = post.images
+              ? post.images.map(
+                  (img: { url?: string }) => `${STRAPI_URL}${img.url}`
+                )
+              : [];
 
-          console.log("post media is", images);
-          // let images: string[] = [];
-          // if (post.media) {
-          //   if (Array.isArray(post.media.data)) {
-          //     images = post.media.data.map(
-          //       (img: any) => `${STRAPI_URL}${img.attributes?.url || img.url}`
-          //     );
-          //   } else if (post.media.data) {
-          //     images = [
-          //       `${STRAPI_URL}${
-          //         post.media.data.attributes?.url || post.media.data.url
-          //       }`,
-          //     ];
-          //   } else if (Array.isArray(post.images)) {
-          //     images = post.images.map(
-          //       (img: any) =>
-          //         `${STRAPI_URL}${
-          //           img.url || img.attributes?.url || img.formats?.medium?.url
-          //         }`
-          //     );
-          //   } else {
-          //     images = [
-          //       `${STRAPI_URL}${
-          //         post.images.url ||
-          //         post.images.attributes?.url ||
-          //         post.images.formats?.medium?.url
-          //       }`,
-          //     ];
-          //   }
-          // }
+            console.log("post media is", images);
+            // let images: string[] = [];
+            // if (post.media) {
+            //   if (Array.isArray(post.media.data)) {
+            //     images = post.media.data.map(
+            //       (img: any) => `${STRAPI_URL}${img.attributes?.url || img.url}`
+            //     );
+            //   } else if (post.media.data) {
+            //     images = [
+            //       `${STRAPI_URL}${
+            //         post.media.data.attributes?.url || post.media.data.url
+            //       }`,
+            //     ];
+            //   } else if (Array.isArray(post.images)) {
+            //     images = post.images.map(
+            //       (img: any) =>
+            //         `${STRAPI_URL}${
+            //           img.url || img.attributes?.url || img.formats?.medium?.url
+            //         }`
+            //     );
+            //   } else {
+            //     images = [
+            //       `${STRAPI_URL}${
+            //         post.images.url ||
+            //         post.images.attributes?.url ||
+            //         post.images.formats?.medium?.url
+            //       }`,
+            //     ];
+            //   }
+            // }
 
-          // Format date
-          const createdAt = new Date(
-            post.createdAt || post.publishedAt || Date.now()
-          );
-          const now = new Date();
-          const diffInSeconds = Math.floor(
-            (now.getTime() - createdAt.getTime()) / 1000
-          );
-          let postedAgo = "";
+            // Format date
+            const createdAt = new Date(
+              post.createdAt || post.publishedAt || Date.now()
+            );
+            const now = new Date();
+            const diffInSeconds = Math.floor(
+              (now.getTime() - createdAt.getTime()) / 1000
+            );
+            let postedAgo = "";
 
-          if (diffInSeconds < 60) {
-            postedAgo = "just now";
-          } else if (diffInSeconds < 3600) {
-            const minutes = Math.floor(diffInSeconds / 60);
-            postedAgo = `${minutes} ${
-              minutes === 1 ? "minute" : "minutes"
-            } ago`;
-          } else if (diffInSeconds < 86400) {
-            const hours = Math.floor(diffInSeconds / 3600);
-            postedAgo = `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
-          } else {
-            const days = Math.floor(diffInSeconds / 86400);
-            postedAgo = `${days} ${days === 1 ? "day" : "days"} ago`;
+            if (diffInSeconds < 60) {
+              postedAgo = "just now";
+            } else if (diffInSeconds < 3600) {
+              const minutes = Math.floor(diffInSeconds / 60);
+              postedAgo = `${minutes} ${
+                minutes === 1 ? "minute" : "minutes"
+              } ago`;
+            } else if (diffInSeconds < 86400) {
+              const hours = Math.floor(diffInSeconds / 3600);
+              postedAgo = `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
+            } else {
+              const days = Math.floor(diffInSeconds / 86400);
+              postedAgo = `${days} ${days === 1 ? "day" : "days"} ago`;
+            }
+
+            return {
+              id:
+                post.documentId?.toString() || post.id?.toString() || "unknown",
+              author: {
+                name: userName,
+                initials: userInitials,
+                avatarUrl: avatarUrl,
+                title: user.title || user.bio || user.course || undefined,
+              },
+              postedAgo: postedAgo,
+              message: post.description || "",
+              images: images.length > 0 ? images : undefined,
+              stats: {
+                likes: post.likes || post.likesCount || 0,
+                comments: post.comments || post.commentsCount || 0,
+                shares: post.shares || post.sharesCount || 0,
+              },
+              isLiked: post.isLiked || false,
+              likedBy: post.likedBy,
+            };
           }
-
-          return {
-            id: post.documentId.toString(),
-            author: {
-              name: userName,
-              initials: userInitials,
-              avatarUrl: avatarUrl,
-              title: user.title || user.bio || user.course || undefined,
-            },
-            postedAgo: postedAgo,
-            message: post.description || "",
-            images: images.length > 0 ? images : undefined,
-            stats: {
-              likes: post.likes || post.likesCount || 0,
-              comments: post.comments || post.commentsCount || 0,
-              shares: post.shares || post.sharesCount || 0,
-            },
-            isLiked: post.isLiked || false,
-            likedBy: post.likedBy,
-          };
-        });
+        );
 
         setPosts(transformedPosts);
       } catch (error) {
@@ -203,7 +257,8 @@ export default function StudentsHomePage() {
   useEffect(() => {
     const fetchGlobalJobs = async () => {
       try {
-        const token = localStorage.getItem("fomo_token");
+        const { getAuthTokenCookie } = await import("@/lib/cookies");
+        const token = getAuthTokenCookie();
         const response = await fetch(
           `${STRAPI_URL}/api/globaljobpostings?populate=*&sort=createdAt:desc`,
           {
@@ -215,21 +270,39 @@ export default function StudentsHomePage() {
         );
         const data = await response.json();
         console.log("Global jobs data:", data.data);
-        const mockJobs: GlobalJob[] = data.data.map((item: any) => ({
-          id: item.id,
-          title: item.data.title,
-          jobType: item.data.jobType,
-          experience: item.data.experience,
-          location: item.data.location,
-          deadline: item.data.deadline,
-          description: item.data.description,
-          skills: item.data.skills,
-          requirements: item.data.requirements,
-          benefits: item.data.benefits,
-          status: item.data.status,
-          companyName: item.data.companyName,
-          createdAt: item.createdAt,
-        }));
+        const mockJobs: GlobalJob[] = data.data.map(
+          (item: {
+            data: {
+              title?: string;
+              jobType?: string;
+              experience?: string;
+              location?: string;
+              deadline?: string;
+              description?: string;
+              skills?: string[];
+              requirements?: string[];
+              benefits?: string[];
+              status?: string;
+              companyName?: string;
+              [key: string]: unknown;
+            };
+            [key: string]: unknown;
+          }) => ({
+            id: Math.random(),
+            title: item.data.title || "Unknown Job",
+            jobType: item.data.jobType || "Full-time",
+            experience: item.data.experience || "Entry Level",
+            location: item.data.location || "Remote",
+            deadline: item.data.deadline || new Date().toISOString(),
+            description: item.data.description || "",
+            skills: item.data.skills || [],
+            requirements: item.data.requirements || [],
+            benefits: item.data.benefits || [],
+            status: item.data.status || "Open",
+            companyName: item.data.companyName || "Unknown Company",
+            createdAt: item.createdAt,
+          })
+        );
         setGlobalJobs(mockJobs);
       } catch (error) {
         console.error("Error fetching global jobs:", error);
@@ -343,7 +416,7 @@ export default function StudentsHomePage() {
               </h2>
               <div className="flex flex-col gap-4">
                 {combinedFeed.length > 0 ? (
-                  combinedFeed.map((item, index) => {
+                  combinedFeed.map((item) => {
                     if (item.type === "post") {
                       return (
                         <PostCard
