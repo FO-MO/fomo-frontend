@@ -61,22 +61,16 @@ export default function OverviewCards1() {
       {colleges.map((college: CollegeData, index: number) => (
         <div
           key={index}
-          className='flex-1 bg-white rounded-2xl shadow-lg p-6 relative overflow-hidden transition-transform duration-300 ease-in-out hover:-translate-y-2 group'
+          className='flex-1 shadow-[0px_0px_3px_#0006] bg-white rounded-2xl  p-6 relative overflow-hidden transition-transform duration-300 ease-in-out hover:-translate-y-2 group'
         >
           {/* Linear Gradient Overlay - Top Left to Bottom Right */}
           <div className='absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out rounded-2xl pointer-events-none'></div>
 
           {/* Content - with relative positioning to stay above gradient */}
-          <div className='relative z-10'>
+          <div className='relative z-10 opacity-0 '>
             {/* Header */}
             <div className='flex items-start justify-between mb-4'>
               <div className='flex-1'>
-                {college.aiRecommended && (
-                  <div className='inline-flex items-center gap-1 bg-yellow-50 border border-yellow-200 rounded-full px-3 py-1 text-xs font-medium text-yellow-800 mb-2'>
-                    <span>✨</span>
-                    <span>AI Recommended</span>
-                  </div>
-                )}
                 <h3 className='text-xl font-bold text-gray-900 mb-1'>
                   {college.name}
                 </h3>

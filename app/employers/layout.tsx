@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -8,15 +8,99 @@ import { usePathname } from "next/navigation";
 
 //SEO NEEDS TO BE DONE...
 
-const res = await fetchFromBackend("employer-dash-tiles?populate=*");
-const x = res[0]; //data.data is an array
+const res = await fetchFromBackend('employer-dash-tiles?populate=*')
+const x = res[0] //data.data is an array
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
+})
 
 const geistMono = Geist_Mono({
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
+})
+
+// export const metadata: Metadata = {
+//   title: "FOOMO - AI-Powered Career Platform for Students & Job Seekers",
+//   description:
+//     "Never Fear Missing Out on your dream job. FOOMO automates your career journey with AI-powered job recommendations, personalized upskilling, networking automation, and direct college placement connections.",
+//   keywords: [
+//     "AI career platform",
+//     "student job placement",
+//     "AI-powered job search",
+//     "career automation",
+//     "college placement",
+//     "student networking",
+//     "personalized learning paths",
+//     "upskilling platform",
+//     "job recommendations",
+//     "campus placements",
+//     "career development for students",
+//     "AI networking",
+//     "automated job matching",
+//     "student career platform",
+//     "entry-level jobs",
+//     "internship opportunities",
+//     "college to career",
+//     "job portal for students",
+//     "AI career advisor",
+//     "career guidance platform",
+//   ],
+//   authors: [{ name: "FOOMO Team" }],
+//   creator: "FOOMO",
+//   publisher: "FOOMO",
+//   robots: {
+//     index: true,
+//     follow: true,
+//     googleBot: {
+//       index: true,
+//       follow: true,
+//       "max-video-preview": -1,
+//       "max-image-preview": "large",
+//       "max-snippet": -1,
+//     },
+//   },
+//   openGraph: {
+//     type: "website",
+//     locale: "en_US",
+//     url: "https://FOOMO.app",
+//     title: "FOOMO - AI-Powered Career Platform for Students",
+//     description:
+//       "Automate your entire career journey with AI-powered upskilling, networking, and college placement automation. Never miss out on your dream job.",
+//     siteName: "FOOMO",
+//     images: [
+//       {
+//         url: "/og-image.png",
+//         width: 1200,
+//         height: 630,
+//         alt: "FOOMO - AI-Powered Career Platform",
+//       },
+//     ],
+//   },
+//   twitter: {
+//     card: "summary_large_image",
+//     title: "FOOMO - AI-Powered Career Platform for Students",
+//     description:
+//       "Automate your career journey with AI-powered job recommendations, upskilling, and networking automation.",
+//     images: ["/og-image.png"],
+//     creator: "@FOOMO_app",
+//   },
+//   viewport: {
+//     width: "device-width",
+//     initialScale: 1,
+//     maximumScale: 5,
+//   },
+//   verification: {
+//     google: "your-google-verification-code",
+//     // yandex: "your-yandex-verification-code",
+//     // yahoo: "your-yahoo-verification-code",
+//   },
+//   alternates: {
+//     canonical: "https://FOOMO.app",
+//   },
+//   category: "Career Development",
+// };
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
@@ -24,116 +108,116 @@ const geistMono = Geist_Mono({
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   const pathname = usePathname();
   const isProfilePage = pathname === "/employers/profile";
-  
+
   const stats = [
     {
-      title: "Total Applications",
+      title: 'Total Applications',
       value: x.applicationNumber,
-      subtitle: "This month",
+      subtitle: 'This month',
       change: `+${x.applicationPercentage}% from last month`,
       icon: (
         <svg
-          aria-hidden="true"
-          className="h-5 w-5 text-emerald-600"
-          fill="none"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+          aria-hidden='true'
+          className='h-5 w-5 text-emerald-600'
+          fill='none'
+          stroke='currentColor'
+          strokeLinecap='round'
+          strokeLinejoin='round'
           strokeWidth={2}
-          viewBox="0 0 24 24"
+          viewBox='0 0 24 24'
         >
-          <path d="M5 3v18M5 7h7a4 4 0 110 8H5" />
+          <path d='M5 3v18M5 7h7a4 4 0 110 8H5' />
         </svg>
       ),
     },
     {
-      title: "Active Jobs",
+      title: 'Active Jobs',
       value: x.activeJobs,
       subtitle: `Across ${x.activeJobsCollege} colleges`,
       change: `+ ${x.activeJobsWeek}new this week`,
       icon: (
         <svg
-          aria-hidden="true"
-          className="h-5 w-5 text-emerald-600"
-          fill="none"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+          aria-hidden='true'
+          className='h-5 w-5 text-emerald-600'
+          fill='none'
+          stroke='currentColor'
+          strokeLinecap='round'
+          strokeLinejoin='round'
           strokeWidth={2}
-          viewBox="0 0 24 24"
+          viewBox='0 0 24 24'
         >
-          <path d="M4 7h16M10 11v6m4-6v6M6 7V4h12v3" />
+          <path d='M4 7h16M10 11v6m4-6v6M6 7V4h12v3' />
         </svg>
       ),
     },
     {
-      title: "Avg. Time to Hire",
+      title: 'Avg. Time to Hire',
       value: x.hireTime,
       subtitle: `Industry avg: ${x.hireTimeIndustrial} days`,
       change: `-${x.hireTimeImprovement} days improved`,
       icon: (
         <svg
-          aria-hidden="true"
-          className="h-5 w-5 text-emerald-600"
-          fill="none"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+          aria-hidden='true'
+          className='h-5 w-5 text-emerald-600'
+          fill='none'
+          stroke='currentColor'
+          strokeLinecap='round'
+          strokeLinejoin='round'
           strokeWidth={2}
-          viewBox="0 0 24 24"
+          viewBox='0 0 24 24'
         >
-          <path d="M12 6v6l4 2M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
+          <path d='M12 6v6l4 2M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z' />
         </svg>
       ),
     },
     {
-      title: "Hires This Month",
+      title: 'Hires This Month',
       value: x.hireMonth,
       subtitle: `${x.hireConversion}% conversion rate`,
       change: `+${x.hirePercent}% from last month`,
       icon: (
         <svg
-          aria-hidden="true"
-          className="h-5 w-5 text-emerald-600"
-          fill="none"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+          aria-hidden='true'
+          className='h-5 w-5 text-emerald-600'
+          fill='none'
+          stroke='currentColor'
+          strokeLinecap='round'
+          strokeLinejoin='round'
           strokeWidth={2}
-          viewBox="0 0 24 24"
+          viewBox='0 0 24 24'
         >
-          <path d="M20 13V7a1 1 0 00-1-1h-5l-2-2H5a1 1 0 00-1 1v14l4-4h11a1 1 0 001-1z" />
+          <path d='M20 13V7a1 1 0 00-1-1h-5l-2-2H5a1 1 0 00-1 1v14l4-4h11a1 1 0 001-1z' />
         </svg>
       ),
     },
     {
-      title: "Cost Saved vs Traditional",
+      title: 'Cost Saved vs Traditional',
       value: `₹${x.costSave}L`,
-      subtitle: "Using FOOMO platform",
+      subtitle: 'Using FOOMO platform',
       change: `${x.costRednpercentage}% cost reduction`,
       icon: (
         <svg
-          aria-hidden="true"
-          className="h-5 w-5 text-emerald-600"
-          fill="none"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+          aria-hidden='true'
+          className='h-5 w-5 text-emerald-600'
+          fill='none'
+          stroke='currentColor'
+          strokeLinecap='round'
+          strokeLinejoin='round'
           strokeWidth={2}
-          viewBox="0 0 24 24"
+          viewBox='0 0 24 24'
         >
-          <path d="M12 8c-2 0-3.5 1.5-3.5 3s1.5 3 3.5 3 3.5 1.5 3.5 3-1.5 3-3.5 3m0-12c2 0 3.5-1.5 3.5-3S14 2 12 2 8.5 3.5 8.5 5" />
+          <path d='M12 8c-2 0-3.5 1.5-3.5 3s1.5 3 3.5 3 3.5 1.5 3.5 3-1.5 3-3.5 3m0-12c2 0 3.5-1.5 3.5-3S14 2 12 2 8.5 3.5 8.5 5' />
         </svg>
       ),
     },
-  ];
+  ]
 
   return (
-    <html lang="en" className="h-full bg-white">
+    <html lang='en' className='h-full bg-white'>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased h-full`}
       >
@@ -289,16 +373,18 @@ export default function RootLayout({
                   </div>
                 </section>
 
+            <div className='mt-10 '>{children}</div>
+          </main>
                 <div className="mt-10 ">{children}</div>
               </main>
             </>
           )}
-          
+
           {isProfilePage && (
             <div>{children}</div>
           )}
         </div>
       </body>
     </html>
-  );
+  )
 }
