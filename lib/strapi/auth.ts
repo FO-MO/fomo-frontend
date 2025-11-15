@@ -1,9 +1,9 @@
 // Minimal Strapi auth helper for client-side usage
 import {
-  setAuthTokenCookie,
-  getAuthTokenCookie,
-  removeAuthTokenCookie,
-} from '@/lib/cookies'
+  setAuthToken as setStorageAuthToken,
+  getAuthToken as getStorageAuthToken,
+  removeAuthToken as removeStorageAuthToken,
+} from '@/lib/storage'
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_BACKEND_URL
 
@@ -100,19 +100,19 @@ export async function strapiRegister(
 }
 
 export function setAuthToken(token: string): void {
-  setAuthTokenCookie(token)
+  setStorageAuthToken(token)
 }
 
 export function removeAuthToken(): void {
-  removeAuthTokenCookie()
+  removeStorageAuthToken()
 }
 
 export function getAuthToken(): string | null {
-  return getAuthTokenCookie()
+  return getStorageAuthToken()
 }
 
 export async function fetchMe(
-  token: string = getAuthTokenCookie() || ''
+  token: string = getStorageAuthToken() || ''
 ): Promise<UserMeResponse> {
   const res = await fetch(`${STRAPI_URL}/api/users/me?populate=*`, {
     headers: { Authorization: `Bearer ${token}` },

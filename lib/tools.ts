@@ -1,6 +1,10 @@
 'use client'
 import axios from 'axios'
-import { getAuthTokenCookie } from './cookies'
+import { getAuthToken } from './storage'
+
+// STORAGE CONFIGURATION
+// Set this to 'cookies' or 'localStorage' to control storage method for the entire app
+export const STORAGE_METHOD: 'cookies' | 'localStorage' = 'localStorage'
 
 //JSON---->
 export async function fetchFromBackend(
@@ -8,7 +12,7 @@ export async function fetchFromBackend(
   {
     backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ||
       'https://tbs9k5m4-1337.inc1.devtunnels.ms',
-    token = getAuthTokenCookie(),
+    token = getAuthToken(),
     options = {},
   }: {
     backendUrl?: string
@@ -43,7 +47,7 @@ export async function postFetchFromBackend(
   {
     backendUrl = process.env.NEXT_PUBLIC_STRAPI_URL ||
       'https://tbs9k5m4-1337.inc1.devtunnels.ms',
-    token = getAuthTokenCookie(),
+    token = getAuthToken(),
   }: {
     backendUrl?: string
     token?: string | null
@@ -74,7 +78,7 @@ export async function postFetchFromBackend(
 
 // DELETE request for college job application...
 export async function deletecollegejobposting(id: string) {
-  const token = getAuthTokenCookie()
+  const token = getAuthToken()
   try {
     const response = await axios.delete(
       `${backendurl}/collegejobpostings/${id}`,
@@ -92,7 +96,7 @@ export async function deletecollegejobposting(id: string) {
 
 // DELETE request for global job application..
 export async function deleteglobaljobposting(id: string) {
-  const token = getAuthTokenCookie()
+  const token = getAuthToken()
 
   // Try both possible endpoints
   const endpoints = [`${backendurl}/api/globaljobpostings/${id}`]
@@ -130,7 +134,7 @@ export async function putglobaljobposting(
   id: string,
   payload: Record<string, unknown>
 ) {
-  const token = getAuthTokenCookie()
+  const token = getAuthToken()
   try {
     console.log(`🔄 PUT to globaljobpostings/${id}:`, payload)
 
