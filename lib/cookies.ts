@@ -12,7 +12,7 @@ const USER_COOKIE = "fomo_user";
 // Cookie options
 const COOKIE_OPTIONS = {
   expires: 7, // 7 days
-  domain: "stable-gem-a63fa44dc9.strapiapp.com",
+  // domain: "stable-gem-a63fa44dc9.strapiapp.com",
   path: "/",
   sameSite: "lax" as const,
   secure: process.env.NODE_ENV === "production", // Only use secure in production (HTTPS)

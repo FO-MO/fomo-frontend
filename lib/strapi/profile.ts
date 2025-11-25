@@ -1,59 +1,58 @@
-import { getAuthTokenCookie } from '../cookies'
+import { getAuthTokenCookie } from "../cookies";
 
 // Strapi profile helper functions
-const STRAPI_URL =
-  process.env.BACKEND_URL || 'https://tbs9k5m4-1337.inc1.devtunnels.ms'
+const STRAPI_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export interface StudentProfile {
-  documentId?: string
-  id?: number
-  studentId: string
-  name: string
-  email?: string
-  about?: string
-  college?: string
-  course?: string
-  graduationYear?: string
-  location?: string
-  skills?: string[]
-  interests?: string[]
-  followers?: string[]
-  following?: string[]
+  documentId?: string;
+  id?: number;
+  studentId: string;
+  name: string;
+  email?: string;
+  about?: string;
+  college?: string;
+  course?: string;
+  graduationYear?: string;
+  location?: string;
+  skills?: string[];
+  interests?: string[];
+  followers?: string[];
+  following?: string[];
   profilePic?: {
-    id: number
-    url: string
-    name: string
-  } | null
+    id: number;
+    url: string;
+    name: string;
+  } | null;
   backgroundImg?: {
-    id: number
-    url: string
-    name: string
-  } | null
-  createdAt?: string
-  updatedAt?: string
+    id: number;
+    url: string;
+    name: string;
+  } | null;
+  createdAt?: string;
+  updatedAt?: string;
   user?: {
-    id: number
-    email: string
-    username: string
-  }
-  projects?: Record<string, unknown>[]
-  clubs?: Record<string, unknown>[]
-  internships?: Record<string, unknown>[]
+    id: number;
+    email: string;
+    username: string;
+  };
+  projects?: Record<string, unknown>[];
+  clubs?: Record<string, unknown>[];
+  internships?: Record<string, unknown>[];
 }
 
 export interface CreateProfileData {
-  studentId: string
-  name: string
-  email?: string
-  about?: string
-  college?: string
-  course?: string
-  graduationYear?: string
-  location?: string
-  skills?: string[]
-  interests?: string[]
-  profilePic?: number // Media ID
-  backgroundImage?: number // Media ID
+  studentId: string;
+  name: string;
+  email?: string;
+  about?: string;
+  college?: string;
+  course?: string;
+  graduationYear?: string;
+  location?: string;
+  skills?: string[];
+  interests?: string[];
+  profilePic?: number; // Media ID
+  backgroundImage?: number; // Media ID
 }
 
 /**
@@ -71,14 +70,14 @@ export async function getStudentProfile(
       {
         headers: { Authorization: `Bearer ${token}` },
       }
-    )
-    if (!res.ok) return null
-    const json = await res.json()
-    console.log('Fetched student profile:', json)
-    return json?.data?.[0] || null
+    );
+    if (!res.ok) return null;
+    const json = await res.json();
+    console.log("Fetched student profile:", json);
+    return json?.data?.[0] || null;
   } catch (err) {
-    console.error('Failed to fetch student profile:', err)
-    return null
+    console.error("Failed to fetch student profile:", err);
+    return null;
   }
 }
 
@@ -91,22 +90,22 @@ export async function createStudentProfile(
 ): Promise<StudentProfile | null> {
   try {
     const res = await fetch(`${STRAPI_URL}/api/student-profiles`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ data }),
-    })
+    });
     if (!res.ok) {
-      console.error('Failed to create profile:', await res.text())
-      return null
+      console.error("Failed to create profile:", await res.text());
+      return null;
     }
-    const json = await res.json()
-    return json?.data || null
+    const json = await res.json();
+    return json?.data || null;
   } catch (err) {
-    console.error('Failed to create student profile:', err)
-    return null
+    console.error("Failed to create student profile:", err);
+    return null;
   }
 }
 
@@ -122,23 +121,23 @@ export async function updateStudentProfile(
     const res = await fetch(
       `${STRAPI_URL}/api/student-profiles/${documentId}`,
       {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ data }),
       }
-    )
+    );
     if (!res.ok) {
-      console.error('Failed to update profile:', await res.text())
-      return null
+      console.error("Failed to update profile:", await res.text());
+      return null;
     }
-    const json = await res.json()
-    return json?.data || null
+    const json = await res.json();
+    return json?.data || null;
   } catch (err) {
-    console.error('Failed to update student profile:', err)
-    return null
+    console.error("Failed to update student profile:", err);
+    return null;
   }
 }
 
@@ -150,42 +149,42 @@ export async function uploadFile(
   token: string
 ): Promise<{ id: number; url: string } | null> {
   try {
-    console.log('Uploading file to Strapi:', file.name, file.type, file.size)
+    console.log("Uploading file to Strapi:", file.name, file.type, file.size);
 
-    const formData = new FormData()
-    formData.append('files', file)
+    const formData = new FormData();
+    formData.append("files", file);
 
     const res = await fetch(`${STRAPI_URL}/api/upload`, {
-      method: 'POST',
+      method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
       },
       body: formData,
-    })
+    });
 
     if (!res.ok) {
-      const errorText = await res.text()
+      const errorText = await res.text();
       console.error(
-        'Failed to upload file. Status:',
+        "Failed to upload file. Status:",
         res.status,
-        'Response:',
+        "Response:",
         errorText
-      )
-      return null
+      );
+      return null;
     }
 
-    const json = await res.json()
-    console.log('Upload response:', json)
+    const json = await res.json();
+    console.log("Upload response:", json);
 
     if (Array.isArray(json) && json[0]) {
-      return { id: json[0].id, url: json[0].url }
+      return { id: json[0].id, url: json[0].url };
     }
 
-    console.error('Unexpected upload response format:', json)
-    return null
+    console.error("Unexpected upload response format:", json);
+    return null;
   } catch (err) {
-    console.error('Failed to upload file:', err)
-    return null
+    console.error("Failed to upload file:", err);
+    return null;
   }
 }
 
@@ -196,8 +195,8 @@ export async function hasCompletedProfile(
   studentId: string,
   token: string
 ): Promise<boolean> {
-  const profile = await getStudentProfile(studentId, token)
-  if (!profile) return false
+  const profile = await getStudentProfile(studentId, token);
+  if (!profile) return false;
 
   // Check if required fields are filled
   return !!(
@@ -206,58 +205,58 @@ export async function hasCompletedProfile(
     profile.course &&
     profile.graduationYear &&
     profile.about
-  )
+  );
 }
 
 // ============= EMPLOYER PROFILE FUNCTIONS =============
 
 interface MediaFile {
-  id: number
-  url: string
-  name: string
+  id: number;
+  url: string;
+  name: string;
 }
 
 interface UserInfo {
-  id: number
-  email: string
-  username: string
+  id: number;
+  email: string;
+  username: string;
 }
 
 export interface EmployerProfile {
-  documentId?: string
-  id?: number
-  employerId: string
-  name: string
-  email?: string
-  phone?: string
-  phoneNumber?: string
-  country_code?: string
-  description?: string
-  website?: string
-  industry?: string
-  location?: string
-  noOfEmployers?: number
-  specialties?: string
-  profilePic?: MediaFile
-  backgroundImg?: MediaFile
-  createdAt?: string
-  updatedAt?: string
-  user?: UserInfo
+  documentId?: string;
+  id?: number;
+  employerId: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  phoneNumber?: string;
+  country_code?: string;
+  description?: string;
+  website?: string;
+  industry?: string;
+  location?: string;
+  noOfEmployers?: number;
+  specialties?: string;
+  profilePic?: MediaFile;
+  backgroundImg?: MediaFile;
+  createdAt?: string;
+  updatedAt?: string;
+  user?: UserInfo;
 }
 
 export interface CreateEmployerProfileData {
-  employerId: string
-  name: string
-  email?: string
-  phone?: string
-  description?: string
-  website?: string
-  industry?: string
-  location?: string
-  noOfEmployers?: number
-  specialties?: string
-  profilePic?: number // Media ID
-  backgroundImg?: number // Media ID
+  employerId: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  description?: string;
+  website?: string;
+  industry?: string;
+  location?: string;
+  noOfEmployers?: number;
+  specialties?: string;
+  profilePic?: number; // Media ID
+  backgroundImg?: number; // Media ID
 }
 
 /**
@@ -265,7 +264,7 @@ export interface CreateEmployerProfileData {
  */
 export async function getEmployerProfile(
   employerId: string,
-  token: string = getAuthTokenCookie() || ''
+  token: string = getAuthTokenCookie() || ""
 ): Promise<EmployerProfile | null> {
   try {
     const res = await fetch(
@@ -275,14 +274,14 @@ export async function getEmployerProfile(
       {
         headers: { Authorization: `Bearer ${token}` },
       }
-    )
-    if (!res.ok) return null
-    const json = await res.json()
-    console.log('Fetched employer profile:', json)
-    return json?.data?.[0] || null
+    );
+    if (!res.ok) return null;
+    const json = await res.json();
+    console.log("Fetched employer profile:", json);
+    return json?.data?.[0] || null;
   } catch (err) {
-    console.error('Failed to fetch employer profile:', err)
-    return null
+    console.error("Failed to fetch employer profile:", err);
+    return null;
   }
 }
 
@@ -295,22 +294,22 @@ export async function createEmployerProfile(
 ): Promise<EmployerProfile | null> {
   try {
     const res = await fetch(`${STRAPI_URL}/api/employer-profiles`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ data }),
-    })
+    });
     if (!res.ok) {
-      console.error('Failed to create employer profile:', await res.text())
-      return null
+      console.error("Failed to create employer profile:", await res.text());
+      return null;
     }
-    const json = await res.json()
-    return json?.data || null
+    const json = await res.json();
+    return json?.data || null;
   } catch (err) {
-    console.error('Failed to create employer profile:', err)
-    return null
+    console.error("Failed to create employer profile:", err);
+    return null;
   }
 }
 
@@ -326,22 +325,22 @@ export async function updateEmployerProfile(
     const res = await fetch(
       `${STRAPI_URL}/api/employer-profiles/${documentId}`,
       {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ data }),
       }
-    )
+    );
     if (!res.ok) {
-      console.error('Failed to update employer profile:', await res.text())
-      return null
+      console.error("Failed to update employer profile:", await res.text());
+      return null;
     }
-    const json = await res.json()
-    return json?.data || null
+    const json = await res.json();
+    return json?.data || null;
   } catch (err) {
-    console.error('Failed to update employer profile:', err)
-    return null
+    console.error("Failed to update employer profile:", err);
+    return null;
   }
 }

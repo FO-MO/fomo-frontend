@@ -1,80 +1,344 @@
-'use client'
-export const dynamic = 'force-dynamic'
+"use client";
+export const dynamic = "force-dynamic";
 
-import { X, Check } from 'lucide-react'
-import { useState } from 'react'
-import { getAuthToken } from '@/lib/strapi/auth'
+import { X, Check } from "lucide-react";
+import { useState } from "react";
+import { getAuthToken } from "@/lib/strapi/auth";
 
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL ||
-  'https://tbs9k5m4-1337.inc1.devtunnels.ms'
+  "https://tbs9k5m4-1337.inc1.devtunnels.ms";
 
 // Predefined options
 const AVAILABLE_SKILLS = [
-  'React',
-  'TypeScript',
-  'JavaScript',
-  'Node.js',
-  'Python',
-  'Java',
-  'C++',
-  'Machine Learning',
-  'UI/UX Design',
-  'Docker',
-  'AWS',
-  'GraphQL',
-  'TensorFlow',
-  'MongoDB',
-  'PostgreSQL',
-  'Git',
-  'Figma',
-  'Flutter',
-  'Swift',
-  'Kotlin',
-]
+  "React",
+  "TypeScript",
+  "JavaScript",
+  "Node.js",
+  "Python",
+  "Java",
+  "C++",
+  "C#",
+  "Ruby",
+  "PHP",
+  "Go",
+  "Rust",
+  "Kotlin",
+  "Swift",
+  "Flutter",
+  "React Native",
+  "Vue.js",
+  "Angular",
+  "Svelte",
+  "Next.js",
+  "Express.js",
+  "Django",
+  "Flask",
+  "Spring Boot",
+  "ASP.NET",
+  "Laravel",
+  "Ruby on Rails",
+  "Machine Learning",
+  "Deep Learning",
+  "Natural Language Processing",
+  "Computer Vision",
+  "Data Science",
+  "Data Analysis",
+  "Statistics",
+  "UI/UX Design",
+  "Graphic Design",
+  "Product Design",
+  "Figma",
+  "Adobe XD",
+  "Photoshop",
+  "Illustrator",
+  "Docker",
+  "Kubernetes",
+  "AWS",
+  "Azure",
+  "Google Cloud",
+  "Firebase",
+  "Heroku",
+  "GraphQL",
+  "REST API",
+  "Microservices",
+  "TensorFlow",
+  "PyTorch",
+  "Scikit-learn",
+  "MongoDB",
+  "PostgreSQL",
+  "MySQL",
+  "Redis",
+  "DynamoDB",
+  "Git",
+  "GitHub",
+  "GitLab",
+  "CI/CD",
+  "Jenkins",
+  "Linux",
+  "Bash Scripting",
+  "Agile/Scrum",
+  "Project Management",
+  "Technical Writing",
+  "Public Speaking",
+  "Leadership",
+  "Team Collaboration",
+];
 
 const AVAILABLE_INTERESTS = [
-  'Artificial Intelligence',
-  'Web Development',
-  'Mobile Development',
-  'Startups',
-  'Product Design',
-  'Open Source',
-  'Hackathons',
-  'Data Science',
-  'Cloud Computing',
-  'Cybersecurity',
-  'Blockchain',
-  'Game Development',
-  'IoT',
-  'DevOps',
-]
+  "Artificial Intelligence",
+  "Machine Learning",
+  "Deep Learning",
+  "Natural Language Processing",
+  "Computer Vision",
+  "Web Development",
+  "Frontend Development",
+  "Backend Development",
+  "Full Stack Development",
+  "Mobile Development",
+  "iOS Development",
+  "Android Development",
+  "Cross-Platform Development",
+  "Game Development",
+  "AR/VR Development",
+  "Blockchain",
+  "Cryptocurrency",
+  "NFTs",
+  "Smart Contracts",
+  "Cybersecurity",
+  "Ethical Hacking",
+  "Network Security",
+  "Cloud Computing",
+  "DevOps",
+  "Data Science",
+  "Big Data",
+  "Data Visualization",
+  "Business Intelligence",
+  "IoT (Internet of Things)",
+  "Robotics",
+  "Embedded Systems",
+  "Quantum Computing",
+  "Edge Computing",
+  "UI/UX Design",
+  "Product Design",
+  "Graphic Design",
+  "Motion Graphics",
+  "3D Modeling",
+  "Animation",
+  "Startups",
+  "Entrepreneurship",
+  "Product Management",
+  "Business Strategy",
+  "Digital Marketing",
+  "Content Creation",
+  "Social Media",
+  "Open Source",
+  "Open Source Contribution",
+  "Hackathons",
+  "Competitive Programming",
+  "Algorithms",
+  "System Design",
+  "Research",
+  "Academic Publishing",
+  "Teaching",
+  "Mentoring",
+  "Community Building",
+  "Tech Blogging",
+  "Podcasting",
+  "Video Production",
+  "Photography",
+  "Music Production",
+  "Finance Technology (FinTech)",
+  "Health Technology (HealthTech)",
+  "Education Technology (EdTech)",
+  "E-commerce",
+  "SaaS Products",
+  "API Development",
+  "Automation",
+  "Testing & QA",
+];
+
+const AVAILABLE_COURSES = [
+  "Computer Science",
+  "Information Technology",
+  "Software Engineering",
+  "Data Science",
+  "Artificial Intelligence",
+  "Machine Learning",
+  "Cybersecurity",
+  "Computer Engineering",
+  "Electronics and Communication",
+  "Electrical Engineering",
+  "Mechanical Engineering",
+  "Civil Engineering",
+  "Chemical Engineering",
+  "Biotechnology",
+  "Biomedical Engineering",
+  "Aerospace Engineering",
+  "Automobile Engineering",
+  "Industrial Engineering",
+  "Mathematics",
+  "Statistics",
+  "Physics",
+  "Chemistry",
+  "Biology",
+  "Biochemistry",
+  "Microbiology",
+  "Genetics",
+  "Business Administration (BBA/MBA)",
+  "Management Studies",
+  "Finance",
+  "Accounting",
+  "Economics",
+  "Marketing",
+  "Human Resources",
+  "International Business",
+  "Commerce",
+  "Psychology",
+  "Sociology",
+  "Political Science",
+  "History",
+  "English Literature",
+  "Journalism",
+  "Mass Communication",
+  "Media Studies",
+  "Film Studies",
+  "Animation",
+  "Graphic Design",
+  "Fashion Design",
+  "Interior Design",
+  "Architecture",
+  "Fine Arts",
+  "Performing Arts",
+  "Music",
+  "Law (LLB/LLM)",
+  "Medicine (MBBS)",
+  "Nursing",
+  "Pharmacy",
+  "Physiotherapy",
+  "Dentistry",
+  "Veterinary Science",
+  "Agriculture",
+  "Forestry",
+  "Environmental Science",
+  "Geography",
+  "Geology",
+  "Hospitality Management",
+  "Hotel Management",
+  "Tourism",
+  "Culinary Arts",
+  "Education (B.Ed/M.Ed)",
+  "Library Science",
+  "Social Work",
+  "Public Administration",
+  "Development Studies",
+  "Urban Planning",
+  "Other",
+];
+
+const KERALA_COLLEGES = [
+  "Indian Institute of Technology Palakkad (IIT Palakkad)",
+  "National Institute of Technology Calicut (NIT Calicut)",
+  "Indian Institute of Management Kozhikode (IIM Kozhikode)",
+  "Indian Institute of Science Education and Research Thiruvananthapuram (IISER)",
+  "Cochin University of Science and Technology (CUSAT)",
+  "University of Kerala, Trivandrum",
+  "Mahatma Gandhi University, Kottayam",
+  "Kannur University",
+  "Calicut University",
+  "Kerala University of Digital Sciences, Innovation and Technology (Digital University Kerala)",
+  "APJ Abdul Kalam Technological University",
+  "Kerala Agricultural University",
+  "Kerala Veterinary and Animal Sciences University",
+  "Kerala University of Fisheries and Ocean Studies",
+  "Sree Sankaracharya University of Sanskrit",
+  "Thunchath Ezhuthachan Malayalam University",
+  "Amrita Vishwa Vidyapeetham, Amritapuri Campus",
+  "Amrita School of Engineering, Coimbatore",
+  "College of Engineering Trivandrum (CET)",
+  "Government Engineering College Thrissur (GEC Thrissur)",
+  "Government Engineering College Kozhikode (GEC Kozhikode)",
+  "Government Engineering College Idukki",
+  "Government Engineering College Barton Hill",
+  "Government Engineering College Wayanad",
+  "Government Engineering College Kannur",
+  "Rajagiri School of Engineering and Technology, Kochi",
+  "Rajagiri College of Social Sciences, Kochi",
+  "Toc H Institute of Science and Technology, Ernakulam",
+  "Mar Baselios College of Engineering and Technology, Trivandrum",
+  "Mar Athanasius College of Engineering, Kothamangalam",
+  "Sree Chitra Thirunal College of Engineering, Trivandrum",
+  "Model Engineering College, Ernakulam",
+  "TKM College of Engineering, Kollam",
+  "LBS Institute of Technology for Women, Trivandrum",
+  "NSS College of Engineering, Palakkad",
+  "Malabar College of Engineering and Technology, Thrissur",
+  "Ilahia College of Engineering and Technology, Muvattupuzha",
+  "Federal Institute of Science and Technology (FISAT), Angamaly",
+  "Albertian Institute of Science and Technology, Kalamassery",
+  "Amal Jyothi College of Engineering, Kottayam",
+  "Adi Shankara Institute of Engineering and Technology, Kalady",
+  "Christ College, Irinjalakuda",
+  "Sacred Heart College, Thevara",
+  "St. Teresa's College, Ernakulam",
+  "Assumption College, Changanassery",
+  "St. Joseph's College, Devagiri",
+  "Farook College, Kozhikode",
+  "Maharaja's College, Ernakulam",
+  "University College, Trivandrum",
+  "Govt. Victoria College, Palakkad",
+  "Brennen College, Thalassery",
+  "St. Thomas College, Thrissur",
+  "Vimala College, Thrissur",
+  "Nirmala College, Muvattupuzha",
+  "MES College, Marampally",
+  "Deva Matha College, Kuravilangad",
+  "Baselius College, Kottayam",
+  "Bishop Moore College, Mavelikara",
+  "CMS College, Kottayam",
+  "Catholicate College, Pathanamthitta",
+  "Government Law College, Ernakulam",
+  "Government Law College, Trivandrum",
+  "Government Medical College, Trivandrum",
+  "Government Medical College, Kozhikode",
+  "Government Medical College, Kottayam",
+  "Pushpagiri Institute of Medical Sciences",
+  "Believers Church Medical College, Thiruvalla",
+  "Azeezia Institute of Medical Sciences, Kollam",
+  "Other",
+];
+
+// Generate years from current year to next 10 years
+const currentYear = new Date().getFullYear();
+const GRADUATION_YEARS = Array.from({ length: 11 }, (_, i) =>
+  (currentYear + i).toString()
+);
 
 interface EditProfileModalProps {
-  isOpen: boolean
-  onClose: () => void
+  isOpen: boolean;
+  onClose: () => void;
   currentData: {
-    name: string
-    email: string
-    institution?: string
-    major?: string
-    graduationYear?: string
-    location?: string
-    bio?: string
-    skills?: string[]
-    interests?: string[]
-  }
+    name: string;
+    email: string;
+    institution?: string;
+    major?: string;
+    graduationYear?: string;
+    location?: string;
+    bio?: string;
+    skills?: string[];
+    interests?: string[];
+  };
   onSave: (data: {
-    name: string
-    email: string
-    institution: string
-    major: string
-    graduationYear: string
-    location: string
-    bio: string
-    skills: string[]
-    interests: string[]
-  }) => void
+    name: string;
+    email: string;
+    institution: string;
+    major: string;
+    graduationYear: string;
+    location: string;
+    bio: string;
+    skills: string[];
+    interests: string[];
+  }) => void;
 }
 
 export default function EditProfileModal({
@@ -83,77 +347,100 @@ export default function EditProfileModal({
   currentData,
   onSave,
 }: EditProfileModalProps) {
-  const [name, setName] = useState(currentData.name)
-  const [email, setEmail] = useState(currentData.email)
-  const [institution, setInstitution] = useState(currentData.institution || '')
-  const [major, setMajor] = useState(currentData.major || '')
+  const [name, setName] = useState(currentData.name);
+  const [email, setEmail] = useState(currentData.email);
+  const [institution, setInstitution] = useState(currentData.institution || "");
+  const [major, setMajor] = useState(currentData.major || "");
   const [graduationYear, setGraduationYear] = useState(
-    currentData.graduationYear || ''
-  )
-  const [location, setLocation] = useState(currentData.location || '')
-  const [bio, setBio] = useState(currentData.bio || '')
+    currentData.graduationYear || ""
+  );
+  const [location, setLocation] = useState(currentData.location || "");
+  const [bio, setBio] = useState(currentData.bio || "");
   const [selectedSkills, setSelectedSkills] = useState<string[]>(
     currentData.skills || []
-  )
+  );
   const [selectedInterests, setSelectedInterests] = useState<string[]>(
     currentData.interests || []
-  )
+  );
 
-  if (!isOpen) return null
+  // Search states
+  const [collegeSearch, setCollegeSearch] = useState("");
+  const [courseSearch, setCourseSearch] = useState("");
+  const [skillSearch, setSkillSearch] = useState("");
+  const [interestSearch, setInterestSearch] = useState("");
+
+  if (!isOpen) return null;
+
+  // Filter functions for search
+  const filteredColleges = KERALA_COLLEGES.filter((college) =>
+    college.toLowerCase().includes(collegeSearch.toLowerCase())
+  );
+
+  const filteredCourses = AVAILABLE_COURSES.filter((course) =>
+    course.toLowerCase().includes(courseSearch.toLowerCase())
+  );
+
+  const filteredSkills = AVAILABLE_SKILLS.filter((skill) =>
+    skill.toLowerCase().includes(skillSearch.toLowerCase())
+  );
+
+  const filteredInterests = AVAILABLE_INTERESTS.filter((interest) =>
+    interest.toLowerCase().includes(interestSearch.toLowerCase())
+  );
 
   const toggleSkill = (skill: string) => {
     setSelectedSkills((prev) =>
       prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
-    )
-  }
+    );
+  };
 
   const toggleInterest = (interest: string) => {
     setSelectedInterests((prev) =>
       prev.includes(interest)
         ? prev.filter((i) => i !== interest)
         : [...prev, interest]
-    )
-  }
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     try {
-      const token = getAuthToken()
+      const token = getAuthToken();
       if (!token) {
-        alert('You must be signed in to update your profile.')
-        return
+        alert("You must be signed in to update your profile.");
+        return;
       }
 
       // Get studentId from stored user
-      let studentId: string | null = null
+      let studentId: string | null = null;
       try {
-        const { getUserCookie } = await import('@/lib/cookies')
-        const parsed = getUserCookie()
+        const { getUserCookie } = await import("@/lib/cookies");
+        const parsed = getUserCookie();
         if (parsed) {
           studentId = (parsed?.documentId ?? parsed?.id ?? null) as
             | string
-            | null
+            | null;
         }
       } catch {
         // ignore parse errors
       }
 
       // Check for existing profile
-      let recordId: string | null = null
+      let recordId: string | null = null;
       if (studentId) {
         const q = `${BACKEND_URL}/api/student-profiles?filters[studentId][$eq]=${encodeURIComponent(
           studentId
-        )}&populate=*`
+        )}&populate=*`;
         const res = await fetch(q, {
           headers: { Authorization: `Bearer ${token}` },
-        })
+        });
         if (res.ok) {
-          const json = await res.json()
-          const rec = json?.data?.[0]
-          recordId = rec?.documentId ?? null
+          const json = await res.json();
+          const rec = json?.data?.[0];
+          recordId = rec?.documentId ?? null;
         } else {
-          console.warn('Failed to check existing profile', res.status)
+          console.warn("Failed to check existing profile", res.status);
         }
       }
 
@@ -167,65 +454,65 @@ export default function EditProfileModal({
         location,
         skills: selectedSkills,
         interests: selectedInterests,
-      }
+      };
 
       // If record exists, try update. If update returns 404, fallback to create.
       if (recordId) {
-        console.log({ data: payload })
+        console.log({ data: payload });
         const updateRes = await fetch(
           `${BACKEND_URL}/api/student-profiles/${recordId}`,
           {
-            method: 'PUT',
+            method: "PUT",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({ data: payload }),
           }
-        )
+        );
 
         if (!updateRes.ok) {
-          const body = await updateRes.text()
-          console.warn('Update failed', updateRes.status, body)
+          const body = await updateRes.text();
+          console.warn("Update failed", updateRes.status, body);
           if (updateRes.status === 404) {
             // fallback to create
             const createRes = await fetch(
               `${BACKEND_URL}/api/student-profiles`,
               {
-                method: 'POST',
+                method: "POST",
                 headers: {
-                  'Content-Type': 'application/json',
+                  "Content-Type": "application/json",
                   Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({ data: { ...payload, studentId } }),
               }
-            )
+            );
             if (!createRes.ok) {
-              console.error('Create fallback failed', await createRes.text())
+              console.error("Create fallback failed", await createRes.text());
               alert(
-                'Failed to create profile after update failed. See console.'
-              )
-              return
+                "Failed to create profile after update failed. See console."
+              );
+              return;
             }
           } else {
-            alert('Failed to update profile. See console for details.')
-            return
+            alert("Failed to update profile. See console for details.");
+            return;
           }
         }
       } else {
         // No record -> create
         const createRes = await fetch(`${BACKEND_URL}/api/student-profiles`, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ data: { ...payload, studentId } }),
-        })
+        });
         if (!createRes.ok) {
-          console.error('Create failed', await createRes.text())
-          alert('Failed to create profile. See console for details.')
-          return
+          console.error("Create failed", await createRes.text());
+          alert("Failed to create profile. See console for details.");
+          return;
         }
       }
 
@@ -240,69 +527,69 @@ export default function EditProfileModal({
         bio,
         skills: selectedSkills,
         interests: selectedInterests,
-      })
+      });
       // Close modal after save
-      onClose()
+      onClose();
     } catch (err) {
-      console.error('Failed to save profile', err)
-      alert('Failed to save profile. See console for details.')
+      console.error("Failed to save profile", err);
+      alert("Failed to save profile. See console for details.");
     }
-  }
+  };
 
   return (
     <div
-      className='fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4'
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
       onClick={onClose}
     >
       <div
-        className='bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto scrollbar-hide'
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto scrollbar-hide"
         onClick={(e) => e.stopPropagation()}
         style={{
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
         }}
       >
         {/* Header */}
-        <div className='flex items-center justify-between p-6 border-b border-gray-200 sticky top-0 bg-white z-10'>
-          <h2 className='text-2xl font-bold text-gray-900'>Edit Profile</h2>
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
+          <h2 className="text-2xl font-bold text-gray-900">Edit Profile</h2>
           <button
             onClick={onClose}
-            className='text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-lg'
+            className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-lg"
           >
-            <X className='w-6 h-6' />
+            <X className="w-6 h-6" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className='p-6 space-y-6'>
+          <div className="p-6 space-y-6">
             {/* Name */}
             <div>
-              <label className='block text-sm font-semibold text-gray-700 mb-2'>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Full Name
               </label>
               <input
-                type='text'
+                type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900'
-                placeholder='Enter your full name'
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900"
+                placeholder="Enter your full name"
                 required
               />
             </div>
 
             {/* Email (read-only) */}
             <div>
-              <label className='block text-sm font-semibold text-gray-700 mb-2'>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Email
               </label>
               <input
-                type='email'
+                type="email"
                 value={email}
                 readOnly
-                className='w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-100 text-gray-700 cursor-not-allowed'
-                placeholder='Email'
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-100 text-gray-700 cursor-not-allowed"
+                placeholder="Email"
               />
-              <p className='text-xs text-gray-500 mt-2'>
+              <p className="text-xs text-gray-500 mt-2">
                 Email cannot be changed here. Contact support to update your
                 email.
               </p>
@@ -310,145 +597,313 @@ export default function EditProfileModal({
 
             {/* Bio */}
             <div>
-              <label className='block text-sm font-semibold text-gray-700 mb-2'>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Bio
               </label>
               <textarea
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 rows={3}
-                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900 resize-none'
-                placeholder='Tell us about yourself...'
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900 resize-none"
+                placeholder="Tell us about yourself..."
               />
             </div>
 
             {/* Institution */}
             <div>
-              <label className='block text-sm font-semibold text-gray-700 mb-2'>
-                Institution
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Institution *
               </label>
-              <input
-                type='text'
-                value={institution}
-                onChange={(e) => setInstitution(e.target.value)}
-                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900'
-                placeholder='e.g., Massachusetts Institute of Technology'
-              />
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  value={collegeSearch}
+                  onChange={(e) => setCollegeSearch(e.target.value)}
+                  placeholder="Search for your college..."
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900"
+                />
+                <div className="max-h-48 overflow-y-auto border-2 border-gray-300 rounded-lg">
+                  {filteredColleges.length > 0 ? (
+                    filteredColleges.map((college) => (
+                      <button
+                        key={college}
+                        type="button"
+                        onClick={() => {
+                          setInstitution(college);
+                          setCollegeSearch("");
+                        }}
+                        className={`w-full text-left px-4 py-2.5 hover:bg-teal-50 transition-colors border-b border-gray-100 last:border-b-0 ${
+                          institution === college
+                            ? "bg-teal-100 font-semibold text-teal-900"
+                            : "text-gray-700"
+                        }`}
+                      >
+                        {college}
+                      </button>
+                    ))
+                  ) : (
+                    <div className="px-4 py-3 text-gray-500 text-sm">
+                      No colleges found. Try a different search.
+                    </div>
+                  )}
+                </div>
+                {institution && (
+                  <div className="flex items-center gap-2 p-3 bg-teal-50 border border-teal-200 rounded-lg">
+                    <Check className="w-4 h-4 text-teal-600 flex-shrink-0" />
+                    <span className="text-sm font-medium text-teal-900 flex-1">
+                      {institution}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setInstitution("")}
+                      className="text-teal-600 hover:text-teal-800"
+                    >
+                      <span className="text-xs">Change</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Major and Graduation Year */}
-            <div className='grid grid-cols-2 gap-4'>
-              <div>
-                <label className='block text-sm font-semibold text-gray-700 mb-2'>
-                  Major
-                </label>
+            {/* Major/Course */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Major/Course *
+              </label>
+              <div className="space-y-2">
                 <input
-                  type='text'
-                  value={major}
-                  onChange={(e) => setMajor(e.target.value)}
-                  className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900'
-                  placeholder='e.g., Computer Science'
+                  type="text"
+                  value={courseSearch}
+                  onChange={(e) => setCourseSearch(e.target.value)}
+                  placeholder="Search for your course..."
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900"
                 />
+                <div className="max-h-48 overflow-y-auto border-2 border-gray-300 rounded-lg">
+                  {filteredCourses.length > 0 ? (
+                    filteredCourses.map((course) => (
+                      <button
+                        key={course}
+                        type="button"
+                        onClick={() => {
+                          setMajor(course);
+                          setCourseSearch("");
+                        }}
+                        className={`w-full text-left px-4 py-2.5 hover:bg-purple-50 transition-colors border-b border-gray-100 last:border-b-0 ${
+                          major === course
+                            ? "bg-purple-100 font-semibold text-purple-900"
+                            : "text-gray-700"
+                        }`}
+                      >
+                        {course}
+                      </button>
+                    ))
+                  ) : (
+                    <div className="px-4 py-3 text-gray-500 text-sm">
+                      No courses found. Try a different search.
+                    </div>
+                  )}
+                </div>
+                {major && (
+                  <div className="flex items-center gap-2 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                    <Check className="w-4 h-4 text-purple-600 flex-shrink-0" />
+                    <span className="text-sm font-medium text-purple-900 flex-1">
+                      {major}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setMajor("")}
+                      className="text-purple-600 hover:text-purple-800"
+                    >
+                      <span className="text-xs">Change</span>
+                    </button>
+                  </div>
+                )}
               </div>
-              <div>
-                <label className='block text-sm font-semibold text-gray-700 mb-2'>
-                  Graduation Year
-                </label>
-                <input
-                  type='text'
-                  value={graduationYear}
-                  onChange={(e) => setGraduationYear(e.target.value)}
-                  className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900'
-                  placeholder='e.g., 2026'
-                />
-              </div>
+            </div>
+
+            {/* Graduation Year */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Graduation Year *
+              </label>
+              <select
+                value={graduationYear}
+                onChange={(e) => setGraduationYear(e.target.value)}
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900 bg-white cursor-pointer"
+                required
+              >
+                <option value="">Select graduation year</option>
+                {GRADUATION_YEARS.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Location */}
             <div>
-              <label className='block text-sm font-semibold text-gray-700 mb-2'>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Location
               </label>
               <input
-                type='text'
+                type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900'
-                placeholder='e.g., Cambridge, MA'
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900"
+                placeholder="e.g., Cambridge, MA"
               />
             </div>
 
             {/* Skills Selection */}
             <div>
-              <label className='block text-sm font-semibold text-gray-700 mb-3'>
-                Skills ({selectedSkills.length} selected)
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                Skills * ({selectedSkills.length} selected)
               </label>
-              <div className='max-h-48 overflow-y-auto border border-gray-300 rounded-lg p-3'>
-                <div className='flex flex-wrap gap-2'>
-                  {AVAILABLE_SKILLS.map((skill) => {
-                    const isSelected = selectedSkills.includes(skill)
-                    return (
-                      <button
-                        key={skill}
-                        type='button'
-                        onClick={() => toggleSkill(skill)}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
-                          isSelected
-                            ? 'bg-teal-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        {isSelected && <Check className='w-3.5 h-3.5' />}
-                        {skill}
-                      </button>
-                    )
-                  })}
+              <div className="space-y-3">
+                <input
+                  type="text"
+                  value={skillSearch}
+                  onChange={(e) => setSkillSearch(e.target.value)}
+                  placeholder="Search skills..."
+                  className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900"
+                />
+                <div className="max-h-60 overflow-y-auto border-2 border-gray-300 rounded-lg p-4">
+                  <div className="flex flex-wrap gap-2">
+                    {filteredSkills.length > 0 ? (
+                      filteredSkills.map((skill) => {
+                        const isSelected = selectedSkills.includes(skill);
+                        return (
+                          <button
+                            key={skill}
+                            type="button"
+                            onClick={() => toggleSkill(skill)}
+                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
+                              isSelected
+                                ? "bg-teal-600 text-white shadow-md"
+                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            }`}
+                          >
+                            {isSelected && <Check className="w-3.5 h-3.5" />}
+                            {skill}
+                          </button>
+                        );
+                      })
+                    ) : (
+                      <div className="w-full text-center py-4 text-gray-500 text-sm">
+                        No skills found matching &quot;{skillSearch}&quot;
+                      </div>
+                    )}
+                  </div>
                 </div>
+                {selectedSkills.length > 0 && (
+                  <div className="bg-teal-50 border border-teal-200 rounded-lg p-3">
+                    <p className="text-xs font-semibold text-teal-900 mb-2">
+                      Selected Skills:
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {selectedSkills.map((skill) => (
+                        <span
+                          key={skill}
+                          className="inline-flex items-center gap-1 px-2 py-1 bg-teal-600 text-white text-xs rounded-md"
+                        >
+                          {skill}
+                          <button
+                            type="button"
+                            onClick={() => toggleSkill(skill)}
+                            className="hover:bg-teal-700 rounded-full p-0.5"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Interests Selection */}
             <div>
-              <label className='block text-sm font-semibold text-gray-700 mb-3'>
-                Interests ({selectedInterests.length} selected)
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                Interests * ({selectedInterests.length} selected)
               </label>
-              <div className='max-h-48 overflow-y-auto border border-gray-300 rounded-lg p-3'>
-                <div className='flex flex-wrap gap-2'>
-                  {AVAILABLE_INTERESTS.map((interest) => {
-                    const isSelected = selectedInterests.includes(interest)
-                    return (
-                      <button
-                        key={interest}
-                        type='button'
-                        onClick={() => toggleInterest(interest)}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
-                          isSelected
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        {isSelected && <Check className='w-3.5 h-3.5' />}
-                        {interest}
-                      </button>
-                    )
-                  })}
+              <div className="space-y-3">
+                <input
+                  type="text"
+                  value={interestSearch}
+                  onChange={(e) => setInterestSearch(e.target.value)}
+                  placeholder="Search interests..."
+                  className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                />
+                <div className="max-h-60 overflow-y-auto border-2 border-gray-300 rounded-lg p-4">
+                  <div className="flex flex-wrap gap-2">
+                    {filteredInterests.length > 0 ? (
+                      filteredInterests.map((interest) => {
+                        const isSelected = selectedInterests.includes(interest);
+                        return (
+                          <button
+                            key={interest}
+                            type="button"
+                            onClick={() => toggleInterest(interest)}
+                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
+                              isSelected
+                                ? "bg-blue-600 text-white shadow-md"
+                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            }`}
+                          >
+                            {isSelected && <Check className="w-3.5 h-3.5" />}
+                            {interest}
+                          </button>
+                        );
+                      })
+                    ) : (
+                      <div className="w-full text-center py-4 text-gray-500 text-sm">
+                        No interests found matching &quot;{interestSearch}&quot;
+                      </div>
+                    )}
+                  </div>
                 </div>
+                {selectedInterests.length > 0 && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <p className="text-xs font-semibold text-blue-900 mb-2">
+                      Selected Interests:
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {selectedInterests.map((interest) => (
+                        <span
+                          key={interest}
+                          className="inline-flex items-center gap-1 px-2 py-1 bg-blue-600 text-white text-xs rounded-md"
+                        >
+                          {interest}
+                          <button
+                            type="button"
+                            onClick={() => toggleInterest(interest)}
+                            className="hover:bg-blue-700 rounded-full p-0.5"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
           {/* Footer */}
-          <div className='flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl'>
+          <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
             <button
-              type='button'
+              type="button"
               onClick={onClose}
-              className='px-6 py-2.5 bg-white hover:bg-gray-100 text-gray-700 rounded-lg font-medium border border-gray-300 transition-colors'
+              className="px-6 py-2.5 bg-white hover:bg-gray-100 text-gray-700 rounded-lg font-medium border border-gray-300 transition-colors"
             >
               Cancel
             </button>
             <button
-              type='submit'
-              className='px-6 py-2.5 bg-teal-700 hover:bg-teal-800 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300'
+              type="submit"
+              className="px-6 py-2.5 bg-teal-700 hover:bg-teal-800 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300"
             >
               Save Changes
             </button>
@@ -456,5 +911,5 @@ export default function EditProfileModal({
         </form>
       </div>
     </div>
-  )
+  );
 }
