@@ -1,4 +1,4 @@
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";
 
 import React from "react";
 
@@ -6,7 +6,7 @@ type Props = {
   title: string;
   description: string;
   status: string;
-  tags: string[];
+  tags?: string[];
 };
 
 export default function ProfileProjectCard({

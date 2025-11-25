@@ -10,7 +10,8 @@ import ProfileInternshipCard from "@/components/student-section/ProfileInternshi
 import EditProfileModal from "@/components/student-section/EditProfileModal";
 import PostCard, { Post } from "@/components/student-section/PostCard";
 import { getAuthToken } from "@/lib/strapi/auth";
-import { getStudentProfile } from "@/lib/strapi/profile";
+import { getStudentProfile, Internship } from "@/lib/strapi/profile";
+import { getMediaUrl } from "@/lib/utils";
 
 type TabKey = "projects" | "clubs" | "internships" | "posts";
 
@@ -163,9 +164,9 @@ export default function ProfilePage() {
             postedAgo: new Date(post.createdAt).toLocaleDateString(),
             message: post.description || "",
             images:
-              post.images?.map(
-                (img: StrapiImage) => `${BACKEND_URL}${img.url}`
-              ) || [],
+              post.images
+                ?.map((img: StrapiImage) => getMediaUrl(img.url))
+                .filter((url): url is string => url !== null) || [],
             stats: {
               likes: Number(post.likes) || 0,
               comments: 0, // You can populate this if you have comment count
@@ -189,12 +190,8 @@ export default function ProfilePage() {
               .toUpperCase()
               .slice(0, 2)
           : "U",
-        backgroundImageUrl: profile.backgroundImg?.url
-          ? `${BACKEND_URL}${profile.backgroundImg.url}`
-          : null,
-        profileImageUrl: profile.profilePic?.url
-          ? `${BACKEND_URL}${profile.profilePic.url}`
-          : null,
+        backgroundImageUrl: getMediaUrl(profile.backgroundImg?.url),
+        profileImageUrl: getMediaUrl(profile.profilePic?.url),
         followers: [],
         following: [],
         institution: profile.college || "Not specified",
@@ -225,11 +222,11 @@ export default function ProfilePage() {
           badge: (club.badge as string) || undefined,
         })),
         internships: (profile.internships || []).map(
-          (internship: Record<string, unknown>) => ({
-            role: (internship.role as string) || "",
-            timeline: (internship.timeline as string) || "",
-            location: (internship.location as string) || "",
-            status: (internship.status as string) || "",
+          (internship: Internship) => ({
+            role: internship.role || "",
+            timeline: internship.timeline || "",
+            location: internship.location || "",
+            status: internship.status || "",
           })
         ),
         posts: userPosts,
