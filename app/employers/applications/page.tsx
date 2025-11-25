@@ -30,7 +30,9 @@ export default function ApplicationsPage() {
   const [collegeFilter, setCollegeFilter] = useState("All Colleges");
   const [skillFilter, setSkillFilter] = useState("All Skills");
   const [cgpaFilter, setCgpaFilter] = useState("");
-  const [applicationsData, setApplicationsData] = useState<ApplicationStat[] | null>(null);
+  const [applicationsData, setApplicationsData] = useState<
+    ApplicationStat[] | null
+  >(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
