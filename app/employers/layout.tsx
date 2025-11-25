@@ -101,6 +101,21 @@ const geistMono = Geist_Mono({
 //   },
 //   category: "Career Development",
 // };
+
+interface DashboardData {
+  applicationNumber?: number;
+  applicationPercentage?: number;
+  activeJobs?: number;
+  activeJobsCollege?: number;
+  activeJobsWeek?: number;
+  hireTime?: number;
+  hireTimeIndustrial?: number;
+  hireTimeImprovement?: number;
+  hireMonth?: number;
+  hireConversion?: number;
+  hirePercent?: number;
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -108,7 +123,7 @@ export default function RootLayout({
 }>) {
   const pathname = usePathname();
   const isProfilePage = pathname === "/employers/profile";
-  const [dashData, setDashData] = useState<any>(null);
+  const [dashData, setDashData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
