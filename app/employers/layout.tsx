@@ -114,6 +114,8 @@ interface DashboardData {
   hireMonth?: number;
   hireConversion?: number;
   hirePercent?: number;
+  costSave?: number;
+  costRednpercentage?: number;
 }
 
 export default function RootLayout({
@@ -124,7 +126,6 @@ export default function RootLayout({
   const pathname = usePathname();
   const isProfilePage = pathname === "/employers/profile";
   const [dashData, setDashData] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadDashData = async () => {
@@ -135,8 +136,6 @@ export default function RootLayout({
         }
       } catch (err) {
         console.error("Failed to load dashboard data:", err);
-      } finally {
-        setLoading(false);
       }
     };
     loadDashData();
@@ -226,9 +225,9 @@ export default function RootLayout({
         },
         {
           title: "Cost Saved vs Traditional",
-          value: `₹${x.costSave}L`,
+          value: `₹${dashData.costSave || 0}L`,
           subtitle: "Using FOOMO platform",
-          change: `${x.costRednpercentage}% cost reduction`,
+          change: `${dashData.costRednpercentage || 0}% cost reduction`,
           icon: (
             <svg
               aria-hidden="true"
