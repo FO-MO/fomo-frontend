@@ -669,6 +669,8 @@ export default function ProfilePage() {
               bio: profileData.bio,
               skills: profileData.skills,
               interests: profileData.interests,
+              profileImageUrl: profileData.profileImageUrl,
+              backgroundImageUrl: profileData.backgroundImageUrl,
             }}
             onSave={handleSaveProfile}
           />

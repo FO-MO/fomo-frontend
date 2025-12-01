@@ -1,9 +1,10 @@
 "use client";
 export const dynamic = "force-dynamic";
 
-import { X, Check } from "lucide-react";
+import { X, Check, Camera, Image as ImageIcon, User } from "lucide-react";
 import { useState } from "react";
 import { getAuthToken } from "@/lib/strapi/auth";
+import { uploadImage } from "@/lib/strapi/strapiData";
 
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL ||
@@ -327,6 +328,8 @@ interface EditProfileModalProps {
     bio?: string;
     skills?: string[];
     interests?: string[];
+    profileImageUrl?: string | null;
+    backgroundImageUrl?: string | null;
   };
   onSave: (data: {
     name: string;
@@ -362,6 +365,10 @@ export default function EditProfileModal({
   const [selectedInterests, setSelectedInterests] = useState<string[]>(
     currentData.interests || []
   );
+  const [profilePicFile, setProfilePicFile] = useState<File | null>(null);
+  const [backgroundImgFile, setBackgroundImgFile] = useState<File | null>(null);
+  const [profilePicPreview, setProfilePicPreview] = useState<string>(currentData.profileImageUrl || "");
+  const [backgroundImgPreview, setBackgroundImgPreview] = useState<string>(currentData.backgroundImageUrl || "");
 
   // Search states
   const [collegeSearch, setCollegeSearch] = useState("");
@@ -400,6 +407,32 @@ export default function EditProfileModal({
         ? prev.filter((i) => i !== interest)
         : [...prev, interest]
     );
+  };
+
+  const handleProfilePicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setProfilePicFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePicPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleBackgroundImgChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setBackgroundImgFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setBackgroundImgPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -516,6 +549,45 @@ export default function EditProfileModal({
         }
       }
 
+      // Upload images only if new files are selected
+      if (profilePicFile || backgroundImgFile) {
+        // Get the profile ID for image upload
+        const profileRes = await fetch(
+          `${BACKEND_URL}/api/student-profiles?filters[studentId][$eq]=${encodeURIComponent(
+            studentId
+          )}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        
+        if (profileRes.ok) {
+          const profileData = await profileRes.json();
+          const profile = profileData?.data?.[0];
+          const profileId = profile?.id;
+
+          if (profileId && profilePicFile) {
+            await uploadImage(
+              token,
+              "api::student-profile.student-profile",
+              profileId,
+              "profilePic",
+              profilePicFile
+            );
+          }
+
+          if (profileId && backgroundImgFile) {
+            await uploadImage(
+              token,
+              "api::student-profile.student-profile",
+              profileId,
+              "backgroundImg",
+              backgroundImgFile
+            );
+          }
+        }
+      }
+
       // call parent onSave so UI updates locally (still include email for UI)
       onSave({
         name,
@@ -562,7 +634,7 @@ export default function EditProfileModal({
 
         <form onSubmit={handleSubmit}>
           <div className="p-6 space-y-6">
-            {/* Name */}
+            {/* Name (read-only) */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Full Name
@@ -570,28 +642,31 @@ export default function EditProfileModal({
               <input
                 type="text"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900"
-                placeholder="Enter your full name"
-                required
+                readOnly
+                disabled
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
+                placeholder="Your name"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                This is your registered name and cannot be changed here
+              </p>
             </div>
 
             {/* Email (read-only) */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Email
+                Email Address
               </label>
               <input
                 type="email"
                 value={email}
                 readOnly
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-100 text-gray-700 cursor-not-allowed"
-                placeholder="Email"
+                disabled
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
+                placeholder="Your email"
               />
-              <p className="text-xs text-gray-500 mt-2">
-                Email cannot be changed here. Contact support to update your
-                email.
+              <p className="text-xs text-gray-500 mt-1">
+                This is your registered email and cannot be changed here
               </p>
             </div>
 
@@ -888,6 +963,120 @@ export default function EditProfileModal({
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+
+            {/* Profile Images Section */}
+            <div className="pt-6 border-t border-gray-200">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">
+                Profile Images
+              </h3>
+              
+              {/* Profile Picture */}
+              <div className="mb-6">
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Profile Picture
+                </label>
+                <div className="bg-gray-50 rounded-lg p-6 border-2 border-gray-200">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
+                      {profilePicPreview ? (
+                        <img
+                          src={profilePicPreview}
+                          alt="Profile preview"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex flex-col items-center justify-center text-gray-400">
+                          <User className="w-12 h-12 mb-2" />
+                          <span className="text-xs">No photo</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-center">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleProfilePicChange}
+                        className="hidden"
+                        id="profilePicInput"
+                      />
+                      <label
+                        htmlFor="profilePicInput"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium cursor-pointer transition-colors shadow-md"
+                      >
+                        <Camera className="w-5 h-5" />
+                        {profilePicPreview ? "Change Photo" : "Upload Photo"}
+                      </label>
+                      <p className="text-xs text-gray-500 mt-2">
+                        JPG, PNG or GIF (max. 5MB)
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Background Image */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Background Image
+                </label>
+                <div className="bg-gray-50 rounded-lg p-6 border-2 border-gray-200">
+                  <div className="flex flex-col gap-4">
+                    <div className="w-full h-48 rounded-lg bg-gradient-to-br from-gray-200 via-gray-300 to-gray-200 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
+                      {backgroundImgPreview ? (
+                        <img
+                          src={backgroundImgPreview}
+                          alt="Background preview"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex flex-col items-center justify-center text-gray-400">
+                          <ImageIcon className="w-16 h-16 mb-3" />
+                          <span className="text-sm font-medium">
+                            No background image
+                          </span>
+                          <span className="text-xs">
+                            Upload to customize your profile
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-center">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleBackgroundImgChange}
+                        className="hidden"
+                        id="backgroundImgInput"
+                      />
+                      <label
+                        htmlFor="backgroundImgInput"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium cursor-pointer transition-colors shadow-md"
+                      >
+                        <ImageIcon className="w-5 h-5" />
+                        {backgroundImgPreview
+                          ? "Change Background"
+                          : "Upload Background"}
+                      </label>
+                      <p className="text-xs text-gray-500 mt-2">
+                        JPG, PNG or GIF (max. 5MB)
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 bg-amber-50 border border-amber-300 rounded-lg p-4 text-sm text-amber-900">
+                <p className="font-semibold mb-1 flex items-center gap-2">
+                  <span className="text-lg">⚠️</span>
+                  Important Notice
+                </p>
+                <p>
+                  Uploaded images may take a few moments to appear on your
+                  profile due to processing time. Please be patient and refresh
+                  your profile page if images don&apos;t appear immediately.
+                </p>
               </div>
             </div>
           </div>
