@@ -56,6 +56,7 @@ export interface StudentProfile {
   profileImageUrl: string | null;
   profilePic?: MediaFile;
   backgroundImg?: MediaFile;
+  verification?: number; // 0 = pending, 1 = verified, -1 = rejected
   createdAt?: string;
   updatedAt?: string;
   user?: {
@@ -91,6 +92,7 @@ export interface CreateProfileData {
   interests?: string[];
   profilePic?: number; // Media ID
   backgroundImage?: number; // Media ID
+  verification?: number;
 }
 
 /**
@@ -485,6 +487,8 @@ export async function getStudentProfile_2(
           badge: club.badge || null,
         })) || [],
       internships: profile.internships || [],
+      verification:
+        typeof profile.verification === "number" ? profile.verification : 0,
       user: profile.user,
       documentId: profile.documentId,
       id: profile.id,

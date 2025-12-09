@@ -6,6 +6,7 @@ import PostCard, { Post } from "@/components/student-section/PostCard";
 import JobPostingCard from "@/components/student-section/JobPostingCard";
 import { useEffect, useState } from "react";
 import { getMediaUrl } from "@/lib/utils";
+import { fetchColleges } from "@/lib/strapi/strapiData";
 
 // Access environment variables from .env.local
 const STRAPI_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -80,6 +81,8 @@ export default function StudentsHomePage() {
       try {
         const { getAuthTokenCookie } = await import("@/lib/cookies");
         const token = getAuthTokenCookie();
+        const test = await fetchColleges(token);
+        console.log("============================", Object.values(test));
         const response = await fetch(
           `${STRAPI_URL}/api/posts?populate=*&sort=createdAt:desc`,
           {
@@ -167,7 +170,6 @@ export default function StudentsHomePage() {
                   .filter((url): url is string => url !== null)
               : [];
 
-            console.log("post media is", images);
             // let images: string[] = [];
             // if (post.media) {
             //   if (Array.isArray(post.media.data)) {
@@ -271,7 +273,6 @@ export default function StudentsHomePage() {
           }
         );
         const data = await response.json();
-        console.log("Global jobs data:", data.data);
         const mockJobs: GlobalJob[] = data.data.map(
           (item: {
             data: {
@@ -372,7 +373,6 @@ export default function StudentsHomePage() {
     }
   };
 
-  console.log(posts);
   return (
     <main className="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-20 bg-white min-h-screen">
       <section className="max-w-6xl mx-auto">

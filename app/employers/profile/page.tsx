@@ -69,7 +69,6 @@ export default function EmployerProfilePage() {
       let userEmail = "company@example.com";
       try {
         const data: UserMeResponse = await fetchMe(token);
-        console.log("data", data);
         if (data && data.employer_profile) {
           employerProfile = data.employer_profile;
           userEmail = data?.email || userEmail;

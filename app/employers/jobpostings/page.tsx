@@ -61,7 +61,6 @@ export default function JobPostingsPage() {
         const res = await fetchFromBackend(
           "employer-profiles/snc25a7at88l2rb59r924wg1?populate=*"
         );
-        console.log("Fetched jobs:", res.globaljobpostings); // Debug log
         const sortedJobs = sortJobsByIdDesc(res.globaljobpostings || []);
         setJobs(sortedJobs);
         // setJobs(res.globaljobpostings || []);
@@ -75,27 +74,6 @@ export default function JobPostingsPage() {
 
     fetchJobs();
   }, []);
-
-  // Debug: Check environment on mount
-  useEffect(() => {
-    console.log("Environment check:");
-    console.log(
-      "NEXT_PUBLIC_BACKEND_URL:",
-      process.env.NEXT_PUBLIC_BACKEND_URL
-    );
-    console.log(
-      "localStorage fomo_token:",
-      localStorage.getItem("fomo_token") ? "exists" : "missing"
-    );
-  }, []);
-
-  // Debug: Monitor deleteConfirm state changes
-  useEffect(() => {
-    console.log("deleteConfirm state changed:", deleteConfirm);
-    if (deleteConfirm.isOpen) {
-      console.log("Delete confirmation modal should be visible now");
-    }
-  }, [deleteConfirm]);
 
   // Helper function to sort jobs by decreasing ID
   const sortJobsByIdDesc = (jobsArray: Array<Record<string, unknown>>) => {

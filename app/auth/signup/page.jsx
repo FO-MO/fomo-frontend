@@ -118,7 +118,6 @@ export default function Signup() {
         password,
         "student"
       );
-      console.log("Register response:", result);
       if (result?.error) {
         setError(result.error.message || "Registration failed");
         console.error("Sign up error:", result);
@@ -132,7 +131,6 @@ export default function Signup() {
         // Strapi may require email confirmation depending on settings
         setSuccess(true);
         setError("Please check your email to confirm your account");
-        console.log("Signup response", result);
       }
     } catch (err) {
       console.error(err);

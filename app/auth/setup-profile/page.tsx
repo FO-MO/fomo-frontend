@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   Check,
   ArrowRight,
@@ -17,7 +18,7 @@ import {
 import { getAuthToken } from "@/lib/strapi/auth";
 import { createStudentProfile, CreateProfileData } from "@/lib/strapi/profile";
 import Link from "next/link";
-import { uploadImage } from "@/lib/strapi/strapiData";
+import { fetchColleges, uploadImage } from "@/lib/strapi/strapiData";
 
 // Predefined options
 const AVAILABLE_SKILLS = [
@@ -246,87 +247,6 @@ const AVAILABLE_COURSES = [
   "Other",
 ];
 
-const KERALA_COLLEGES = [
-  "Indian Institute of Technology Palakkad (IIT Palakkad)",
-  "National Institute of Technology Calicut (NIT Calicut)",
-  "Indian Institute of Management Kozhikode (IIM Kozhikode)",
-  "Indian Institute of Science Education and Research Thiruvananthapuram (IISER)",
-  "Cochin University of Science and Technology (CUSAT)",
-  "University of Kerala, Trivandrum",
-  "Mahatma Gandhi University, Kottayam",
-  "Kannur University",
-  "Calicut University",
-  "Kerala University of Digital Sciences, Innovation and Technology (Digital University Kerala)",
-  "APJ Abdul Kalam Technological University",
-  "Kerala Agricultural University",
-  "Kerala Veterinary and Animal Sciences University",
-  "Kerala University of Fisheries and Ocean Studies",
-  "Sree Sankaracharya University of Sanskrit",
-  "Thunchath Ezhuthachan Malayalam University",
-  "Amrita Vishwa Vidyapeetham, Amritapuri Campus",
-  "Amrita School of Engineering, Coimbatore",
-  "College of Engineering Trivandrum (CET)",
-  "Government Engineering College Thrissur (GEC Thrissur)",
-  "Government Engineering College Kozhikode (GEC Kozhikode)",
-  "Government Engineering College Idukki",
-  "Government Engineering College Barton Hill",
-  "Government Engineering College Wayanad",
-  "Government Engineering College Kannur",
-  "Rajagiri School of Engineering and Technology, Kochi",
-  "Rajagiri College of Social Sciences, Kochi",
-  "Toc H Institute of Science and Technology, Ernakulam",
-  "Mar Baselios College of Engineering and Technology, Trivandrum",
-  "Mar Athanasius College of Engineering, Kothamangalam",
-  "Sree Chitra Thirunal College of Engineering, Trivandrum",
-  "Model Engineering College, Ernakulam",
-  "TKM College of Engineering, Kollam",
-  "LBS Institute of Technology for Women, Trivandrum",
-  "NSS College of Engineering, Palakkad",
-  "Malabar College of Engineering and Technology, Thrissur",
-  "Ilahia College of Engineering and Technology, Muvattupuzha",
-  "Federal Institute of Science and Technology (FISAT), Angamaly",
-  "Albertian Institute of Science and Technology, Kalamassery",
-  "Amal Jyothi College of Engineering, Kottayam",
-  "Adi Shankara Institute of Engineering and Technology, Kalady",
-  "Christ College, Irinjalakuda",
-  "Sacred Heart College, Thevara",
-  "St. Teresa's College, Ernakulam",
-  "Assumption College, Changanassery",
-  "St. Joseph's College, Devagiri",
-  "Farook College, Kozhikode",
-  "Maharaja's College, Ernakulam",
-  "University College, Trivandrum",
-  "Govt. Victoria College, Palakkad",
-  "Brennen College, Thalassery",
-  "St. Thomas College, Thrissur",
-  "Vimala College, Thrissur",
-  "Nirmala College, Muvattupuzha",
-  "MES College, Marampally",
-  "Deva Matha College, Kuravilangad",
-  "Baselius College, Kottayam",
-  "Bishop Moore College, Mavelikara",
-  "CMS College, Kottayam",
-  "Catholicate College, Pathanamthitta",
-  "Government Law College, Ernakulam",
-  "Government Law College, Trivandrum",
-  "Government Medical College, Trivandrum",
-  "Government Medical College, Kozhikode",
-  "Government Medical College, Kottayam",
-  "Pushpagiri Institute of Medical Sciences",
-  "Believers Church Medical College, Thiruvalla",
-  "Azeezia Institute of Medical Sciences, Kollam",
-  "Albertian Institute of Science and Technology",
-  "RAJIV GANDHI INSTITUTE OF TECHNOLOGY, KOTTAYAM",
-  "Saintgits College of Engineering (Autonomous), Kottayam",
-  "TOMS College of Engineering And Polytechnic",
-  "St. Joseph's College of Engineering and Technology, Palai (Autonomous)",
-  "Mangalam College of Engineering",
-  "Amal Jyothi College of Engineering Autonomous",
-  "College of Engineering Kidangoor",
-  "GIT Engineering College - Kangazha Kottayam",
-  "Other",
-];
-
 // Generate years from current year to next 10 years
 const currentYear = new Date().getFullYear();
 const GRADUATION_YEARS = Array.from({ length: 11 }, (_, i) => currentYear + i);
@@ -342,6 +262,10 @@ export default function SetupProfilePage() {
   const [email, setEmail] = useState("");
   const [bio, setBio] = useState("");
   const [institution, setInstitution] = useState("");
+  const [colleges, setColleges] = useState<string[]>([]);
+  const [collegeData, setCollegeData] = useState<Record<string, string>>({}); // Store key-value pairs
+  const [verificationCode, setVerificationCode] = useState("");
+  const [verification, setVerification] = useState(0); // 0 = not verified, 1 = verified
   const [major, setMajor] = useState("");
   const [graduationYear, setGraduationYear] = useState("");
   const [location, setLocation] = useState("");
@@ -365,6 +289,26 @@ export default function SetupProfilePage() {
       router.push("/auth/login");
       return;
     }
+
+    // Fetch colleges from backend
+    const loadColleges = async () => {
+      try {
+        const collegeData = await fetchColleges(token);
+        if (collegeData && typeof collegeData === "object") {
+          // Store the raw key-value pairs
+          setCollegeData(collegeData as Record<string, string>);
+          // Extract college names for display
+          const collegeList = Array.isArray(collegeData)
+            ? collegeData
+            : Object.values(collegeData);
+          setColleges(collegeList.map((c) => String(c)));
+        }
+      } catch (error) {
+        console.error("Failed to fetch colleges:", error);
+      }
+    };
+
+    loadColleges();
 
     // Get user info from cookies
     const fetchUser = async () => {
@@ -400,8 +344,30 @@ export default function SetupProfilePage() {
     );
   };
 
-  // Filter functions for search
-  const filteredColleges = KERALA_COLLEGES.filter((college) =>
+  const handleVerificationCodeSubmit = () => {
+    if (verificationCode.trim() === "") {
+      setError("Please enter a verification code");
+      return;
+    }
+
+    // Check if code exists in college data keys
+    if (collegeData.hasOwnProperty(verificationCode)) {
+      const collegeName = collegeData[verificationCode];
+      setInstitution(collegeName);
+      setVerification(1); // Mark as verified
+      setVerificationCode("");
+      setError("");
+    } else {
+      setError("Invalid verification code. Please check and try again.");
+    }
+  };
+
+  const handleCollegeSelect = (college: string) => {
+    setInstitution(college);
+    setVerification(0); // Mark as not verified when manually selected
+    setCollegeSearch("");
+  };
+  const filteredColleges = colleges.filter((college) =>
     college.toLowerCase().includes(collegeSearch.toLowerCase())
   );
 
@@ -538,6 +504,7 @@ export default function SetupProfilePage() {
         location,
         skills: selectedSkills,
         interests: selectedInterests,
+        verification: verification,
         // ...(profilePicId && { profilePic: profilePicId }),
         // ...(backgroundImgId && { backgroundImage: backgroundImgId }),
       };
@@ -548,7 +515,6 @@ export default function SetupProfilePage() {
         // Profile created successfully
         // Store profile completion flag
         localStorage.setItem("profile_completed", "true");
-        console.log("Profile created:", result);
         if (profilePicFile) {
           uploadImage(
             token,
@@ -569,21 +535,17 @@ export default function SetupProfilePage() {
         }
 
         const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-        const r = await fetch(
-          `${BACKEND_URL}/api/student-profile/${result.documentId}`,
-          {
-            method: "PUT",
-            headers: {
-              Authorization: `Bearer ${token}`,
+        await fetch(`${BACKEND_URL}/api/student-profile/${result.documentId}`, {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            data: {
+              age: 12,
             },
-            body: JSON.stringify({
-              data: {
-                age: 12,
-              },
-            }),
-          }
-        );
-        console.log("Updated profile with age:", r);
+          }),
+        });
 
         // Redirect to students dashboard
         router.push("/students");
@@ -682,10 +644,7 @@ export default function SetupProfilePage() {
                       <button
                         key={college}
                         type="button"
-                        onClick={() => {
-                          setInstitution(college);
-                          setCollegeSearch("");
-                        }}
+                        onClick={() => handleCollegeSelect(college)}
                         className={`w-full text-left px-4 py-2.5 hover:bg-teal-50 transition-colors border-b border-gray-100 last:border-b-0 ${
                           institution === college
                             ? "bg-teal-100 font-semibold text-teal-900"
@@ -714,6 +673,42 @@ export default function SetupProfilePage() {
                     >
                       <span className="text-xs">Change</span>
                     </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Verification Code Section */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Verification Code (Optional)
+              </label>
+              <p className="text-xs text-gray-500 mb-3">
+                Have a college verification code? Enter it to get verified.
+              </p>
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={verificationCode}
+                    onChange={(e) => setVerificationCode(e.target.value)}
+                    placeholder="Enter verification code..."
+                    className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleVerificationCodeSubmit}
+                    className="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium transition-colors"
+                  >
+                    Verify
+                  </button>
+                </div>
+                {verification === 1 && (
+                  <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
+                    <span className="text-sm font-medium text-green-900">
+                      ✓ Verified with code
+                    </span>
                   </div>
                 )}
               </div>
@@ -1011,10 +1006,12 @@ export default function SetupProfilePage() {
                 <div className="flex flex-col items-center gap-4">
                   <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
                     {profilePicPreview ? (
-                      <img
+                      <Image
                         src={profilePicPreview}
                         alt="Profile preview"
                         className="w-full h-full object-cover"
+                        width={128}
+                        height={128}
                       />
                     ) : (
                       <div className="flex flex-col items-center justify-center text-gray-400">
@@ -1055,10 +1052,12 @@ export default function SetupProfilePage() {
                 <div className="flex flex-col gap-4">
                   <div className="w-full h-48 rounded-lg bg-gradient-to-br from-gray-200 via-gray-300 to-gray-200 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
                     {backgroundImgPreview ? (
-                      <img
+                      <Image
                         src={backgroundImgPreview}
                         alt="Background preview"
                         className="w-full h-full object-cover"
+                        width={800}
+                        height={192}
                       />
                     ) : (
                       <div className="flex flex-col items-center justify-center text-gray-400">

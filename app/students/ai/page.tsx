@@ -14,8 +14,6 @@ type Message = {
   timestamp: Date;
 };
 
-const apiKeyEnv = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
-console.log("Environment API Key available:", !!apiKeyEnv); // === FOOMO Clubs & Projects Database ===
 const CLUBS = {
   cybersecurity: {
     name: "Cybersecurity Club",
@@ -185,12 +183,6 @@ const callGeminiAPI = async (
   for (const modelName of MODELS) {
     const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
-    console.log("Calling Gemini API with:", {
-      url: GEMINI_API_URL.replace(apiKey, "***hidden***"),
-      messageCount: contents.length,
-      model: modelName,
-    });
-
     // Up to 3 retries for 429/5xx per model
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
@@ -280,7 +272,6 @@ const callGeminiAPI = async (
         }
 
         const data = await response.json();
-        console.log("Gemini API Response (model used):", modelName, data);
 
         const aiResponse =
           data?.candidates?.[0]?.content?.parts?.[0]?.text ||
@@ -371,7 +362,6 @@ But don’t worry — you can still start learning from YouTube and online platf
 
 export default function AIAssistantPage() {
   const router = useRouter();
-  console.log("Router available:", !!router);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -394,13 +384,11 @@ export default function AIAssistantPage() {
     const envApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
     if (envApiKey) {
       setApiKey(envApiKey);
-      console.log("✅ Using Gemini API key from environment variable");
     } else {
       // Fall back to localStorage
       const savedApiKey = localStorage.getItem("gemini_api_key");
       if (savedApiKey) {
         setApiKey(savedApiKey);
-        console.log("✅ Using Gemini API key from localStorage");
       } else {
         console.log(
           "⚠️ No Gemini API key found. Please add one in settings or .env.local"

@@ -367,8 +367,12 @@ export default function EditProfileModal({
   );
   const [profilePicFile, setProfilePicFile] = useState<File | null>(null);
   const [backgroundImgFile, setBackgroundImgFile] = useState<File | null>(null);
-  const [profilePicPreview, setProfilePicPreview] = useState<string>(currentData.profileImageUrl || "");
-  const [backgroundImgPreview, setBackgroundImgPreview] = useState<string>(currentData.backgroundImageUrl || "");
+  const [profilePicPreview, setProfilePicPreview] = useState<string>(
+    currentData.profileImageUrl || ""
+  );
+  const [backgroundImgPreview, setBackgroundImgPreview] = useState<string>(
+    currentData.backgroundImageUrl || ""
+  );
 
   // Search states
   const [collegeSearch, setCollegeSearch] = useState("");
@@ -560,7 +564,7 @@ export default function EditProfileModal({
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        
+
         if (profileRes.ok) {
           const profileData = await profileRes.json();
           const profile = profileData?.data?.[0];
@@ -971,7 +975,7 @@ export default function EditProfileModal({
               <h3 className="text-lg font-bold text-gray-900 mb-4">
                 Profile Images
               </h3>
-              
+
               {/* Profile Picture */}
               <div className="mb-6">
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
