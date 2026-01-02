@@ -9,6 +9,7 @@ import VideoPlayer from "@/components/student-section/VideoPlayer";
 import UploadVideoModal from "@/components/student-section/UploadVideoModal";
 import { fetchData } from "@/lib/strapi/strapiData";
 import { getMediaUrl } from "@/lib/utils";
+import { getAuthTokenCookie } from "@/lib/cookies";
 
 type Video = {
   id: string;
@@ -45,7 +46,7 @@ export default function ClubVideosPage() {
     const fetchClubVideos = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem("fomo_token");
+        const token = getAuthTokenCookie();
 
         // Fetch specific club by documentId (clubId from URL)
         const result = (await fetchData(
