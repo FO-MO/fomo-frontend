@@ -467,7 +467,7 @@ export default function EditProfileModal({
       let recordId: string | null = null;
       if (studentId) {
         const q = `${BACKEND_URL}/api/student-profiles?filters[studentId][$eq]=${encodeURIComponent(
-          studentId
+          studentId ?? ""
         )}&populate=*`;
         const res = await fetch(q, {
           headers: { Authorization: `Bearer ${token}` },
@@ -558,7 +558,7 @@ export default function EditProfileModal({
         // Get the profile ID for image upload
         const profileRes = await fetch(
           `${BACKEND_URL}/api/student-profiles?filters[studentId][$eq]=${encodeURIComponent(
-            studentId
+            studentId ?? ""
           )}`,
           {
             headers: { Authorization: `Bearer ${token}` },
