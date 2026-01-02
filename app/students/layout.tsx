@@ -21,7 +21,7 @@ export default function RootLayout({
     isLoading: verificationLoading,
     verificationStatus,
     isVerified,
-  } = useVerificationCheck(true);
+  } = useVerificationCheck();
 
   // Show loading state while checking profile or verification
   if (profileLoading || verificationLoading) {
