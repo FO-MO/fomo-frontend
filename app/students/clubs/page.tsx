@@ -3,7 +3,8 @@
 export const dynamic = "force-dynamic";
 
 import React, { useState, useEffect } from "react";
-import ClubCard, { Club } from "@/components/student-section/ClubCard";
+import ClubCard from "@/components/student-section/ClubCard";
+import { Club } from "@/lib/interfaces";
 import { backendurl, fetchFromBackend } from "@/lib/tools";
 
 export default function ClubsPage() {
@@ -38,6 +39,7 @@ export default function ClubsPage() {
 
           return {
             id: clubData.documentId,
+            name: clubData.title,
             title: clubData.title,
             description: clubData.description,
             tags: clubData.skills || [],

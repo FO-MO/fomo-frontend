@@ -10,7 +10,8 @@ import ProfileInternshipCard from "@/components/student-section/ProfileInternshi
 import EditProfileModal from "@/components/student-section/EditProfileModal";
 import PostCard, { Post } from "@/components/student-section/PostCard";
 import { getAuthToken } from "@/lib/strapi/auth";
-import { getStudentProfile, Internship } from "@/lib/strapi/profile";
+import { getStudentProfile } from "@/lib/strapi/profile";
+import { Internship } from "@/lib/interfaces";
 import { getMediaUrl } from "@/lib/utils";
 
 type TabKey = "projects" | "clubs" | "internships" | "posts";

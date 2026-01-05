@@ -7,7 +7,8 @@ import ProfileClubCard from "@/components/student-section/ProfileClubCard";
 import ProfileInternshipCard from "@/components/student-section/ProfileInternshipCard";
 import EditProfileModal from "@/components/student-section/EditProfileModal";
 import { getAuthToken } from "@/lib/strapi/auth";
-import { Internship, getStudentProfile_2 } from "@/lib/strapi/profile";
+import { getStudentProfile_2 } from "@/lib/strapi/profile";
+import { Internship } from "@/lib/interfaces";
 
 type TabKey = "projects" | "clubs" | "internships";
 
