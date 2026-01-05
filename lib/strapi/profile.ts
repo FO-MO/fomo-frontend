@@ -1,99 +1,13 @@
 // Strapi profile helper functions
 import { getMediaUrl } from "@/lib/utils";
+import {
+  Project,
+  Club,
+  StudentProfile,
+  CreateProfileData,
+} from "@/lib/interfaces";
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-
-export interface MediaFile {
-  id: number;
-  url: string;
-  name: string;
-}
-
-export interface Project {
-  title: string;
-  description: string;
-  status?: string;
-  tags?: string[];
-}
-
-export interface Club {
-  name: string;
-  title: string;
-  description: string;
-  tags?: string[];
-  badge?: string | null;
-}
-
-export interface Internship {
-  company?: string;
-  role: string;
-  timeline?: string;
-  location?: string;
-  duration?: string;
-  status?: string;
-}
-
-export interface StudentProfile {
-  documentId?: string;
-  email: string;
-  id?: number;
-  initials: string;
-  name: string;
-  studentId: string;
-  about?: string;
-  college?: string;
-  course?: string;
-  graduationYear: string;
-  location: string;
-  skills: string[];
-  interests: string[];
-  followers: number;
-  following: number;
-  institution: string;
-  major: string;
-  bio: string;
-  backgroundImageUrl: string | null;
-  profileImageUrl: string | null;
-  profilePic?: MediaFile;
-  backgroundImg?: MediaFile;
-  verification?: number; // 0 = pending, 1 = verified, -1 = rejected
-  createdAt?: string;
-  updatedAt?: string;
-  user?: {
-    id: number;
-    username: string;
-    email: string;
-  };
-  projects: {
-    title: string;
-    description: string;
-    status: string;
-    tags?: string[];
-  }[];
-  clubs: {
-    name: string;
-    description: string;
-    tags: string[];
-    badge: string | null;
-  }[];
-  internships: Internship[];
-}
-
-export interface CreateProfileData {
-  studentId: string;
-  name: string;
-  email?: string;
-  about?: string;
-  college?: string;
-  course?: string;
-  graduationYear?: string;
-  location?: string;
-  skills?: string[];
-  interests?: string[];
-  profilePic?: number; // Media ID
-  backgroundImage?: number; // Media ID
-  verification?: number;
-}
 
 /**
  * Fetch student profile by studentId (user's documentId or id)

@@ -2,46 +2,15 @@
 
 export const dynamic = "force-dynamic";
 
-import PostCard, { Post } from "@/components/student-section/PostCard";
+import PostCard from "@/components/student-section/PostCard";
 import JobPostingCard from "@/components/student-section/JobPostingCard";
 import { useEffect, useState } from "react";
 import { getMediaUrl } from "@/lib/utils";
+import { GlobalJob, Post } from "@/lib/interfaces";
 import { fetchColleges } from "@/lib/strapi/strapiData";
 
 // Access environment variables from .env.local
 const STRAPI_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-
-interface GlobalJob {
-  id: string;
-  title: string;
-  jobType: string;
-  experience: string;
-  location: string;
-  deadline: string;
-  description: string;
-  skills: string[];
-  requirements: string[];
-  benefits: string[];
-  status: string;
-  companyName?: string;
-  companyLogo?: string;
-  createdAt?: string;
-}
-
-export type HomePageData = {
-  user: {
-    name: string;
-    initials: string;
-    greetingEmoji: string;
-    subtitle: string;
-  };
-  composer: {
-    placeholder: string;
-    postLabel: string;
-  };
-  postsSectionTitle: string;
-  posts: Post[];
-};
 
 export default function StudentsHomePage() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -169,36 +138,6 @@ export default function StudentsHomePage() {
                   .map((img: { url?: string }) => getMediaUrl(img.url))
                   .filter((url): url is string => url !== null)
               : [];
-
-            // let images: string[] = [];
-            // if (post.media) {
-            //   if (Array.isArray(post.media.data)) {
-            //     images = post.media.data.map(
-            //       (img: any) => `${STRAPI_URL}${img.attributes?.url || img.url}`
-            //     );
-            //   } else if (post.media.data) {
-            //     images = [
-            //       `${STRAPI_URL}${
-            //         post.media.data.attributes?.url || post.media.data.url
-            //       }`,
-            //     ];
-            //   } else if (Array.isArray(post.images)) {
-            //     images = post.images.map(
-            //       (img: any) =>
-            //         `${STRAPI_URL}${
-            //           img.url || img.attributes?.url || img.formats?.medium?.url
-            //         }`
-            //     );
-            //   } else {
-            //     images = [
-            //       `${STRAPI_URL}${
-            //         post.images.url ||
-            //         post.images.attributes?.url ||
-            //         post.images.formats?.medium?.url
-            //       }`,
-            //     ];
-            //   }
-            // }
 
             // Format date
             const createdAt = new Date(

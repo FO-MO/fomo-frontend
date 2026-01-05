@@ -60,16 +60,6 @@ export async function uploadImage(
     formData.append("ref", ref);
     formData.append("refId", refId ? refId.toString() : "");
     formData.append("field", field);
-    // formData.append("publishedAt", new Date().toISOString());
-    // formData.append("publishedAt", new Date().toISOString());
-
-    // console.log("Uploading image to Strapi:", formData.get("files"));
-    // console.log(
-    //   "other details:",
-    //   formData.get("ref"),
-    //   formData.get("refId"),
-    //   formData.get("field")
-    // );
 
     const res = await fetch(`${BACKEND_URL}/api/upload`, {
       method: "POST",
@@ -102,7 +92,7 @@ export async function fetchColleges(
   token: string | null
 ): Promise<Record<string, unknown>> {
   const res = await fetch(
-    `${BACKEND_URL}/api/data-sets/b6xn8llo3ng85x3zpkzt7ca3`,
+    `${BACKEND_URL}/api/data-sets/j9qh4kuvn2gf9o1pjy9u1d7u`,
     {
       headers: { Authorization: `Bearer ${token}` },
     }
