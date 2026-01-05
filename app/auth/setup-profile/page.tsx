@@ -16,7 +16,8 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { getAuthToken } from "@/lib/strapi/auth";
-import { createStudentProfile, CreateProfileData } from "@/lib/strapi/profile";
+import { createStudentProfile } from "@/lib/strapi/profile";
+import { CreateProfileData } from "@/lib/interfaces";
 import Link from "next/link";
 import { fetchColleges, uploadImage } from "@/lib/strapi/strapiData";
 
