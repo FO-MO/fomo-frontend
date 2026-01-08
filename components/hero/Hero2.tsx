@@ -4,7 +4,6 @@ export const dynamic = 'force-dynamic'
 import React, { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import Particles from '../Particles'
 
 export default function Hero2() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -184,33 +183,15 @@ export default function Hero2() {
   return (
     <section
       ref={sectionRef}
-      className='w-full relative min-h-[110vh] py-16 px-4 sm:px-6 lg:px-8 bg-black overflow-hidden opacity-0'
+      className='w-full relative min-h-[110vh] py-16 px-4 sm:px-6 lg:px-8 bg-white overflow-hidden opacity-0'
     >
-      {/* Particles Background */}
-      <div className='fixed inset-0 z-0'>
-        <Particles
-          particleCount={5000}
-          particleColors={['#D6FF3A']}
-          particleSpread={3}
-          speed={0.3}
-          alphaParticles={false}
-          particleBaseSize={1.2}
-          sizeRandomness={0}
-          cameraDistance={0}
-          moveParticlesOnHover={true}
-          particleHoverFactor={0.5}
-          disableRotation={true}
-          className='w-full h-full'
-        />
-      </div>
-
       {/* Content */}
       <div className='relative z-10 max-w-7xl mx-auto'>
         <div ref={headerRef} className='text-center mb-16'>
-          <h2 className='text-4xl sm:text-5xl font-bold text-[antiquewhite] mb-4'>
+          <h2 className='text-4xl sm:text-5xl font-bold text-black mb-4'>
             How It Works
           </h2>
-          <p className='text-lg sm:text-xl text-[antiquewhite] max-w-3xl mx-auto px-4'>
+          <p className='text-lg sm:text-xl text-black max-w-3xl mx-auto px-4'>
             Your AI-powered journey from student to hired professional
           </p>
         </div>

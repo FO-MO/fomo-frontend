@@ -2,7 +2,6 @@
 export const dynamic = 'force-dynamic'
 
 import React from 'react'
-import Particles from '../Particles'
 
 export default function Hero4() {
   const features = [
@@ -70,32 +69,14 @@ export default function Hero4() {
   ]
 
   return (
-    <section className='w-full relative py-16 sm:py-20 lg:py-60 px-4 sm:px-6 lg:px-8 bg-black overflow-hidden'>
-      {/* Particles Background */}
-      <div className='fixed inset-0 z-0'>
-        <Particles
-          particleCount={5000}
-          particleColors={['#D6FF3A']}
-          particleSpread={3}
-          speed={0.3}
-          alphaParticles={false}
-          particleBaseSize={1.2}
-          sizeRandomness={0}
-          cameraDistance={0}
-          moveParticlesOnHover={true}
-          particleHoverFactor={0.5}
-          disableRotation={true}
-          className='w-full h-full'
-        />
-      </div>
-
+    <section className='w-full relative py-16 sm:py-20 lg:py-60 px-4 sm:px-6 lg:px-8 bg-white overflow-hidden'>
       {/* Content */}
       <div className='relative z-10 max-w-7xl mx-auto'>
         {/* Header */}
         <div className='text-center mb-12 sm:mb-16'>
           <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6'>
             Your Biggest Edge Over{' '}
-            <span className='text-transparent bg-clip-text bg-gradient-to-r from-[#d6ff3a] to-[#c4e82e]'>
+            <span className='text-transparent bg-clip-text bg-gradient-to-r from-[oklch(43.7%_0.078_188.216)] to-[oklch(35%_0.06_188.216)]'>
               The Competition
             </span>
           </h2>
@@ -121,12 +102,12 @@ export default function Hero4() {
               </div>
 
               {/* Title */}
-              <h3 className='text-xl sm:text-2xl font-bold text-white mb-3'>
+              <h3 className='text-xl sm:text-2xl font-bold text-black mb-3'>
                 {feature.title}
               </h3>
 
               {/* Description */}
-              <p className='text-sm sm:text-base text-white/80 leading-relaxed'>
+              <p className='text-sm sm:text-base text-black/80 leading-relaxed'>
                 {feature.description}
               </p>
             </div>
