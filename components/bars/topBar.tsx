@@ -34,85 +34,103 @@ export default function TopBar({
   const authenticatedUser: User | null =
     isAuthenticated && mockUser ? mockUser : null
 
-  const isHomeTheme = theme === 'home'
-  const navbarClasses = isHomeTheme ? '' : 'backdrop-blur-md'
-  const backgroundStyle = isHomeTheme
-    ? {
-        backgroundColor: '#000',
-        borderBottom: '1px solid rgba(255,255,255,0.1)',
-      }
-    : {
-        background:
-          'linear-gradient(rgba(255,255,255,0.50), rgba(255,255,255,0.50))',
-        borderBottom: '1px solid rgba(255,255,255,0.05)',
-      }
-
-  const greetingColor = theme === 'black' ? 'text-gray-900' : 'text-white'
-
   return (
-    <div
-      role='banner'
-      className={`fixed inset-x-0 top-0 z-50 ${navbarClasses}`}
-      style={backgroundStyle}
-    >
-      <div className='mx-auto flex h-16 sm:h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8'>
-        {/* Logo and Title */}
-        <div className='flex items-center gap-2 sm:gap-3 flex-shrink-0'>
-          <div className='flex h-10 w-10 sm:h-13 sm:w-13 items-center rounded-full justify-center bg-[#d6ff3a] text-lg sm:text-xl font-extrabold text-[#082926] shadow-[0_3px_0_rgba(0,0,0,0.12)]'>
-            F
+    <header className='fixed top-0 left-0 right-0 z-50 bg-gray-100 border-b border-border/50'>
+      <div className='max-w-7xl mx-auto px-6 h-16 flex items-center justify-between'>
+        <div className='flex items-center gap-2'>
+          <div className='w-8 h-8 rounded-lg bg-primary flex items-center justify-center'>
+            <span className='text-primary-foreground font-bold text-sm'>F</span>
           </div>
           <Link href='/'>
             <span
-              className={`${
-                theme === 'black' ? 'text-black' : 'text-white'
-              } text-lg sm:text-2xl lg:text-3xl font-semibold truncate`}
+              className='font-bold text-xl tracking-tight'
+              data-testid='text-logo'
             >
-              {title}
+              FOOMO
             </span>
           </Link>
         </div>
 
-        {/* Navigation */}
-        <nav className='flex items-center' aria-label='Primary'>
+        <nav className='hidden md:flex items-center gap-8'>
+          <a
+            href='#features'
+            className='text-sm font-medium text-muted-foreground hover:text-foreground transition-colors'
+            data-testid='link-features'
+          >
+            Features
+          </a>
+          <a
+            href='#testimonials'
+            className='text-sm font-medium text-muted-foreground hover:text-foreground transition-colors'
+            data-testid='link-testimonials'
+          >
+            Testimonials
+          </a>
+          <a
+            href='#pricing'
+            className='text-sm font-medium text-muted-foreground hover:text-foreground transition-colors'
+            data-testid='link-pricing'
+          >
+            Pricing
+          </a>
+        </nav>
+
+        <div className='flex items-center gap-3'>
           {!authenticatedUser ? (
-            <div className='flex items-center gap-2 sm:gap-3'>
-              <a
-                className='transform rounded-lg sm:rounded-2xl bg-[#d6ff3a] px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base font-bold sm:font-extrabold text-[#082926] shadow-[0_3px_0_rgba(0,0,0,0.12)] sm:shadow-[0_6px_0_rgba(0,0,0,0.12)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_6px_0_rgba(0,0,0,0.12)] sm:hover:shadow-[0_10px_0_rgba(0,0,0,0.12)]'
+            <>
+              <Link
                 href='/auth/login'
+                className='items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover-elevate active-elevate-2 border border-transparent min-h-9 px-4 py-2 hidden sm:flex'
+                data-testid='button-login'
               >
-                Login
-              </a>
-              <a
-                className='transform rounded-lg sm:rounded-2xl bg-[#d6ff3a] px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base font-bold sm:font-extrabold text-[#082926] shadow-[0_3px_0_rgba(0,0,0,0.12)] sm:shadow-[0_6px_0_rgba(0,0,0,0.12)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_6px_0_rgba(0,0,0,0.12)] sm:hover:shadow-[0_10px_0_rgba(0,0,0,0.12)]'
+                Log in
+              </Link>
+              <Link
                 href='/auth/signup'
+                className='inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover-elevate active-elevate-2 text-primary-foreground border border-primary-border min-h-9 px-4 py-2 bg-primary hover:bg-primary/90'
+                data-testid='button-signup'
               >
-                Sign Up
-              </a>
-            </div>
+                Get Started
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  width='24'
+                  height='24'
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='currentColor'
+                  strokeWidth='2'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  className='lucide lucide-arrow-right ml-2 h-4 w-4'
+                  aria-hidden='true'
+                >
+                  <path d='M5 12h14'></path>
+                  <path d='m12 5 7 7-7 7'></path>
+                </svg>
+              </Link>
+            </>
           ) : (
             <div className='flex items-center gap-2 sm:gap-4'>
               {/* User Greeting - Hidden on very small screens, visible on larger */}
-              <span
-                className={`hidden sm:block rounded-lg sm:rounded-2xl px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-medium ${greetingColor}`}
-              >
+              <span className='hidden sm:block rounded-lg sm:rounded-2xl px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-medium text-foreground'>
                 Hi {authenticatedUser.username}!
               </span>
 
               {/* User Avatar - Visible on small screens instead of greeting */}
-              <span className='flex sm:hidden h-8 w-8 items-center justify-center rounded-full border border-white/40 bg-white/10 text-xs font-semibold text-white'>
+              <span className='flex sm:hidden h-8 w-8 items-center justify-center rounded-full border border-border bg-muted text-xs font-semibold'>
                 {authenticatedUser.abbreviation}
               </span>
 
-              <a
-                className='transform rounded-lg sm:rounded-2xl bg-[#d6ff3a] px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base font-bold sm:font-extrabold text-[#082926] shadow-[0_3px_0_rgba(0,0,0,0.12)] sm:shadow-[0_6px_0_rgba(0,0,0,0.12)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_6px_0_rgba(0,0,0,0.12)] sm:hover:shadow-[0_10px_0_rgba(0,0,0,0.12)]'
+              <Link
                 href={DASHBOARD_ROUTES[authenticatedUser.userType]}
+                className='transform rounded-lg sm:rounded-2xl bg-primary px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base font-bold text-primary-foreground shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md'
               >
                 Dashboard
-              </a>
+              </Link>
             </div>
           )}
-        </nav>
+        </div>
       </div>
-    </div>
+    </header>
   )
 }
