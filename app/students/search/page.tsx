@@ -7,6 +7,7 @@ import SearchCard, { Profile } from "@/components/student-section/SearchCard";
 import { Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { fetchData } from "@/lib/strapi/strapiData";
+import { getMediaUrl } from "@/lib/utils";
 
 export default function SearchPage() {
   const router = useRouter();
@@ -36,6 +37,9 @@ export default function SearchPage() {
             skills?: string[];
             followers?: unknown[];
             following?: unknown[];
+            profilePic?: {
+              url?: string;
+            };
           }>;
         };
 
@@ -49,7 +53,7 @@ export default function SearchPage() {
           followers: (search.followers || []).map(String),
           following: (search.following || []).map(String),
           isFollowing: false,
-          avatarUrl: null,
+          avatarUrl: search.profilePic?.url ? getMediaUrl(search.profilePic.url) : null,
         }));
 
         setProfiles(fetchedProfiles);

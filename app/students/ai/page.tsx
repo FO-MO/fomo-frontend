@@ -6,6 +6,9 @@ import React, { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, Sparkles, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 import ReactMarkdown from "react-markdown";
+import { getAuthToken } from "@/lib/strapi/auth";
+import { getStudentProfile } from "@/lib/strapi/profile";
+import { getMediaUrl } from "@/lib/utils";
 
 type Message = {
   id: string;
@@ -377,6 +380,7 @@ export default function AIAssistantPage() {
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
   const [tempApiKey, setTempApiKey] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
 
   // Load API key from environment variable or localStorage on mount
   useEffect(() => {
@@ -395,6 +399,30 @@ export default function AIAssistantPage() {
         );
       }
     }
+
+    // Fetch user profile photo
+    const fetchUserProfile = async () => {
+      try {
+        const token = getAuthToken();
+        if (!token) return;
+
+        const { getUserCookie } = await import('@/lib/cookies');
+        const user = getUserCookie();
+        if (user) {
+          const studentId = user?.documentId || null;
+          if (studentId) {
+            const profile = await getStudentProfile(studentId, token);
+            if (profile?.profilePic?.url) {
+              const imageUrl = getMediaUrl(profile.profilePic.url);
+              setProfileImageUrl(imageUrl);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch user profile:', err);
+      }
+    };
+    fetchUserProfile();
   }, []);
 
   const scrollToBottom = () =>
@@ -548,16 +576,7 @@ export default function AIAssistantPage() {
               </p>
             </div>
           </div>
-          <button
-            onClick={() => {
-              setTempApiKey(apiKey);
-              setShowApiKeyModal(true);
-            }}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            title="Configure Gemini API Key"
-          >
-            <Settings className="w-5 h-5 text-gray-600" />
-          </button>
+          {/* Settings button removed per request */}
         </header>
 
         {/* Chat Section */}
@@ -570,14 +589,22 @@ export default function AIAssistantPage() {
               }`}
             >
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                className={`w-10 h-10 rounded-full flex items-center justify-center overflow-hidden ${
                   msg.role === "user"
                     ? "bg-blue-600"
                     : "bg-gradient-to-br from-teal-400 to-teal-600"
                 }`}
               >
                 {msg.role === "user" ? (
-                  <User className="w-5 h-5 text-white" />
+                  profileImageUrl ? (
+                    <img
+                      src={profileImageUrl}
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <User className="w-5 h-5 text-white" />
+                  )
                 ) : (
                   <Bot className="w-5 h-5 text-white" />
                 )}
@@ -664,7 +691,7 @@ export default function AIAssistantPage() {
         </div>
 
         {/* API Key Modal */}
-        {showApiKeyModal && (
+        {/* {showApiKeyModal && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
               <div className="flex items-center justify-between mb-4">
@@ -726,7 +753,7 @@ export default function AIAssistantPage() {
                 </div>
 
                 {/* Test Result Display */}
-                {testResult && (
+                {/* {testResult && (
                   <div
                     className={`rounded-lg p-3 text-sm border ${
                       testResult.success
@@ -747,7 +774,7 @@ export default function AIAssistantPage() {
                 )}
 
                 {/* Test API Key Button */}
-                <button
+                {/* <button
                   onClick={handleTestApiKey}
                   disabled={!tempApiKey.trim() || testingApiKey}
                   className="w-full px-4 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg font-medium transition-colors border border-blue-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
@@ -791,7 +818,7 @@ export default function AIAssistantPage() {
               </div>
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </main>
   );
