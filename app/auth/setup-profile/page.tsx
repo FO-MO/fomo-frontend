@@ -19,234 +19,11 @@ import { getAuthToken } from "@/lib/strapi/auth";
 import { createStudentProfile } from "@/lib/strapi/profile";
 import { CreateProfileData } from "@/lib/interfaces";
 import Link from "next/link";
-import { fetchColleges, uploadImage } from "@/lib/strapi/strapiData";
-
-// Predefined options
-const AVAILABLE_SKILLS = [
-  "React",
-  "TypeScript",
-  "JavaScript",
-  "Node.js",
-  "Python",
-  "Java",
-  "C++",
-  "C#",
-  "Ruby",
-  "PHP",
-  "Go",
-  "Rust",
-  "Kotlin",
-  "Swift",
-  "Flutter",
-  "React Native",
-  "Vue.js",
-  "Angular",
-  "Svelte",
-  "Next.js",
-  "Express.js",
-  "Django",
-  "Flask",
-  "Spring Boot",
-  "ASP.NET",
-  "Laravel",
-  "Ruby on Rails",
-  "Machine Learning",
-  "Deep Learning",
-  "Natural Language Processing",
-  "Computer Vision",
-  "Data Science",
-  "Data Analysis",
-  "Statistics",
-  "UI/UX Design",
-  "Graphic Design",
-  "Product Design",
-  "Figma",
-  "Adobe XD",
-  "Photoshop",
-  "Illustrator",
-  "Docker",
-  "Kubernetes",
-  "AWS",
-  "Azure",
-  "Google Cloud",
-  "Firebase",
-  "Heroku",
-  "GraphQL",
-  "REST API",
-  "Microservices",
-  "TensorFlow",
-  "PyTorch",
-  "Scikit-learn",
-  "MongoDB",
-  "PostgreSQL",
-  "MySQL",
-  "Redis",
-  "DynamoDB",
-  "Git",
-  "GitHub",
-  "GitLab",
-  "CI/CD",
-  "Jenkins",
-  "Linux",
-  "Bash Scripting",
-  "Agile/Scrum",
-  "Project Management",
-  "Technical Writing",
-  "Public Speaking",
-  "Leadership",
-  "Team Collaboration",
-];
-
-const AVAILABLE_INTERESTS = [
-  "Artificial Intelligence",
-  "Machine Learning",
-  "Deep Learning",
-  "Natural Language Processing",
-  "Computer Vision",
-  "Web Development",
-  "Frontend Development",
-  "Backend Development",
-  "Full Stack Development",
-  "Mobile Development",
-  "iOS Development",
-  "Android Development",
-  "Cross-Platform Development",
-  "Game Development",
-  "AR/VR Development",
-  "Blockchain",
-  "Cryptocurrency",
-  "NFTs",
-  "Smart Contracts",
-  "Cybersecurity",
-  "Ethical Hacking",
-  "Network Security",
-  "Cloud Computing",
-  "DevOps",
-  "Data Science",
-  "Big Data",
-  "Data Visualization",
-  "Business Intelligence",
-  "IoT (Internet of Things)",
-  "Robotics",
-  "Embedded Systems",
-  "Quantum Computing",
-  "Edge Computing",
-  "UI/UX Design",
-  "Product Design",
-  "Graphic Design",
-  "Motion Graphics",
-  "3D Modeling",
-  "Animation",
-  "Startups",
-  "Entrepreneurship",
-  "Product Management",
-  "Business Strategy",
-  "Digital Marketing",
-  "Content Creation",
-  "Social Media",
-  "Open Source",
-  "Open Source Contribution",
-  "Hackathons",
-  "Competitive Programming",
-  "Algorithms",
-  "System Design",
-  "Research",
-  "Academic Publishing",
-  "Teaching",
-  "Mentoring",
-  "Community Building",
-  "Tech Blogging",
-  "Podcasting",
-  "Video Production",
-  "Photography",
-  "Music Production",
-  "Finance Technology (FinTech)",
-  "Health Technology (HealthTech)",
-  "Education Technology (EdTech)",
-  "E-commerce",
-  "SaaS Products",
-  "API Development",
-  "Automation",
-  "Testing & QA",
-];
-
-const AVAILABLE_COURSES = [
-  "Computer Science",
-  "Information Technology",
-  "Software Engineering",
-  "Data Science",
-  "Artificial Intelligence",
-  "Machine Learning",
-  "Cybersecurity",
-  "Computer Engineering",
-  "Electronics and Communication",
-  "Electrical Engineering",
-  "Mechanical Engineering",
-  "Civil Engineering",
-  "Chemical Engineering",
-  "Biotechnology",
-  "Biomedical Engineering",
-  "Aerospace Engineering",
-  "Automobile Engineering",
-  "Industrial Engineering",
-  "Mathematics",
-  "Statistics",
-  "Physics",
-  "Chemistry",
-  "Biology",
-  "Biochemistry",
-  "Microbiology",
-  "Genetics",
-  "Business Administration (BBA/MBA)",
-  "Management Studies",
-  "Finance",
-  "Accounting",
-  "Economics",
-  "Marketing",
-  "Human Resources",
-  "International Business",
-  "Commerce",
-  "Psychology",
-  "Sociology",
-  "Political Science",
-  "History",
-  "English Literature",
-  "Journalism",
-  "Mass Communication",
-  "Media Studies",
-  "Film Studies",
-  "Animation",
-  "Graphic Design",
-  "Fashion Design",
-  "Interior Design",
-  "Architecture",
-  "Fine Arts",
-  "Performing Arts",
-  "Music",
-  "Law (LLB/LLM)",
-  "Medicine (MBBS)",
-  "Nursing",
-  "Pharmacy",
-  "Physiotherapy",
-  "Dentistry",
-  "Veterinary Science",
-  "Agriculture",
-  "Forestry",
-  "Environmental Science",
-  "Geography",
-  "Geology",
-  "Hospitality Management",
-  "Hotel Management",
-  "Tourism",
-  "Culinary Arts",
-  "Education (B.Ed/M.Ed)",
-  "Library Science",
-  "Social Work",
-  "Public Administration",
-  "Development Studies",
-  "Urban Planning",
-  "Other",
-];
+import {
+  uploadImage,
+  collegeCodeVarification,
+  fetchData,
+} from "@/lib/strapi/strapiData";
 
 // Generate years from current year to next 10 years
 const currentYear = new Date().getFullYear();
@@ -263,8 +40,12 @@ export default function SetupProfilePage() {
   const [email, setEmail] = useState("");
   const [bio, setBio] = useState("");
   const [institution, setInstitution] = useState("");
+
   const [colleges, setColleges] = useState<string[]>([]);
-  const [collegeData, setCollegeData] = useState<Record<string, string>>({}); // Store key-value pairs
+  const [skills, setSkills] = useState<string[]>([]);
+  const [interests, setInterests] = useState<string[]>([]);
+  const [courses, setCourses] = useState<string[]>([]);
+
   const [verificationCode, setVerificationCode] = useState("");
   const [verification, setVerification] = useState(0); // 0 = not verified, 1 = verified
   const [major, setMajor] = useState("");
@@ -292,24 +73,26 @@ export default function SetupProfilePage() {
     }
 
     // Fetch colleges from backend
-    const loadColleges = async () => {
+    const loadData = async () => {
       try {
-        const collegeData = await fetchColleges(token);
-        if (collegeData && typeof collegeData === "object") {
-          // Store the raw key-value pairs
-          setCollegeData(collegeData as Record<string, string>);
-          // Extract college names for display
-          const collegeList = Array.isArray(collegeData)
-            ? collegeData
-            : Object.values(collegeData);
-          setColleges(collegeList.map((c) => String(c)));
-        }
+        const collegeData = await fetchData(
+          token,
+          "college-sets?namesOnly=true",
+        );
+        const skillData = await fetchData(token, "data-sets?skills=true");
+        const interestData = await fetchData(token, "data-sets?interests=true");
+        const courseData = await fetchData(token, "data-sets?courses=true");
+
+        setColleges(collegeData);
+        setSkills(skillData);
+        setInterests(interestData);
+        setCourses(courseData);
       } catch (error) {
         console.error("Failed to fetch colleges:", error);
       }
     };
 
-    loadColleges();
+    loadData();
 
     // Get user info from cookies
     const fetchUser = async () => {
@@ -333,7 +116,7 @@ export default function SetupProfilePage() {
 
   const toggleSkill = (skill: string) => {
     setSelectedSkills((prev) =>
-      prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
+      prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill],
     );
   };
 
@@ -341,25 +124,32 @@ export default function SetupProfilePage() {
     setSelectedInterests((prev) =>
       prev.includes(interest)
         ? prev.filter((i) => i !== interest)
-        : [...prev, interest]
+        : [...prev, interest],
     );
   };
 
-  const handleVerificationCodeSubmit = () => {
+  const handleVerificationCodeSubmit = async () => {
     if (verificationCode.trim() === "") {
       setError("Please enter a verification code");
       return;
     }
-
-    // Check if code exists in college data keys
-    if (collegeData.hasOwnProperty(verificationCode)) {
-      const collegeName = collegeData[verificationCode];
-      setInstitution(collegeName);
-      setVerification(1); // Mark as verified
-      setVerificationCode("");
-      setError("");
-    } else {
-      setError("Invalid verification code. Please check and try again.");
+    try {
+      const token = getAuthToken();
+      const collegeData = await collegeCodeVarification(
+        token,
+        verificationCode,
+      );
+      // Check if code exists in college data keys
+      if (collegeData.found) {
+        setInstitution(collegeData.name);
+        setVerification(1); // Mark as verified
+        setVerificationCode("");
+        setError("");
+      } else {
+        setError("Invalid verification code. Please check and try again.");
+      }
+    } catch (error) {
+      console.error("Failed to fetch colleges:", error);
     }
   };
 
@@ -369,19 +159,19 @@ export default function SetupProfilePage() {
     setCollegeSearch("");
   };
   const filteredColleges = colleges.filter((college) =>
-    college.toLowerCase().includes(collegeSearch.toLowerCase())
+    college.toLowerCase().includes(collegeSearch.toLowerCase()),
   );
 
-  const filteredCourses = AVAILABLE_COURSES.filter((course) =>
-    course.toLowerCase().includes(courseSearch.toLowerCase())
+  const filteredCourses = courses.filter((course) =>
+    course.toLowerCase().includes(courseSearch.toLowerCase()),
   );
 
-  const filteredSkills = AVAILABLE_SKILLS.filter((skill) =>
-    skill.toLowerCase().includes(skillSearch.toLowerCase())
+  const filteredSkills = skills.filter((skill) =>
+    skill.toLowerCase().includes(skillSearch.toLowerCase()),
   );
 
-  const filteredInterests = AVAILABLE_INTERESTS.filter((interest) =>
-    interest.toLowerCase().includes(interestSearch.toLowerCase())
+  const filteredInterests = interests.filter((interest) =>
+    interest.toLowerCase().includes(interestSearch.toLowerCase()),
   );
 
   const handleProfilePicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -397,7 +187,7 @@ export default function SetupProfilePage() {
   };
 
   const handleBackgroundImgChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -415,7 +205,7 @@ export default function SetupProfilePage() {
       case 1:
         if (!name.trim() || !email.trim()) {
           setError(
-            "Name and email are required. Please log in again if missing."
+            "Name and email are required. Please log in again if missing.",
           );
           return false;
         }
@@ -522,7 +312,7 @@ export default function SetupProfilePage() {
             "api::student-profile.student-profile",
             result.id ? result.id : undefined,
             "profilePic",
-            profilePicFile
+            profilePicFile,
           );
         }
         if (backgroundImgFile) {
@@ -531,7 +321,7 @@ export default function SetupProfilePage() {
             "api::student-profile.student-profile",
             result.id ? result.id : undefined,
             "backgroundImg",
-            backgroundImgFile
+            backgroundImgFile,
           );
         }
 

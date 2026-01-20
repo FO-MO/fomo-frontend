@@ -87,17 +87,6 @@ export default function StudentsPage() {
     skills: string[];
     tags: string[];
   }) => {
-    // TODO: Implement API call to create project
-    // Example:
-    // const response = await fetch('/api/projects', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(projectData)
-    // });
-    // if (response.ok) {
-    //   // Refresh projects list
-    // }
-
     console.log("Create project data:", projectData);
     alert("Project created! (Connect to your API)");
   };

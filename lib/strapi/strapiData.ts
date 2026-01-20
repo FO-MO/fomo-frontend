@@ -3,10 +3,7 @@ export const dynamic = "force-dynamic";
 // Minimal Strapi auth helper for client-side usage
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-export async function fetchData(
-  token: string | null,
-  endpoint: string
-): Promise<Record<string, unknown>> {
+export async function fetchData(token: string | null, endpoint: string) {
   const res = await fetch(`${BACKEND_URL}/api/${endpoint}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -16,7 +13,7 @@ export async function fetchData(
 export async function postData(
   token: string | null,
   endpoint: string,
-  data: Record<string, unknown>
+  data: Record<string, unknown>,
 ): Promise<Record<string, unknown>> {
   const res = await fetch(`${BACKEND_URL}/api/${endpoint}`, {
     method: "POST",
@@ -32,7 +29,7 @@ export async function postData(
 export async function putData(
   token: string | null,
   endpoint: string,
-  data: Record<string, unknown>
+  data: Record<string, unknown>,
 ): Promise<Record<string, unknown>> {
   const res = await fetch(`${BACKEND_URL}/api/${endpoint}`, {
     method: "PUT",
@@ -50,7 +47,7 @@ export async function uploadImage(
   ref: string,
   refId: number | undefined,
   field: string,
-  file: File | null
+  file: File | null,
 ): Promise<number | null> {
   try {
     const formData = new FormData();
@@ -88,16 +85,19 @@ export async function uploadImage(
   }
 }
 
-export async function fetchColleges(
-  token: string | null
-): Promise<Record<string, unknown>> {
-  const res = await fetch(
-    `${BACKEND_URL}/api/data-sets/j9qh4kuvn2gf9o1pjy9u1d7u`,
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    }
-  );
-  const data = await res.json();
-  const KVpairs = data.data.data;
-  return KVpairs;
+export async function fetchColleges(token: string | null): Promise<string[]> {
+  const res = await fetch(`${BACKEND_URL}/api/college-sets?namesOnly=true`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.json();
+}
+
+export async function collegeCodeVarification(
+  token: string | null,
+  code: string,
+) {
+  const res = await fetch(`${BACKEND_URL}/api/college-sets?check=${code}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.json();
 }

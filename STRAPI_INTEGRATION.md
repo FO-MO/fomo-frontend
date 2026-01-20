@@ -8,7 +8,8 @@ This project was updated to use Strapi's built-in authentication instead of Supa
 
 - `lib/strapi/auth.ts` - helper functions: `strapiLogin`, `strapiRegister`, `setAuthToken`, `getAuthToken`, `removeAuthToken`, `fetchMe`
 - `app/auth/login/page.jsx` - login page now calls `strapiLogin` and stores the JWT
-- `app/auth/signup/page.jsx` - signup page now calls `strapiRegister` and redirects to profile setup
+- `app/auth/signup/page.jsx` - signup page now calls `strapiRegister` and redirects to prof
+  ile setup
 - `app/auth/logout/page.jsx` - clears token and redirects
 - `components/UserProfileClient.jsx` - client component that reads token, fetches `/api/users/me`, and shows sign out
 

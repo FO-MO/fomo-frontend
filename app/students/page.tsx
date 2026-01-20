@@ -50,8 +50,6 @@ export default function StudentsHomePage() {
       try {
         const { getAuthTokenCookie } = await import("@/lib/cookies");
         const token = getAuthTokenCookie();
-        const test = await fetchColleges(token);
-        console.log("============================", Object.values(test));
         const response = await fetch(
           `${STRAPI_URL}/api/posts?populate=*&sort=createdAt:desc`,
           {
@@ -59,7 +57,7 @@ export default function StudentsHomePage() {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
-          }
+          },
         );
 
         if (!response.ok) {
@@ -129,7 +127,7 @@ export default function StudentsHomePage() {
 
             // Get avatar URL
             const avatarUrl = getMediaUrl(
-              user.avatar?.url || user.profilePic?.url
+              user.avatar?.url || user.profilePic?.url,
             );
 
             // Get images - handle both array and single image
@@ -141,11 +139,11 @@ export default function StudentsHomePage() {
 
             // Format date
             const createdAt = new Date(
-              post.createdAt || post.publishedAt || Date.now()
+              post.createdAt || post.publishedAt || Date.now(),
             );
             const now = new Date();
             const diffInSeconds = Math.floor(
-              (now.getTime() - createdAt.getTime()) / 1000
+              (now.getTime() - createdAt.getTime()) / 1000,
             );
             let postedAgo = "";
 
@@ -184,7 +182,7 @@ export default function StudentsHomePage() {
               isLiked: post.isLiked || false,
               likedBy: post.likedBy,
             };
-          }
+          },
         );
 
         setPosts(transformedPosts);
@@ -209,7 +207,7 @@ export default function StudentsHomePage() {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
-          }
+          },
         );
         const data = await response.json();
         const mockJobs: GlobalJob[] = data.data.map(
@@ -243,7 +241,7 @@ export default function StudentsHomePage() {
             status: item.data.status || "Open",
             companyName: item.data.companyName || "Unknown Company",
             createdAt: item.createdAt,
-          })
+          }),
         );
         setGlobalJobs(mockJobs);
       } catch (error) {
