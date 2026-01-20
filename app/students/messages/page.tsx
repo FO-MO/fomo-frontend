@@ -2,7 +2,10 @@
 
 export const dynamic = 'force-dynamic'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { getAuthToken } from '@/lib/strapi/auth'
+import { getStudentProfile } from '@/lib/strapi/profile'
+import { getMediaUrl } from '@/lib/utils'
 
 type Conversation = {
   id: string
@@ -17,6 +20,42 @@ export default function MessagesPage() {
     string | null
   >(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null)
+  const [userInitials, setUserInitials] = useState('U')
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const token = getAuthToken()
+        if (!token) return
+
+        const { getUserCookie } = await import('@/lib/cookies')
+        const user = getUserCookie()
+        if (user) {
+          const name = user?.name || user?.username || 'User'
+          const initials = name
+            .split(' ')
+            .map((n: string) => n[0])
+            .join('')
+            .toUpperCase()
+            .slice(0, 2)
+          setUserInitials(initials)
+
+          const studentId = user?.documentId || null
+          if (studentId) {
+            const profile = await getStudentProfile(studentId, token)
+            if (profile?.profilePic?.url) {
+              const imageUrl = getMediaUrl(profile.profilePic.url)
+              setProfileImageUrl(imageUrl)
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch user profile:', err)
+      }
+    }
+    fetchUserProfile()
+  }, [])
 
   // Mock conversations data - replace with actual data later
   const conversations: Conversation[] = []

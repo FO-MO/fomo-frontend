@@ -8,6 +8,8 @@ import Link from "next/link";
 import { X, Image as ImageIcon, Smile, AtSign } from "lucide-react";
 import { postData, uploadImage } from "@/lib/strapi/strapiData";
 import { getStudentProfile } from "@/lib/strapi/profile";
+import { getAuthToken } from "@/lib/strapi/auth";
+import { getMediaUrl } from "@/lib/utils";
 
 export default function CreatePostPage() {
   const router = useRouter();
@@ -21,14 +23,18 @@ export default function CreatePostPage() {
   // Get user info from cookies
   const [userName, setUserName] = useState("User");
   const [userInitials, setUserInitials] = useState("U");
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
 
   React.useEffect(() => {
-    const fetchUser = async () => {
+    const fetchUserProfile = async () => {
       try {
+        const token = getAuthToken();
+        if (!token) return;
+
         const { getUserCookie } = await import("@/lib/cookies");
         const user = getUserCookie();
         if (user) {
-          const name = user?.username || "User";
+          const name = user?.username || user?.name || "User";
           setUserName(name);
           setUserInitials(
             name
@@ -38,12 +44,22 @@ export default function CreatePostPage() {
               .toUpperCase()
               .slice(0, 2)
           );
+
+          // Fetch profile from Strapi
+          const studentId = user?.documentId || null;
+          if (studentId) {
+            const profile = await getStudentProfile(studentId, token);
+            if (profile?.profilePic?.url) {
+              const imageUrl = getMediaUrl(profile.profilePic.url);
+              setProfileImageUrl(imageUrl);
+            }
+          }
         }
       } catch (err) {
         console.error("Failed to get user data:", err);
       }
     };
-    fetchUser();
+    fetchUserProfile();
   }, []);
 
   const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -233,8 +249,16 @@ export default function CreatePostPage() {
             {/* Author Info */}
             <div className="p-6 border-b border-gray-100">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-semibold text-lg">
-                  {userInitials}
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-semibold text-lg overflow-hidden">
+                  {profileImageUrl ? (
+                    <img
+                      src={profileImageUrl}
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    userInitials
+                  )}
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900">{userName}</p>

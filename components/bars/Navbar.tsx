@@ -5,46 +5,61 @@ export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { getAuthToken } from '@/lib/strapi/auth'
+import { getStudentProfile } from '@/lib/strapi/profile'
+import { getMediaUrl } from '@/lib/utils'
 
 export default function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [initials, setInitials] = useState<string>('U')
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    // Compute initials from current user's name stored in cookies
-    const fetchUser = async () => {
+    // Fetch user profile data including profile photo
+    const fetchUserProfile = async () => {
       try {
+        const token = getAuthToken()
+        if (!token) return
+
         const { getUserCookie } = await import('@/lib/cookies')
-        const parsed = getUserCookie()
-        if (parsed) {
-          // Try common fields for name
-          const name =
-            (parsed && (parsed.name || parsed.username || parsed.email)) ||
-            'User'
-          // If email, strip domain
-          const cleanedName =
-            typeof name === 'string' && name.includes('@')
-              ? name.split('@')[0]
-              : name
-          const words = String(cleanedName).trim().split(/\s+/).filter(Boolean)
-          let computed = 'U'
-          if (words.length >= 2) {
-            computed = `${words[0][0] || ''}${words[1][0] || ''}`.toUpperCase()
-          } else if (words.length === 1) {
-            // Fallback: use first two characters of the single word (or single char if short)
-            const w = words[0]
-            computed =
-              (w[0] || '').toUpperCase() + ((w[1] || '').toUpperCase() || '')
-          }
-          if (computed) setInitials(computed)
+        const user = getUserCookie()
+        if (!user) return
+
+        // Get studentId from user cookie
+        const studentId = user?.documentId || null
+        if (!studentId) return
+
+        // Compute initials from user name
+        const name = user.name || user.username || user.email || 'User'
+        const cleanedName =
+          typeof name === 'string' && name.includes('@')
+            ? name.split('@')[0]
+            : name
+        const words = String(cleanedName).trim().split(/\s+/).filter(Boolean)
+        let computed = 'U'
+        if (words.length >= 2) {
+          computed = `${words[0][0] || ''}${words[1][0] || ''}`.toUpperCase()
+        } else if (words.length === 1) {
+          const w = words[0]
+          computed =
+            (w[0] || '').toUpperCase() + ((w[1] || '').toUpperCase() || '')
         }
-      } catch {
-        // ignore and keep fallback
+        if (computed) setInitials(computed)
+
+        // Fetch profile from Strapi
+        const profile = await getStudentProfile(studentId, token)
+        if (profile?.profilePic?.url) {
+          const imageUrl = getMediaUrl(profile.profilePic.url)
+          setProfileImageUrl(imageUrl)
+        }
+      } catch (error) {
+        console.error('Failed to fetch user profile:', error)
+        // Keep fallback initials
       }
     }
-    fetchUser()
+    fetchUserProfile()
 
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -107,10 +122,18 @@ export default function Navbar() {
             <div className='relative' ref={dropdownRef}>
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className='flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-sm font-semibold text-gray-900 hover:bg-gray-200 transition-colors'
+                className='flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-sm font-semibold text-gray-900 hover:bg-gray-200 transition-colors overflow-hidden'
                 aria-label='Open account menu'
               >
-                {initials}
+                {profileImageUrl ? (
+                  <img
+                    src={profileImageUrl}
+                    alt='Profile'
+                    className='h-full w-full object-cover'
+                  />
+                ) : (
+                  initials
+                )}
               </button>
 
               {/* Dropdown Menu */}

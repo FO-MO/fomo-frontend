@@ -2,7 +2,6 @@
 export const dynamic = 'force-dynamic'
 
 import React from 'react'
-import Particles from '../Particles'
 
 export default function Hero3() {
   const cards = [
@@ -21,11 +20,11 @@ export default function Hero3() {
       title: 'Personalized job recs',
       description:
         'Get AI-powered suggestions for jobs and opportunities based on your profile, interests, skills, and where you are in your career journey.',
-      bgColor: 'bg-white/5 hover:bg-white/10',
-      badgeBg: 'bg-[#d6ff3a]/20',
-      badgeText: 'text-[#d6ff3a]',
-      clr: 'white',
-      clrdesc: 'white/80',
+      bgColor: 'bg-black/5 hover:bg-black/10',
+      badgeBg: 'bg-[oklch(43.7%_0.078_188.216)]/20',
+      badgeText: 'text-[oklch(43.7%_0.078_188.216)]',
+      clr: 'black',
+      clrdesc: 'black/80',
     },
     {
       icon: (
@@ -42,34 +41,16 @@ export default function Hero3() {
       title: 'Real career advice',
       description:
         "Grow your career with posts, videos, and articles from people who've done it before. Learn from expert-led clubs and industry professionals.",
-      bgColor: 'bg-white/5 hover:bg-white/10',
-      badgeBg: 'bg-[#d6ff3a]/20',
-      badgeText: 'text-[#d6ff3a]',
-      clr: 'white',
-      clrdesc: 'white/80',
+      bgColor: 'bg-black/5 hover:bg-black/10',
+      badgeBg: 'bg-[oklch(43.7%_0.078_188.216)]/20',
+      badgeText: 'text-[oklch(43.7%_0.078_188.216)]',
+      clr: 'black',
+      clrdesc: 'black/80',
     },
   ]
 
   return (
-    <section className='w-full relative bg-[#000] min-h-[80vh] py-24 px-4 sm:px-6 lg:px-8 overflow-hidden'>
-      {/* Particles Background */}
-      <div className='fixed inset-0 z-0'>
-        <Particles
-          particleCount={5000}
-          particleColors={['#D6FF3A']}
-          particleSpread={3}
-          speed={0.3}
-          alphaParticles={false}
-          particleBaseSize={1.2}
-          sizeRandomness={0}
-          cameraDistance={0}
-          moveParticlesOnHover={true}
-          particleHoverFactor={0.5}
-          disableRotation={true}
-          className='w-full h-full'
-        />
-      </div>
-
+    <section className='w-full relative bg-white min-h-[80vh] py-24 px-4 sm:px-6 lg:px-8 overflow-hidden'>
       {/* Content */}
       <div className='relative z-10 max-w-7xl mx-auto'>
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8'>
@@ -81,14 +62,14 @@ export default function Hero3() {
               {/* Badge and Icon */}
               <div className='flex items-center gap-3 mb-6'>
                 <div
-                  className={`${card.badgeBg} p-3 rounded-xl group-hover:bg-[#d6ff3a]/30 transition-colors duration-300`}
+                  className={`${card.badgeBg} p-3 rounded-xl group-hover:bg-[oklch(43.7%_0.078_188.216)]/30 transition-colors duration-300`}
                 >
-                  <div className='text-white group-hover:text-[#d6ff3a] transition-colors duration-300'>
+                  <div className='text-black group-hover:text-[oklch(43.7%_0.078_188.216)] transition-colors duration-300'>
                     {card.icon}
                   </div>
                 </div>
                 <span
-                  className={`${card.badgeBg} ${card.badgeText} px-4 py-1.5 rounded-full text-sm font-semibold group-hover:bg-[#d6ff3a]/30 transition-colors duration-300`}
+                  className={`${card.badgeBg} ${card.badgeText} px-4 py-1.5 rounded-full text-sm font-semibold group-hover:bg-[oklch(43.7%_0.078_188.216)]/30 transition-colors duration-300`}
                 >
                   {card.badge}
                 </span>
@@ -96,7 +77,7 @@ export default function Hero3() {
 
               {/* Title */}
               <h3
-                className={`text-3xl sm:text-4xl font-bold text-${card.clr} mb-4 group-hover:text-[#d6ff3a] transition-colors duration-300`}
+                className={`text-3xl sm:text-4xl font-bold text-${card.clr} mb-4 group-hover:text-[oklch(43.7%_0.078_188.216)] transition-colors duration-300`}
               >
                 {card.title}
               </h3>
