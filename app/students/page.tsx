@@ -7,7 +7,6 @@ import JobPostingCard from "@/components/student-section/JobPostingCard";
 import { useEffect, useState } from "react";
 import { getMediaUrl } from "@/lib/utils";
 import { GlobalJob, Post } from "@/lib/interfaces";
-import { fetchColleges } from "@/lib/strapi/strapiData";
 
 // Access environment variables from .env.local
 const STRAPI_URL = process.env.NEXT_PUBLIC_BACKEND_URL;

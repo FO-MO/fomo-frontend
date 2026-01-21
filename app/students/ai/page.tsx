@@ -3,19 +3,12 @@
 export const dynamic = "force-dynamic";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Sparkles, Settings } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Send, Bot, User, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { getAuthToken } from "@/lib/strapi/auth";
 import { getStudentProfile } from "@/lib/strapi/profile";
 import { getMediaUrl } from "@/lib/utils";
-
-type Message = {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  timestamp: Date;
-};
+import { Message } from "@/lib/interfaces";
 
 const CLUBS = {
   cybersecurity: {
@@ -151,7 +144,7 @@ Remember: You&apos;re a helpful mentor focused on practical skill building and c
 const callGeminiAPI = async (
   userMessage: string,
   conversationHistory: Message[],
-  apiKey: string
+  apiKey: string,
 ): Promise<string> => {
   // Try a set of compatible models from newest to older
   const MODELS = [
@@ -246,7 +239,7 @@ const callGeminiAPI = async (
             lastError = new Error(
               `Model ${modelName} not available: ${
                 errorData?.error?.message || response.statusText
-              }`
+              }`,
             );
             break; // try next model
           }
@@ -254,7 +247,7 @@ const callGeminiAPI = async (
           // Auth or other non-retryable errors – stop early
           if (response.status === 403) {
             throw new Error(
-              "API key authentication failed. Please verify your Gemini API key is correct and has proper permissions."
+              "API key authentication failed. Please verify your Gemini API key is correct and has proper permissions.",
             );
           }
           if (response.status === 400) {
@@ -262,7 +255,7 @@ const callGeminiAPI = async (
               `Invalid API request. ${
                 errorData?.error?.message ||
                 "Please check your API key and request format."
-              }`
+              }`,
             );
           }
 
@@ -270,7 +263,7 @@ const callGeminiAPI = async (
           throw new Error(
             `API Error (${response.status}): ${
               errorData?.error?.message || response.statusText
-            }`
+            }`,
           );
         }
 
@@ -309,7 +302,7 @@ const getAIResponse = (userMessage: string): string => {
   if (learnMatch) {
     const skill = learnMatch[1].toLowerCase();
     const foundClubKey = Object.keys(CLUBS).find((club) =>
-      skill.includes(club)
+      skill.includes(club),
     );
 
     if (foundClubKey) {
@@ -364,7 +357,6 @@ But don’t worry — you can still start learning from YouTube and online platf
 };
 
 export default function AIAssistantPage() {
-  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -377,8 +369,6 @@ export default function AIAssistantPage() {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [apiKey, setApiKey] = useState("");
-  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
-  const [tempApiKey, setTempApiKey] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
 
@@ -395,7 +385,7 @@ export default function AIAssistantPage() {
         setApiKey(savedApiKey);
       } else {
         console.log(
-          "⚠️ No Gemini API key found. Please add one in settings or .env.local"
+          "⚠️ No Gemini API key found. Please add one in settings or .env.local",
         );
       }
     }
@@ -406,7 +396,7 @@ export default function AIAssistantPage() {
         const token = getAuthToken();
         if (!token) return;
 
-        const { getUserCookie } = await import('@/lib/cookies');
+        const { getUserCookie } = await import("@/lib/cookies");
         const user = getUserCookie();
         if (user) {
           const studentId = user?.documentId || null;
@@ -419,7 +409,7 @@ export default function AIAssistantPage() {
           }
         }
       } catch (err) {
-        console.error('Failed to fetch user profile:', err);
+        console.error("Failed to fetch user profile:", err);
       }
     };
     fetchUserProfile();
@@ -431,65 +421,6 @@ export default function AIAssistantPage() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-
-  const [testingApiKey, setTestingApiKey] = useState(false);
-  const [testResult, setTestResult] = useState<{
-    success: boolean;
-    message: string;
-  } | null>(null);
-
-  const handleTestApiKey = async () => {
-    if (!tempApiKey.trim()) {
-      setTestResult({
-        success: false,
-        message: "Please enter an API key first",
-      });
-      return;
-    }
-
-    setTestingApiKey(true);
-    setTestResult(null);
-
-    try {
-      const testResponse = await callGeminiAPI(
-        "Hello, this is a test message. Please respond with 'Test successful!'",
-        [],
-        tempApiKey.trim()
-      );
-      console.log("Test response:", testResponse);
-
-      setTestResult({
-        success: true,
-        message: "✓ API key is valid and working!",
-      });
-    } catch (error) {
-      const errorText =
-        error instanceof Error ? error.message : "Unknown error";
-      setTestResult({
-        success: false,
-        message: `✗ API key test failed: ${errorText}`,
-      });
-    } finally {
-      setTestingApiKey(false);
-    }
-  };
-
-  const handleSaveApiKey = () => {
-    if (tempApiKey.trim()) {
-      localStorage.setItem("gemini_api_key", tempApiKey.trim());
-      setApiKey(tempApiKey.trim());
-      setShowApiKeyModal(false);
-      setTempApiKey("");
-      setTestResult(null);
-    }
-  };
-
-  const handleRemoveApiKey = () => {
-    localStorage.removeItem("gemini_api_key");
-    setApiKey("");
-    setShowApiKeyModal(false);
-    setTestResult(null);
-  };
 
   const handleSendMessage = async () => {
     if (!input.trim()) return;
@@ -513,7 +444,7 @@ export default function AIAssistantPage() {
         responseContent = await callGeminiAPI(
           userMessage.content,
           messages,
-          apiKey
+          apiKey,
         );
       } else {
         // Fallback to rule-based responses
@@ -689,136 +620,6 @@ export default function AIAssistantPage() {
             </button>
           </div>
         </div>
-
-        {/* API Key Modal */}
-        {/* {showApiKeyModal && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-900">
-                  Gemini API Configuration
-                </h2>
-                <button
-                  onClick={() => {
-                    setShowApiKeyModal(false);
-                    setTempApiKey("");
-                  }}
-                  className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <span className="text-2xl text-gray-600">×</span>
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Gemini API Key
-                  </label>
-                  <input
-                    type="password"
-                    value={tempApiKey}
-                    onChange={(e) => setTempApiKey(e.target.value)}
-                    placeholder="Enter your Gemini API key..."
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500 text-sm"
-                  />
-                  <p className="text-xs text-gray-500 mt-2">
-                    Your API key is stored locally in your browser and never
-                    sent to our servers.
-                  </p>
-                </div>
-
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
-                  <p className="font-semibold text-blue-900 mb-2">
-                    How to get your API key:
-                  </p>
-                  <ol className="list-decimal list-inside space-y-1 text-blue-800">
-                    <li>
-                      Visit{" "}
-                      <a
-                        href="https://makersuite.google.com/app/apikey"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline hover:text-blue-600"
-                      >
-                        Google AI Studio
-                      </a>
-                    </li>
-                    <li>Sign in with your Google account</li>
-                    <li>
-                      Click &quot;Get API Key&quot; or &quot;Create API
-                      Key&quot;
-                    </li>
-                    <li>Copy the key and paste it above</li>
-                  </ol>
-                </div>
-
-                {/* Test Result Display */}
-                {/* {testResult && (
-                  <div
-                    className={`rounded-lg p-3 text-sm border ${
-                      testResult.success
-                        ? "bg-green-50 border-green-200 text-green-900"
-                        : "bg-red-50 border-red-200 text-red-900"
-                    }`}
-                  >
-                    <p className="font-medium">{testResult.message}</p>
-                  </div>
-                )}
-
-                {apiKey && !testResult && (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm">
-                    <p className="text-green-900 font-medium">
-                      ✓ API Key is currently configured
-                    </p>
-                  </div>
-                )}
-
-                {/* Test API Key Button */}
-                {/* <button
-                  onClick={handleTestApiKey}
-                  disabled={!tempApiKey.trim() || testingApiKey}
-                  className="w-full px-4 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg font-medium transition-colors border border-blue-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {testingApiKey ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-blue-700 border-t-transparent rounded-full animate-spin"></div>
-                      <span>Testing...</span>
-                    </>
-                  ) : (
-                    "Test API Key"
-                  )}
-                </button>
-
-                <div className="flex gap-3">
-                  {apiKey && (
-                    <button
-                      onClick={handleRemoveApiKey}
-                      className="flex-1 px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg font-medium transition-colors border border-red-200"
-                    >
-                      Remove Key
-                    </button>
-                  )}
-                  <button
-                    onClick={handleSaveApiKey}
-                    disabled={!tempApiKey.trim()}
-                    className="flex-1 px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Save Key
-                  </button>
-                </div>
-
-                <div className="bg-amber-50 border border-amber-300 rounded-lg p-3 text-xs text-amber-900">
-                  <p className="font-semibold mb-1">⚠️ Note:</p>
-                  <p>
-                    Without an API key, FOOMO-AI will use basic rule-based
-                    responses. For intelligent, context-aware conversations,
-                    please add your Gemini API key.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )} */}
       </div>
     </main>
   );

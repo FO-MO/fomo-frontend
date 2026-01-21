@@ -221,3 +221,165 @@ export type CommentData = {
     avatarUrl?: string;
   };
 };
+
+export type Message = {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  timestamp: Date;
+};
+
+export type Video = {
+  id: string;
+  title: string;
+  thumbnailUrl?: string;
+  author: {
+    name: string;
+    avatarUrl?: string;
+  };
+  date: string;
+  videoUrl?: string;
+};
+
+export type ClubDetails = {
+  id: string;
+  name: string;
+  description: string;
+  videos: Video[];
+};
+
+export interface Job {
+  id: number;
+  title: string;
+  company: string;
+  location: string;
+  salary: string;
+  postedDate: string;
+  description: string;
+  tags: string[];
+  type: string;
+  jobType: string;
+  experience: string;
+  deadline: string | null;
+  skills: string[];
+  requirements: string[];
+  benefits: string[];
+}
+
+export interface JobData {
+  title: string;
+  jobType: string;
+  experience: string;
+  location: string;
+  deadline: string | null;
+  description: string;
+  skills: string[];
+  requirements: string[];
+  benefits: string[];
+}
+
+export type TabKey = "projects" | "clubs" | "internships" | "posts";
+
+interface FollowerProfile {
+  id: string;
+  name: string;
+  avatarUrl: string;
+  institution: string;
+  course: string;
+  skills: string[];
+  profileUrl: string;
+}
+
+export interface StrapiImage {
+  id: string | number;
+  documentId?: string;
+  url: string;
+  name?: string;
+  alternativeText?: string;
+  width?: number;
+  height?: number;
+}
+
+export interface StrapiPostData {
+  id: string | number;
+  documentId?: string;
+  createdAt: string;
+  description?: string;
+  likes?: number;
+  likedBy?: string[];
+  images?: StrapiImage[];
+}
+
+export interface ProfileData {
+  name: string;
+  email: string;
+  initials: string;
+  backgroundImageUrl: string | null;
+  profileImageUrl: string | null;
+  followers: FollowerProfile[];
+  following: FollowerProfile[];
+  institution: string;
+  major: string;
+  graduationYear: string;
+  location: string;
+  bio: string;
+  skills: string[];
+  interests: string[];
+  tabs: Array<{ key: TabKey; label: string }>;
+  projects: Array<{
+    title: string;
+    description: string;
+    status: string;
+    tags: string[];
+  }>;
+  clubs: Array<{
+    name: string;
+    description: string;
+    tags: string[];
+    badge?: string;
+  }>;
+  internships: Array<{
+    role: string;
+    timeline: string;
+    location: string;
+    status: string;
+  }>;
+  posts: Post[];
+}
+
+interface ProjectContributor {
+  name: string;
+  avatarUrl: string;
+  profileUrl: string;
+  role?: string;
+  contributions?: number;
+}
+
+interface ProjectStats {
+  stars: number;
+  members: number;
+}
+
+interface NeedHelpItem {
+  title: string;
+  description: string;
+  skills: string[];
+}
+
+export interface ProjectDetails {
+  id: string;
+  title: string;
+  description: string;
+  githubUrl?: string;
+  createdDate: string;
+  owner: {
+    name: string;
+    avatarUrl?: string | null;
+  };
+  skills: string[];
+  imageUrl?: string | null;
+  contributors: ProjectContributor[];
+  stats: ProjectStats;
+  needHelp: NeedHelpItem[];
+  detailsMarkdown: string;
+}

@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import Image from "next/image";
 import { X, Image as ImageIcon, Smile, AtSign } from "lucide-react";
 import { postData, uploadImage } from "@/lib/strapi/strapiData";
 import { getStudentProfile } from "@/lib/strapi/profile";
@@ -32,9 +32,13 @@ export default function CreatePostPage() {
         if (!token) return;
 
         const { getUserCookie } = await import("@/lib/cookies");
-        const user = getUserCookie();
+        const user = getUserCookie() as {
+          username?: string;
+          name?: string;
+          documentId?: string;
+        } | null;
         if (user) {
-          const name = user?.username || user?.name || "User";
+          const name: string = user?.username || user?.name || "User";
           setUserName(name);
           setUserInitials(
             name
@@ -42,7 +46,7 @@ export default function CreatePostPage() {
               .map((n: string) => n[0])
               .join("")
               .toUpperCase()
-              .slice(0, 2)
+              .slice(0, 2),
           );
 
           // Fetch profile from Strapi
@@ -114,9 +118,8 @@ export default function CreatePostPage() {
     setIsSubmitting(true);
 
     try {
-      const { getAuthTokenCookie, getUserCookie } = await import(
-        "@/lib/cookies"
-      );
+      const { getAuthTokenCookie, getUserCookie } =
+        await import("@/lib/cookies");
       const token = getAuthTokenCookie();
 
       if (!token) {
@@ -150,7 +153,7 @@ export default function CreatePostPage() {
 
       console.log(
         "Creating post with payload:",
-        JSON.stringify(postPayload, null, 2)
+        JSON.stringify(postPayload, null, 2),
       );
 
       const response = (await postData(token, "posts", postPayload)) as {
@@ -161,7 +164,7 @@ export default function CreatePostPage() {
       if (response?.error) {
         console.error("Error creating post:", response.error);
         alert(
-          `Failed to create post: ${response.error?.message || "Unknown error"}`
+          `Failed to create post: ${response.error?.message || "Unknown error"}`,
         );
         setIsSubmitting(false);
         return;
@@ -178,7 +181,7 @@ export default function CreatePostPage() {
             const file = imageFiles[i];
             console.log(
               `Uploading image ${i + 1}/${imageFiles.length}:`,
-              file.name
+              file.name,
             );
 
             console.log("Calling data id:", response.data.id);
@@ -188,7 +191,7 @@ export default function CreatePostPage() {
               "api::post.post",
               Number(response.data.id),
               "images",
-              file
+              file,
             );
           }
           console.log("All images uploaded successfully");
@@ -197,7 +200,7 @@ export default function CreatePostPage() {
           // Don&apos;t fail the post creation if image upload fails
           // The post is already created, just warn the user
           alert(
-            "Post created, but some images failed to upload. You can try adding them again by editing the post."
+            "Post created, but some images failed to upload. You can try adding them again by editing the post.",
           );
         }
       }
@@ -214,7 +217,7 @@ export default function CreatePostPage() {
   const handleCancel = () => {
     if (message.trim() || images.length > 0) {
       const confirm = window.confirm(
-        "Are you sure you want to discard this post?"
+        "Are you sure you want to discard this post?",
       );
       if (confirm) {
         router.back();
@@ -251,9 +254,11 @@ export default function CreatePostPage() {
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-semibold text-lg overflow-hidden">
                   {profileImageUrl ? (
-                    <img
+                    <Image
                       src={profileImageUrl}
                       alt="Profile"
+                      width={48}
+                      height={48}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -298,15 +303,17 @@ export default function CreatePostPage() {
                       images.length === 1
                         ? "grid-cols-1"
                         : images.length === 2
-                        ? "grid-cols-2"
-                        : "grid-cols-3"
+                          ? "grid-cols-2"
+                          : "grid-cols-3"
                     }`}
                   >
                     {images.map((img, index) => (
                       <div key={index} className="relative group">
-                        <img
+                        <Image
                           src={img}
                           alt={`Upload ${index + 1}`}
+                          width={400}
+                          height={192}
                           className="w-full h-48 object-cover rounded-lg"
                         />
                         <button

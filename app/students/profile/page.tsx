@@ -11,77 +11,14 @@ import EditProfileModal from "@/components/student-section/EditProfileModal";
 import PostCard, { Post } from "@/components/student-section/PostCard";
 import { getAuthToken } from "@/lib/strapi/auth";
 import { getStudentProfile } from "@/lib/strapi/profile";
-import { Internship } from "@/lib/interfaces";
+import {
+  Internship,
+  StrapiPostData,
+  ProfileData,
+  TabKey,
+  StrapiImage,
+} from "@/lib/interfaces";
 import { getMediaUrl } from "@/lib/utils";
-
-type TabKey = "projects" | "clubs" | "internships" | "posts";
-
-interface FollowerProfile {
-  id: string;
-  name: string;
-  avatarUrl: string;
-  institution: string;
-  course: string;
-  skills: string[];
-  profileUrl: string;
-}
-
-interface StrapiImage {
-  id: string | number;
-  documentId?: string;
-  url: string;
-  name?: string;
-  alternativeText?: string;
-  width?: number;
-  height?: number;
-}
-
-interface StrapiPostData {
-  id: string | number;
-  documentId?: string;
-  createdAt: string;
-  description?: string;
-  likes?: number;
-  likedBy?: string[];
-  images?: StrapiImage[];
-}
-
-interface ProfileData {
-  name: string;
-  email: string;
-  initials: string;
-  backgroundImageUrl: string | null;
-  profileImageUrl: string | null;
-  followers: FollowerProfile[];
-  following: FollowerProfile[];
-  institution: string;
-  major: string;
-  graduationYear: string;
-  location: string;
-  bio: string;
-  skills: string[];
-  interests: string[];
-  tabs: Array<{ key: TabKey; label: string }>;
-  projects: Array<{
-    title: string;
-    description: string;
-    status: string;
-    tags: string[];
-  }>;
-  clubs: Array<{
-    name: string;
-    description: string;
-    tags: string[];
-    badge?: string;
-  }>;
-  internships: Array<{
-    role: string;
-    timeline: string;
-    location: string;
-    status: string;
-  }>;
-  posts: Post[];
-}
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -139,7 +76,7 @@ export default function ProfilePage() {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
-          }
+          },
         );
 
         if (postsResponse.ok) {
@@ -214,7 +151,7 @@ export default function ProfilePage() {
             description: (proj.description as string) || "",
             status: "Active",
             tags: (proj.tags as string[]) || [],
-          })
+          }),
         ),
         clubs: (profile.clubs || []).map((club: Record<string, unknown>) => ({
           name: (club.title as string) || "",
@@ -228,7 +165,7 @@ export default function ProfilePage() {
             timeline: internship.timeline || "",
             location: internship.location || "",
             status: internship.status || "",
-          })
+          }),
         ),
         posts: userPosts,
       };
@@ -526,7 +463,7 @@ export default function ProfilePage() {
                       >
                         {interest}
                       </span>
-                    )
+                    ),
                   )}
                 </div>
               </div>

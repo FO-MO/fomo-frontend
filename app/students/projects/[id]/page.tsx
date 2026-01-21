@@ -20,86 +20,13 @@ import {
 import Link from "next/link";
 import { fetchData } from "@/lib/strapi/strapiData";
 import { getAuthTokenCookie } from "@/lib/cookies";
+import type { ProjectDetails } from "@/lib/interfaces";
 
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  "https://tbs9k5m4-1337.inc1.devtunnels.ms";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 const token = getAuthTokenCookie();
-// const res = await fetch(`${BACKEND_URL}/api/project-details?populate=*`, {
-//   headers: { Authorization: `Bearer ${token}` },
-// });
-// const data = await res.json();
-
-// console.log("Fetched projects:", data.data);
-
-// const mockProject: ProjectDetails[] = data.data.map((project: any) => {
-//   return {
-//     id: project.documentId,
-//     title: project.title,
-//     description: project.description,
-//     githubUrl: project.githubURL,
-//     createdDate: project.date,
-//     owner: {
-//       name: project.Owner,
-//       // avatarUrl:
-//     },
-//     skills: project.skills,
-//     imageUrl: `${BACKEND_URL}${
-//       project.image?.formats?.medium?.url || project.image?.url
-//     }`,
-//     contributors: project.contributors || [],
-//     stats: {
-//       stars: project.stars,
-//       members: project.contributors.length || 0,
-//     },
-//     needHelp: project.needHelp?.map((item: any) => ({
-//       title: item.title,
-//       description: item.description,
-//       skills: item.skills,
-//     })),
-//     detailsMarkdown: project.projectDetail,
-//   };
-// });
 
 // Configuration: Set to true to fetch data from GitHub
 const USE_GITHUB_DATA = false;
-
-interface ProjectContributor {
-  name: string;
-  avatarUrl: string;
-  profileUrl: string;
-  role?: string;
-  contributions?: number;
-}
-
-interface ProjectStats {
-  stars: number;
-  members: number;
-}
-
-interface NeedHelpItem {
-  title: string;
-  description: string;
-  skills: string[];
-}
-
-interface ProjectDetails {
-  id: string;
-  title: string;
-  description: string;
-  githubUrl?: string;
-  createdDate: string;
-  owner: {
-    name: string;
-    avatarUrl?: string | null;
-  };
-  skills: string[];
-  imageUrl?: string | null;
-  contributors: ProjectContributor[];
-  stats: ProjectStats;
-  needHelp: NeedHelpItem[];
-  detailsMarkdown: string;
-}
 
 export default function ProjectDetailsPage() {
   const params = useParams();
@@ -147,7 +74,7 @@ export default function ProjectDetailsPage() {
             title: (item.title as string) || "",
             description: (item.description as string) || "",
             skills: (item.skills as string[]) || [],
-          })
+          }),
         ) || [],
       detailsMarkdown: (project.projectDetail as string) || "",
     };
@@ -175,7 +102,7 @@ export default function ProjectDetailsPage() {
 
       // Fetch GitHub stats
       const repoRes = await fetch(
-        `https://api.github.com/repos/${owner}/${cleanRepo}`
+        `https://api.github.com/repos/${owner}/${cleanRepo}`,
       );
 
       if (repoRes.ok) {
@@ -190,7 +117,7 @@ export default function ProjectDetailsPage() {
                   members: prev.contributors.length,
                 },
               }
-            : null
+            : null,
         );
       }
     } catch (err) {

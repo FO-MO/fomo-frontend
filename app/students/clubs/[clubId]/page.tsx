@@ -4,31 +4,13 @@ export const dynamic = "force-dynamic";
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { RefreshCw, Plus } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import VideoPlayer from "@/components/student-section/VideoPlayer";
 import UploadVideoModal from "@/components/student-section/UploadVideoModal";
 import { fetchData } from "@/lib/strapi/strapiData";
 import { getMediaUrl } from "@/lib/utils";
 import { getAuthTokenCookie } from "@/lib/cookies";
-
-type Video = {
-  id: string;
-  title: string;
-  thumbnailUrl?: string;
-  author: {
-    name: string;
-    avatarUrl?: string;
-  };
-  date: string;
-  videoUrl?: string;
-};
-
-type ClubDetails = {
-  id: string;
-  name: string;
-  description: string;
-  videos: Video[];
-};
+import { Video, ClubDetails } from "@/lib/interfaces";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -51,7 +33,7 @@ export default function ClubVideosPage() {
         // Fetch specific club by documentId (clubId from URL)
         const result = (await fetchData(
           token,
-          `clubs/${clubId}?populate=*`
+          `clubs/${clubId}?populate=*`,
         )) as {
           data?: {
             documentId?: string;
@@ -72,7 +54,7 @@ export default function ClubVideosPage() {
         console.log("Fetched club data:", result);
         console.log(
           "Fetched club videos:",
-          getMediaUrl(result.data?.videos?.[0]?.url) || "No video URL"
+          getMediaUrl(result.data?.videos?.[0]?.url) || "No video URL",
         );
 
         // Transform the data to match our ClubDetails type
@@ -94,7 +76,7 @@ export default function ClubVideosPage() {
                   createdAt?: string;
                   url?: string;
                 },
-                index: number
+                index: number,
               ) => ({
                 id: video.id?.toString() || index.toString(),
                 title: video.name || video.title || "Video",
@@ -113,7 +95,7 @@ export default function ClubVideosPage() {
                     })
                   : "Recently",
                 videoUrl: getMediaUrl(video.url) || undefined,
-              })
+              }),
             ) || [],
         };
         setClubDetails(transformedClub);
@@ -146,7 +128,7 @@ export default function ClubVideosPage() {
         `${BACKEND_URL}/api/clubs/${clubId}?populate=*`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -173,7 +155,7 @@ export default function ClubVideosPage() {
                 createdAt?: string;
                 url?: string;
               },
-              index: number
+              index: number,
             ) => ({
               id: video.id?.toString() || index.toString(),
               title: video.name || video.title || "Video",
@@ -190,7 +172,7 @@ export default function ClubVideosPage() {
                   })
                 : "Recently",
               videoUrl: getMediaUrl(video.url) || undefined,
-            })
+            }),
           ) || [],
       };
 
