@@ -51,10 +51,6 @@ export default function Home() {
     <>
       <TopBar theme='home' user={parsedUser} />
       <Hero1 />
-      <Hero2 />
-      <Hero3 />
-      <Hero4 />
-      <Hero5 />
       <Footer />
     </>
   )
