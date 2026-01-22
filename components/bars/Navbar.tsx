@@ -3,6 +3,7 @@
 export const dynamic = 'force-dynamic'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { getAuthToken } from '@/lib/strapi/auth'
@@ -126,10 +127,11 @@ export default function Navbar() {
                 aria-label='Open account menu'
               >
                 {profileImageUrl ? (
-                  <img
+                  <Image
                     src={profileImageUrl}
                     alt='Profile'
-                    className='h-full w-full object-cover'
+                    fill
+                    className='object-cover'
                   />
                 ) : (
                   initials

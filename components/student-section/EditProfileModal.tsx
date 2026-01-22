@@ -2,6 +2,7 @@
 export const dynamic = "force-dynamic";
 
 import { X, Check, Camera, Image as ImageIcon, User } from "lucide-react";
+import Image from "next/image";
 import { useState } from "react";
 import { getAuthToken } from "@/lib/strapi/auth";
 import { uploadImage } from "@/lib/strapi/strapiData";
@@ -985,9 +986,11 @@ export default function EditProfileModal({
                   <div className="flex flex-col items-center gap-4">
                     <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
                       {profilePicPreview ? (
-                        <img
+                        <Image
                           src={profilePicPreview}
                           alt="Profile preview"
+                          width={128}
+                          height={128}
                           className="w-full h-full object-cover"
                         />
                       ) : (
@@ -1029,10 +1032,11 @@ export default function EditProfileModal({
                   <div className="flex flex-col gap-4">
                     <div className="w-full h-48 rounded-lg bg-gradient-to-br from-gray-200 via-gray-300 to-gray-200 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
                       {backgroundImgPreview ? (
-                        <img
+                        <Image
                           src={backgroundImgPreview}
                           alt="Background preview"
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover"
                         />
                       ) : (
                         <div className="flex flex-col items-center justify-center text-gray-400">

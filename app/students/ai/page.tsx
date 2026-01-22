@@ -3,6 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import React, { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import { Send, Bot, User, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { getAuthToken } from "@/lib/strapi/auth";
@@ -528,10 +529,11 @@ export default function AIAssistantPage() {
               >
                 {msg.role === "user" ? (
                   profileImageUrl ? (
-                    <img
+                    <Image
                       src={profileImageUrl}
                       alt="Profile"
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
                     />
                   ) : (
                     <User className="w-5 h-5 text-white" />

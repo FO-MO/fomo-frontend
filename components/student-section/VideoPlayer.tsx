@@ -2,6 +2,7 @@
 export const dynamic = 'force-dynamic'
 
 import React, { useEffect, useRef } from 'react'
+import Image from 'next/image'
 import { X } from 'lucide-react'
 
 type Video = {
@@ -88,9 +89,11 @@ export default function VideoPlayer({ video, onClose }: VideoPlayerProps) {
             <div className='flex items-center gap-3'>
               <div className='w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-sm text-white font-semibold shadow-sm'>
                 {video.author.avatarUrl ? (
-                  <img
+                  <Image
                     src={video.author.avatarUrl}
                     alt={video.author.name}
+                    width={40}
+                    height={40}
                     className='w-10 h-10 rounded-full object-cover'
                   />
                 ) : (

@@ -3,6 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { RefreshCw } from "lucide-react";
 import VideoPlayer from "@/components/student-section/VideoPlayer";
@@ -320,10 +321,11 @@ function VideoCard({ video, onClick }: { video: Video; onClick: () => void }) {
       {/* Thumbnail */}
       <div className="relative h-44 bg-gradient-to-br from-blue-50 to-gray-100 overflow-hidden">
         {video.thumbnailUrl ? (
-          <img
+          <Image
             src={video.thumbnailUrl}
             alt={video.title}
-            className={`w-full h-full object-cover transition-transform duration-500 ${
+            fill
+            className={`object-cover transition-transform duration-500 ${
               isHovered ? "scale-110" : "scale-100"
             }`}
           />
@@ -374,9 +376,11 @@ function VideoCard({ video, onClick }: { video: Video; onClick: () => void }) {
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-xs text-white font-semibold shadow-sm">
               {video.author.avatarUrl ? (
-                <img
+                <Image
                   src={video.author.avatarUrl}
                   alt={video.author.name}
+                  width={28}
+                  height={28}
                   className="w-7 h-7 rounded-full object-cover"
                 />
               ) : (

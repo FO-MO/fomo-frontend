@@ -2,6 +2,7 @@
 export const dynamic = 'force-dynamic'
 
 import React from 'react'
+import Image from 'next/image'
 
 export type Profile = {
   documentId?: string
@@ -49,10 +50,11 @@ export default function SearchCard({ profile, onFollowToggle }: Props) {
           {/* Profile Picture */}
           <div className='flex-shrink-0'>
             {profile.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={profile.avatarUrl}
                 alt={profile.name}
+                width={48}
+                height={48}
                 className='w-12 h-12 rounded-full object-cover'
               />
             ) : (

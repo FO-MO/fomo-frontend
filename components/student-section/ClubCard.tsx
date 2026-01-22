@@ -2,6 +2,7 @@
 export const dynamic = "force-dynamic";
 
 import React from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Club } from "@/lib/interfaces";
 
@@ -23,11 +24,11 @@ export default function ClubCard({ club }: Props) {
     >
       <div className="h-36 bg-gray-200 relative flex items-center justify-center">
         {club.imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={club.imageUrl}
             alt={club.title}
-            className="object-cover w-full h-full"
+            fill
+            className="object-cover"
           />
         ) : (
           <div className="text-gray-400 text-sm">Image</div>
@@ -66,10 +67,11 @@ export default function ClubCard({ club }: Props) {
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center">
               {club.leader && club.leader.avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <Image
                   src={club.leader.avatarUrl}
                   alt={club.leader.name}
+                  width={36}
+                  height={36}
                   className="w-9 h-9 rounded-full object-cover"
                 />
               ) : (

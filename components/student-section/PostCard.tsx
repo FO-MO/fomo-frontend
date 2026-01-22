@@ -2,6 +2,7 @@
 export const dynamic = "force-dynamic";
 
 import React, { useState, useCallback, useEffect } from "react";
+import Image from "next/image";
 import {
   MoreHorizontal,
   ThumbsUp,
@@ -136,9 +137,11 @@ const UserAvatar = ({
 }) => (
   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-sm font-bold text-white shadow-md flex-shrink-0 overflow-hidden">
     {user.avatarUrl ? (
-      <img
+      <Image
         src={user.avatarUrl}
         alt={user.name}
+        width={40}
+        height={40}
         className='w-full h-full object-cover'
       />
     ) : (
@@ -414,22 +417,24 @@ export default function PostCard({ post, user }: Props) {
       {images && images.length > 0 && (
         <div className="mb-3 px-4">
           {images.length === 1 && (
-            <div className="w-full">
-              <img
+            <div className="w-full relative h-[500px]">
+              <Image
                 src={images[0]}
                 alt="Post content"
-                className="w-full max-h-[500px] object-cover rounded-lg"
+                fill
+                className="object-cover rounded-lg"
               />
             </div>
           )}
           {images.length === 2 && (
             <div className="grid grid-cols-2 gap-2">
               {images.map((img, idx) => (
-                <div key={idx} className="w-full">
-                  <img
+                <div key={idx} className="w-full relative h-[300px]">
+                  <Image
                     src={img}
                     alt={`Post content ${idx + 1}`}
-                    className="w-full h-[300px] object-cover rounded-lg"
+                    fill
+                    className="object-cover rounded-lg"
                   />
                 </div>
               ))}
@@ -437,19 +442,21 @@ export default function PostCard({ post, user }: Props) {
           )}
           {images.length === 3 && (
             <div className="grid grid-cols-2 gap-2">
-              <div className="col-span-2">
-                <img
+              <div className="col-span-2 relative h-[300px]">
+                <Image
                   src={images[0]}
                   alt="Post content 1"
-                  className="w-full h-[300px] object-cover rounded-lg"
+                  fill
+                  className="object-cover rounded-lg"
                 />
               </div>
               {images.slice(1).map((img, idx) => (
-                <div key={idx + 1} className="w-full">
-                  <img
+                <div key={idx + 1} className="w-full relative h-[200px]">
+                  <Image
                     src={img}
                     alt={`Post content ${idx + 2}`}
-                    className="w-full h-[200px] object-cover rounded-lg"
+                    fill
+                    className="object-cover rounded-lg"
                   />
                 </div>
               ))}
@@ -458,11 +465,12 @@ export default function PostCard({ post, user }: Props) {
           {images.length >= 4 && (
             <div className="grid grid-cols-2 gap-2">
               {images.slice(0, 4).map((img, idx) => (
-                <div key={idx} className="w-full relative">
-                  <img
+                <div key={idx} className="w-full relative h-[250px]">
+                  <Image
                     src={img}
                     alt={`Post content ${idx + 1}`}
-                    className="w-full h-[250px] object-cover rounded-lg"
+                    fill
+                    className="object-cover rounded-lg"
                   />
                   {idx === 3 && images.length > 4 && (
                     <div className="absolute inset-0 bg-black bg-opacity-60 rounded-lg flex items-center justify-center">

@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 export type Project = {
   id: string | number;
@@ -54,11 +55,11 @@ export default function ProjectCard({ project }: Props) {
         <div className="h-36 bg-gray-200 relative flex items-center justify-center flex-shrink-0">
           {project.imageUrl ? (
             // image cover
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={project.imageUrl}
               alt={project.title}
-              className="object-cover w-full h-full"
+              fill
+              className="object-cover"
             />
           ) : (
             <div className="text-gray-400 text-sm">Image</div>
@@ -100,10 +101,11 @@ export default function ProjectCard({ project }: Props) {
               <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center">
                 {/* creator avatar */}
                 {project.creator && project.creator.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     src={project.creator.avatarUrl}
                     alt={project.creator.name}
+                    width={36}
+                    height={36}
                     className="w-9 h-9 rounded-full object-cover"
                   />
                 ) : (

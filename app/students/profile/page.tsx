@@ -3,6 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import ProfileProjectCard from "@/components/student-section/ProfileProjectCard";
 import ProfileClubCard from "@/components/student-section/ProfileClubCard";
@@ -340,10 +341,11 @@ export default function ProfilePage() {
         <div className="w-full h-48 relative overflow-hidden rounded-lg mb-6">
           {profileData.backgroundImageUrl ? (
             <>
-              <img
+              <Image
                 src={profileData.backgroundImageUrl}
                 alt="Cover"
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
               <div className="absolute inset-0 bg-black/20"></div>
             </>
@@ -361,9 +363,11 @@ export default function ProfilePage() {
           <div className="relative -mt-20 mb-6">
             <div className="relative inline-block">
               {profileData.profileImageUrl ? (
-                <img
+                <Image
                   src={profileData.profileImageUrl}
                   alt={profileData.name}
+                  width={160}
+                  height={160}
                   className="w-32 h-32 sm:w-40 sm:h-40 rounded-full object-cover border-4 border-white shadow-2xl"
                 />
               ) : (

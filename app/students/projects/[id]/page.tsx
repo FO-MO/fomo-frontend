@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
@@ -161,10 +162,11 @@ export default function ProjectDetailsPage() {
         {/* Cover Image */}
         <div className="h-64 bg-gradient-to-r from-teal-600 via-teal-700 to-cyan-700 relative flex items-center justify-center">
           {project.imageUrl ? (
-            <img
+            <Image
               src={project.imageUrl}
               alt={project.title}
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
             />
           ) : (
             <div className="text-white/30 text-6xl font-bold">
@@ -331,9 +333,11 @@ export default function ProjectDetailsPage() {
                 className="flex items-center gap-4 p-4 rounded-xl border border-gray-200 hover:border-teal-500 hover:shadow-md transition-all duration-200 group"
               >
                 <div className="relative">
-                  <img
+                  <Image
                     src={contributor.avatarUrl}
                     alt={contributor.name}
+                    width={64}
+                    height={64}
                     className="w-16 h-16 rounded-full object-cover"
                   />
                   {index === 0 && (
