@@ -32,53 +32,10 @@ const formatDate = (dateString: string) => {
 };
 
 // --- ENVIRONMENT & TYPES ---
+import { Props, CommentData } from "@/lib/interfaces";
 
 // Environment variable handling
-const STRAPI_URL =
-  (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_STRAPI_URL) ||
-  (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_BACKEND_URL) ||
-  "https://tbs9k5m4-1337.inc1.devtunnels.ms";
-
-type PostAuthor = {
-  name: string;
-  initials: string;
-  avatarUrl?: string | null;
-  title?: string;
-};
-
-type PostStats = {
-  likes: number;
-  comments: number;
-  shares?: number;
-};
-
-export type Post = {
-  id: string;
-  author: PostAuthor;
-  postedAgo: string;
-  message: string;
-  images?: string[];
-  stats: PostStats;
-  isLiked?: boolean;
-  likedBy?: string[];
-};
-
-type Props = {
-  post: Post;
-  user: string; // The currently logged-in user's identifier (email/username/ID)
-};
-
-// Type for the cleaned-up comment data used in state and rendering
-type CommentData = {
-  id: number;
-  content: string;
-  sentAt: string; // Formatted date string
-  user: {
-    name: string;
-    initials: string;
-    avatarUrl?: string;
-  };
-};
+const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL;
 
 // Function to map the deeply nested Strapi API response into a flattened structure
 const mapStrapiComment = (strapiComment: {
@@ -180,11 +137,34 @@ export default function PostCard({ post, user }: Props) {
     fetchAuth();
   }, []);
 
-  const { id, author, postedAgo, message, images, stats, likedBy } = post;
+  // Map from Post interface to display values
+  const id = post.id;
+  const author = post.author ? {
+    name: post.author.name || "Unknown",
+    initials: getInitials(post.author.name || "Unknown"),
+    avatarUrl: post.author.profilePic || null,
+    title: post.author.course || undefined,
+  } : {
+    name: "Unknown",
+    initials: "??",
+    avatarUrl: null,
+    title: undefined,
+  };
+  const postedAgo = post.postedAt || "";
+  const message = post.description || "";
+  const images = post.images || [];
+  const stats = {
+    likes: post.likes || 0,
+    comments: 0, // Not available from backend
+    shares: 0, // Not available from backend
+  };
+  const likedBy = post.likedBy || [];
+  
   const initialLikes = Number(stats.likes);
   const initialComments = Number(stats.comments);
 
-  const [isLiked, setIsLiked] = useState(post.isLiked || false);
+  // Initialize isLiked based on whether current user is in likedBy array
+  const [isLiked, setIsLiked] = useState(likedBy.includes(user));
   const [likeCount, setLikeCount] = useState(initialLikes);
   // Using local state to track comment count for optimistic updates
   const [commentCount, setCommentCount] = useState(initialComments);

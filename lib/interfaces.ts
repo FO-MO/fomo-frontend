@@ -183,10 +183,11 @@ export interface GlobalJob {
 }
 
 export type PostAuthor = {
+  id: number;
   name: string;
-  initials: string;
-  avatarUrl?: string | null;
-  title?: string;
+  email: string;
+  course: string;
+  profilePic: string | null;
 };
 
 export type PostStats = {
@@ -196,14 +197,13 @@ export type PostStats = {
 };
 
 export type Post = {
-  id: string;
-  author: PostAuthor;
-  postedAgo: string;
-  message: string;
-  images?: string[];
-  stats: PostStats;
-  isLiked?: boolean;
-  likedBy?: string[];
+  id: number;
+  description: string;
+  likes: number | null;
+  likedBy: string[] | null;
+  images: string[];
+  postedAt: string;
+  author: PostAuthor | null;
 };
 
 export type Props = {

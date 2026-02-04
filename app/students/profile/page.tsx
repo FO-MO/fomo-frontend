@@ -9,7 +9,7 @@ import ProfileProjectCard from "@/components/student-section/ProfileProjectCard"
 import ProfileClubCard from "@/components/student-section/ProfileClubCard";
 import ProfileInternshipCard from "@/components/student-section/ProfileInternshipCard";
 import EditProfileModal from "@/components/student-section/EditProfileModal";
-import PostCard, { Post } from "@/components/student-section/PostCard";
+import PostCard from "@/components/student-section/PostCard";
 import { getAuthToken } from "@/lib/strapi/auth";
 import { getStudentProfile } from "@/lib/strapi/profile";
 import {
@@ -18,6 +18,7 @@ import {
   ProfileData,
   TabKey,
   StrapiImage,
+  Post,
 } from "@/lib/interfaces";
 import { getMediaUrl } from "@/lib/utils";
 
@@ -85,33 +86,22 @@ export default function ProfilePage() {
           console.log("Fetched user posts:", postsData);
 
           userPosts = (postsData.data || []).map((post: StrapiPostData) => ({
-            id: post.documentId || post.id,
-            author: {
-              name: profile.name || "Unknown",
-              initials: profile.name
-                ? profile.name
-                    .split(" ")
-                    .map((n: string) => n[0])
-                    .join("")
-                    .toUpperCase()
-                : "U",
-              avatarUrl: profile.profilePic?.url || null,
-              title: `${profile.course || ""} at ${
-                profile.college || ""
-              }`.trim(),
-            },
-            postedAgo: new Date(post.createdAt).toLocaleDateString(),
-            message: post.description || "",
+            id: Number(post.documentId || post.id) || 0,
+            description: post.description || "",
+            likes: Number(post.likes) || 0,
+            likedBy: Array.isArray(post.likedBy) ? post.likedBy : null,
             images:
               post.images
                 ?.map((img: StrapiImage) => getMediaUrl(img.url))
                 .filter((url): url is string => url !== null) || [],
-            stats: {
-              likes: Number(post.likes) || 0,
-              comments: 0, // You can populate this if you have comment count
+            postedAt: new Date(post.createdAt).toLocaleDateString(),
+            author: {
+              id: 0, // Not available from this endpoint
+              name: profile.name || "Unknown",
+              email: profile.email || "",
+              course: `${profile.course || ""} at ${profile.college || ""}`.trim(),
+              profilePic: profile.profilePic?.url || null,
             },
-            isLiked: false,
-            likedBy: Array.isArray(post.likedBy) ? post.likedBy : [],
           }));
         }
       } catch (error) {

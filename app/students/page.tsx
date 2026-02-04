@@ -7,6 +7,7 @@ import JobPostingCard from "@/components/student-section/JobPostingCard";
 import { useEffect, useState } from "react";
 import { getMediaUrl } from "@/lib/utils";
 import { GlobalJob, Post } from "@/lib/interfaces";
+import { fetchData } from "@/lib/strapi/strapiData";  
 
 // Access environment variables from .env.local
 const STRAPI_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -49,142 +50,16 @@ export default function StudentsHomePage() {
       try {
         const { getAuthTokenCookie } = await import("@/lib/cookies");
         const token = getAuthTokenCookie();
-        const response = await fetch(
-          `${STRAPI_URL}/api/posts?populate=*&sort=createdAt:desc`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          },
-        );
+        const response = await fetchData(token, "/api/posts?recent=true");
 
         if (!response.ok) {
           throw new Error(`Failed to fetch posts: ${response.statusText}`);
         }
 
         const data = await response.json();
-        const rawPosts = data.data || [];
+        const rawPosts:Post[] = data.data || [];
 
-        // Transform Strapi posts to match Post type
-        const transformedPosts: Post[] = rawPosts.map(
-          (post: {
-            user?: {
-              name?: string;
-              username?: string;
-              avatar?: { url?: string };
-              profilePic?: { url?: string };
-              title?: string;
-              bio?: string;
-              course?: string;
-            };
-            author?: {
-              name?: string;
-              username?: string;
-              avatar?: { url?: string };
-              profilePic?: { url?: string };
-              title?: string;
-              bio?: string;
-              course?: string;
-            };
-            images?: Array<{ url?: string }>;
-            title?: string;
-            content?: string;
-            description?: string;
-            documentId?: string | number;
-            id?: string | number;
-            createdAt?: string;
-            publishedAt?: string;
-            likes?: Array<unknown>;
-            comments?: Array<unknown>;
-            likesCount?: number;
-            commentsCount?: number;
-            shares?: Array<unknown>;
-            sharesCount?: number;
-            isLiked?: boolean;
-            likedBy?: Array<unknown>;
-          }) => {
-            // Get user data
-            const user = (post.user || post.author || {}) as {
-              name?: string;
-              username?: string;
-              avatar?: { url?: string };
-              profilePic?: { url?: string };
-              title?: string;
-              bio?: string;
-              course?: string;
-            };
-            const userName = (user.name ||
-              user.username ||
-              "Unknown User") as string;
-            const userInitials = userName
-              .split(" ")
-              .map((n: string) => n[0])
-              .join("")
-              .toUpperCase()
-              .slice(0, 2);
-
-            // Get avatar URL
-            const avatarUrl = getMediaUrl(
-              user.avatar?.url || user.profilePic?.url,
-            );
-
-            // Get images - handle both array and single image
-            const images: string[] = post.images
-              ? post.images
-                  .map((img: { url?: string }) => getMediaUrl(img.url))
-                  .filter((url): url is string => url !== null)
-              : [];
-
-            // Format date
-            const createdAt = new Date(
-              post.createdAt || post.publishedAt || Date.now(),
-            );
-            const now = new Date();
-            const diffInSeconds = Math.floor(
-              (now.getTime() - createdAt.getTime()) / 1000,
-            );
-            let postedAgo = "";
-
-            if (diffInSeconds < 60) {
-              postedAgo = "just now";
-            } else if (diffInSeconds < 3600) {
-              const minutes = Math.floor(diffInSeconds / 60);
-              postedAgo = `${minutes} ${
-                minutes === 1 ? "minute" : "minutes"
-              } ago`;
-            } else if (diffInSeconds < 86400) {
-              const hours = Math.floor(diffInSeconds / 3600);
-              postedAgo = `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
-            } else {
-              const days = Math.floor(diffInSeconds / 86400);
-              postedAgo = `${days} ${days === 1 ? "day" : "days"} ago`;
-            }
-
-            return {
-              id:
-                post.documentId?.toString() || post.id?.toString() || "unknown",
-              author: {
-                name: userName,
-                initials: userInitials,
-                avatarUrl: avatarUrl,
-                title: user.title || user.bio || user.course || undefined,
-              },
-              postedAgo: postedAgo,
-              message: post.description || "",
-              images: images.length > 0 ? images : undefined,
-              stats: {
-                likes: post.likes || post.likesCount || 0,
-                comments: post.comments || post.commentsCount || 0,
-                shares: post.shares || post.sharesCount || 0,
-              },
-              isLiked: post.isLiked || false,
-              likedBy: post.likedBy,
-            };
-          },
-        );
-
-        setPosts(transformedPosts);
+        setPosts(rawPosts);
       } catch (error) {
         console.error("Error fetching posts:", error);
         setPosts([]);
@@ -261,18 +136,18 @@ export default function StudentsHomePage() {
 
     // Add posts
     posts.forEach((post) => {
-      // Try to extract timestamp from postedAgo string or use current time
+      // Try to extract timestamp from postedAt string or use current time
       let timestamp = Date.now();
-      if (post.postedAgo.includes("just now")) {
+      if (post.postedAt.includes("just now")) {
         timestamp = Date.now();
-      } else if (post.postedAgo.includes("minute")) {
-        const minutes = parseInt(post.postedAgo);
+      } else if (post.postedAt.includes("minute")) {
+        const minutes = parseInt(post.postedAt);
         timestamp = Date.now() - minutes * 60 * 1000;
-      } else if (post.postedAgo.includes("hour")) {
-        const hours = parseInt(post.postedAgo);
+      } else if (post.postedAt.includes("hour")) {
+        const hours = parseInt(post.postedAt);
         timestamp = Date.now() - hours * 60 * 60 * 1000;
-      } else if (post.postedAgo.includes("day")) {
-        const days = parseInt(post.postedAgo);
+      } else if (post.postedAt.includes("day")) {
+        const days = parseInt(post.postedAt);
         timestamp = Date.now() - days * 24 * 60 * 60 * 1000;
       }
 
