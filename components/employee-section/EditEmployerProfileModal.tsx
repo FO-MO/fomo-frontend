@@ -3,11 +3,7 @@ export const dynamic = 'force-dynamic'
 
 import { X } from 'lucide-react'
 import { useState } from 'react'
-import { getAuthToken } from '@/lib/strapi/auth'
-
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  'https://tbs9k5m4-1337.inc1.devtunnels.ms'
+import { getCurrentUser, getEmployerProfile, updateEmployerProfile } from '@/lib/supabase'
 
 interface EditEmployerProfileModalProps {
   isOpen: boolean
@@ -26,20 +22,15 @@ interface EditEmployerProfileModalProps {
   onSave: () => void
 }
 
-interface UserData {
-  documentId?: string
-  id?: string
-}
-
 interface EmployerProfilePayload {
-  name: string
-  phone: string
-  description: string
-  website: string
-  industry: string
-  location: string
-  noOfEmployers: number
-  specialties: string
+  company_name: string
+  phone?: string
+  description?: string
+  website?: string
+  industry?: string
+  location?: string
+  company_size?: string
+  specialties?: string[]
 }
 
 export default function EditEmployerProfileModal({
@@ -66,117 +57,43 @@ export default function EditEmployerProfileModal({
     e.preventDefault()
 
     try {
-      const token = getAuthToken()
-      if (!token) {
+      const { user } = await getCurrentUser()
+      if (!user) {
         alert('You must be signed in to update your profile.')
         return
       }
 
-      // Get employerId from stored user
-      let employerId: string | null = null
-      try {
-        const raw = localStorage.getItem('fomo_user')
-        if (raw) {
-          const parsed: UserData = JSON.parse(raw as string)
-          employerId = parsed?.documentId ?? parsed?.id ?? null
-        }
-      } catch {
-        // ignore parse errors
+      // Get existing profile
+      const existingProfile = await getEmployerProfile(user.id)
+      
+      if (!existingProfile) {
+        alert('Profile not found. Please complete your profile setup first.')
+        return
       }
 
-      // Check for existing profile
-      let recordId: string | null = null
-      if (employerId) {
-        const q = `${BACKEND_URL}/api/Employer-profiles?filters[employerId][$eq]=${encodeURIComponent(
-          employerId
-        )}&populate=*`
-        const res = await fetch(q, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        if (res.ok) {
-          const json = await res.json()
-          const rec = json?.data?.[0]
-          recordId = rec?.documentId ?? null
-        } else {
-          console.warn('Failed to check existing profile', res.status)
-        }
-      }
-
-      // Build payload for Strapi
+      // Build payload for Supabase
       const payload: EmployerProfilePayload = {
-        name,
+        company_name: name,
         phone,
         description,
         website,
         industry,
         location,
-        noOfEmployers: Number(noOfEmployers),
-        specialties,
+        company_size: noOfEmployers > 0 ? `${noOfEmployers}` : undefined,
+        specialties: specialties ? specialties.split(',').map(s => s.trim()) : [],
       }
 
-      // If record exists, try update. If update returns 404, fallback to create.
-      if (recordId) {
-        console.log('Updating employer profile:', { data: payload })
-        const updateRes = await fetch(
-          `${BACKEND_URL}/api/employer-profiles/${recordId}`,
-          {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ data: payload }),
-          }
-        )
-
-        if (!updateRes.ok) {
-          const body = await updateRes.text()
-          console.warn('Update failed', updateRes.status, body)
-          if (updateRes.status === 404) {
-            // fallback to create
-            const createRes = await fetch(
-              `${BACKEND_URL}/api/employer-profiles`,
-              {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ data: { ...payload, employerId } }),
-              }
-            )
-            if (!createRes.ok) {
-              console.error('Create fallback failed', await createRes.text())
-              alert(
-                'Failed to create profile after update failed. See console.'
-              )
-              return
-            }
-          } else {
-            alert('Failed to update profile. See console for details.')
-            return
-          }
-        }
-      } else {
-        // No record -> create
-        console.log('Creating employer profile:', { data: payload })
-        const createRes = await fetch(`${BACKEND_URL}/api/employer-profiles`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ data: { ...payload, employerId } }),
-        })
-        if (!createRes.ok) {
-          console.error('Create failed', await createRes.text())
-          alert('Failed to create profile. See console for details.')
-          return
-        }
+      // Update profile
+      const updatedProfile = await updateEmployerProfile(existingProfile.id, payload)
+      
+      if (!updatedProfile) {
+        alert('Failed to update profile. Please try again.')
+        return
       }
 
       // call parent onSave so UI updates locally
       onSave()
+      onClose()
     } catch (err) {
       console.error('Failed to save profile', err)
       alert('Failed to save profile. See console for details.')

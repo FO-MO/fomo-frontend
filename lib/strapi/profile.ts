@@ -14,16 +14,16 @@ const STRAPI_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
  */
 export async function getStudentProfile(
   studentId: string,
-  token: string
+  token: string,
 ): Promise<StudentProfile | null> {
   try {
     const res = await fetch(
       `${STRAPI_URL}/api/student-profiles?filters[studentId][$eq]=${encodeURIComponent(
-        studentId
+        studentId,
       )}&populate=*`,
       {
         headers: { Authorization: `Bearer ${token}` },
-      }
+      },
     );
     if (!res.ok) return null;
     const json = await res.json();
@@ -40,7 +40,7 @@ export async function getStudentProfile(
  */
 export async function createStudentProfile(
   data: CreateProfileData,
-  token: string
+  token: string,
 ): Promise<StudentProfile | null> {
   try {
     const res = await fetch(`${STRAPI_URL}/api/student-profiles`, {
@@ -69,7 +69,7 @@ export async function createStudentProfile(
 export async function updateStudentProfile(
   documentId: string,
   data: Partial<CreateProfileData>,
-  token: string
+  token: string,
 ): Promise<StudentProfile | null> {
   try {
     const res = await fetch(
@@ -81,7 +81,7 @@ export async function updateStudentProfile(
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ data }),
-      }
+      },
     );
     if (!res.ok) {
       console.error("Failed to update profile:", await res.text());
@@ -100,7 +100,7 @@ export async function updateStudentProfile(
  */
 export async function uploadFile(
   file: File,
-  token: string
+  token: string,
 ): Promise<{ id: number; url: string } | null> {
   try {
     console.log("Uploading file to Strapi:", file.name, file.type, file.size);
@@ -122,7 +122,7 @@ export async function uploadFile(
         "Failed to upload file. Status:",
         res.status,
         "Response:",
-        errorText
+        errorText,
       );
       return null;
     }
@@ -147,7 +147,7 @@ export async function uploadFile(
  */
 export async function hasCompletedProfile(
   studentId: string,
-  token: string
+  token: string,
 ): Promise<boolean> {
   const profile = await getStudentProfile(studentId, token);
   if (!profile) return false;
@@ -189,7 +189,7 @@ export interface CreateCollegeProfileData {
  * Fetch the first college profile (for the logged-in user)
  */
 export async function getCollegeProfile(
-  token: string
+  token: string,
 ): Promise<CollegeProfile | null> {
   try {
     const res = await fetch(`${STRAPI_URL}/api/college-profiles?populate=*`, {
@@ -211,14 +211,14 @@ export async function getCollegeProfile(
  */
 export async function getCollegeProfileById(
   token: string,
-  userId: string
+  userId: string,
 ): Promise<CollegeProfile | null> {
   try {
     const res = await fetch(
       `${STRAPI_URL}/api/college-profiles?filters[userId][$eq]=${userId}&populate=*`,
       {
         headers: { Authorization: `Bearer ${token}` },
-      }
+      },
     );
     if (!res.ok) return null;
     const json = await res.json();
@@ -235,7 +235,7 @@ export async function getCollegeProfileById(
  */
 export async function createCollegeProfile(
   data: CreateCollegeProfileData,
-  token: string
+  token: string,
 ): Promise<CollegeProfile | null> {
   try {
     const res = await fetch(`${STRAPI_URL}/api/college-profiles`, {
@@ -264,7 +264,7 @@ export async function createCollegeProfile(
 export async function updateCollegeProfile(
   documentId: string,
   data: Partial<CreateCollegeProfileData>,
-  token: string
+  token: string,
 ): Promise<CollegeProfile | null> {
   try {
     const res = await fetch(
@@ -276,7 +276,7 @@ export async function updateCollegeProfile(
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ data }),
-      }
+      },
     );
     if (!res.ok) {
       console.error("Failed to update college profile:", await res.text());
@@ -295,7 +295,7 @@ export async function updateCollegeProfile(
  */
 export async function deleteCollegeProfile(
   documentId: string,
-  token: string
+  token: string,
 ): Promise<boolean> {
   try {
     const res = await fetch(
@@ -305,7 +305,7 @@ export async function deleteCollegeProfile(
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
     return res.ok;
   } catch (err) {
@@ -318,7 +318,7 @@ export async function deleteCollegeProfile(
  * Check if a user has completed their college profile
  */
 export async function hasCompletedCollegeProfile(
-  token: string
+  token: string,
 ): Promise<boolean> {
   const profile = await getCollegeProfile(token);
   if (!profile) return false;
@@ -338,16 +338,16 @@ export async function hasCompletedCollegeProfile(
  */
 export async function getStudentProfile_2(
   studentId: string,
-  token: string
+  token: string,
 ): Promise<StudentProfile | null> {
   try {
     const res = await fetch(
       `${STRAPI_URL}/api/student-profiles?filters[studentId][$eq]=${encodeURIComponent(
-        studentId
+        studentId,
       )}&populate=*`,
       {
         headers: { Authorization: `Bearer ${token}` },
-      }
+      },
     );
     if (!res.ok) return null;
     const json = await res.json();

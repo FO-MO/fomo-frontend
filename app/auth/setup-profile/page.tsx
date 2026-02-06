@@ -15,11 +15,16 @@ import {
   Camera,
   Image as ImageIcon,
 } from "lucide-react";
-import { getAuthToken } from "@/lib/strapi/auth";
-import { createStudentProfile } from "@/lib/strapi/profile";
+import {
+  getCurrentUser,
+  createStudentProfile,
+  getCollegeNames,
+  getDataSetByName,
+  uploadProfilePic,
+  uploadBackgroundImage,
+} from "@/lib/supabase";
 import { CreateProfileData } from "@/lib/interfaces";
 import Link from "next/link";
-import { fetchColleges, uploadImage } from "@/lib/strapi/strapiData";
 
 // Predefined options
 const AVAILABLE_SKILLS = [
@@ -284,51 +289,40 @@ export default function SetupProfilePage() {
   const [interestSearch, setInterestSearch] = useState("");
 
   useEffect(() => {
-    // Check if user is authenticated
-    const token = getAuthToken();
-    if (!token) {
-      router.push("/auth/login");
-      return;
-    }
-
-    // Fetch colleges from backend
-    const loadColleges = async () => {
+    // Check if user is authenticated and get user info
+    const loadUserAndColleges = async () => {
       try {
-        const collegeData = await fetchColleges(token);
-        if (collegeData && typeof collegeData === "object") {
-          // Store the raw key-value pairs
-          setCollegeData(collegeData as Record<string, string>);
-          // Extract college names for display
-          const collegeList = Array.isArray(collegeData)
-            ? collegeData
-            : Object.values(collegeData);
-          setColleges(collegeList.map((c) => String(c)));
+        const { user, error } = await getCurrentUser();
+        if (error || !user) {
+          router.push("/auth/login");
+          return;
+        }
+
+        // Set user info
+        if (user.username) {
+          setName(user.username);
+        }
+        if (user.email) {
+          setEmail(user.email);
+        }
+
+        // Fetch colleges from backend
+        const collegeNames = await getCollegeNames();
+        if (collegeNames && collegeNames.length > 0) {
+          setColleges(collegeNames);
+        }
+
+        // Also try to get college data with codes for verification
+        const dataSet = await getDataSetByName("colleges");
+        if (dataSet && typeof dataSet === "object") {
+          setCollegeData(dataSet as Record<string, string>);
         }
       } catch (error) {
-        console.error("Failed to fetch colleges:", error);
+        console.error("Failed to load initial data:", error);
       }
     };
 
-    loadColleges();
-
-    // Get user info from cookies
-    const fetchUser = async () => {
-      try {
-        const { getUserCookie } = await import("@/lib/cookies");
-        const user = getUserCookie();
-        if (user) {
-          if (user.username) {
-            setName(user.username);
-          }
-          if (user.email) {
-            setEmail(user.email);
-          }
-        }
-      } catch (err) {
-        console.error("Failed to get user data:", err);
-      }
-    };
-    fetchUser();
+    loadUserAndColleges();
   }, [router]);
 
   const toggleSkill = (skill: string) => {
@@ -468,85 +462,61 @@ export default function SetupProfilePage() {
     setLoading(true);
 
     try {
-      const token = getAuthToken();
-      if (!token) {
+      // Get current user from Supabase
+      const { user, error: userError } = await getCurrentUser();
+      if (userError || !user) {
         setError("You must be signed in to create a profile");
         setLoading(false);
         return;
       }
 
-      // Get student ID from stored user
-      let studentId: string | null = null;
-      try {
-        const { getUserCookie } = await import("@/lib/cookies");
-        const user = getUserCookie();
-        if (user) {
-          studentId = user?.documentId || null;
+      const userId = user.id;
+
+      // Upload images if provided
+      let profilePicUrl: string | null = null;
+      let backgroundImgUrl: string | null = null;
+
+      if (profilePicFile) {
+        const { url, error: uploadError } = await uploadProfilePic(profilePicFile, userId);
+        if (uploadError) {
+          console.error("Failed to upload profile pic:", uploadError);
+        } else {
+          profilePicUrl = url;
         }
-      } catch (err) {
-        console.error("Failed to get student ID:", err);
       }
 
-      if (!studentId) {
-        setError("Failed to identify user. Please log in again.");
-        setLoading(false);
-        return;
+      if (backgroundImgFile) {
+        const { url, error: uploadError } = await uploadBackgroundImage(backgroundImgFile, userId);
+        if (uploadError) {
+          console.error("Failed to upload background image:", uploadError);
+        } else {
+          backgroundImgUrl = url;
+        }
       }
 
-      // Create profile
-      const profileData: CreateProfileData = {
-        studentId: studentId as string,
+      // Create profile in Supabase
+      const result = await createStudentProfile({
+        user_id: userId,
+        student_id: userId,
         name,
         email,
         about: bio,
         college: institution,
         course: major,
-        graduationYear,
+        graduation_year: graduationYear ? parseInt(graduationYear) : null,
         location,
         skills: selectedSkills,
         interests: selectedInterests,
         verification: verification,
-        // ...(profilePicId && { profilePic: profilePicId }),
-        // ...(backgroundImgId && { backgroundImage: backgroundImgId }),
-      };
-
-      const result = await createStudentProfile(profileData, token);
+        profile_pic: profilePicUrl,
+        background_img: backgroundImgUrl,
+        published_at: new Date().toISOString(),
+      });
 
       if (result) {
         // Profile created successfully
         // Store profile completion flag
         localStorage.setItem("profile_completed", "true");
-        if (profilePicFile) {
-          uploadImage(
-            token,
-            "api::student-profile.student-profile",
-            result.id ? result.id : undefined,
-            "profilePic",
-            profilePicFile
-          );
-        }
-        if (backgroundImgFile) {
-          uploadImage(
-            token,
-            "api::student-profile.student-profile",
-            result.id ? result.id : undefined,
-            "backgroundImg",
-            backgroundImgFile
-          );
-        }
-
-        const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-        await fetch(`${BACKEND_URL}/api/student-profile/${result.documentId}`, {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            data: {
-              age: 12,
-            },
-          }),
-        });
 
         // Redirect to students dashboard
         router.push("/students");

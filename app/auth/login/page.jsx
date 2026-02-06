@@ -3,8 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { strapiLogin, setAuthToken } from "@/lib/strapi/auth";
-import { setUserCookie } from "@/lib/cookies";
+import { signIn } from "@/lib/supabase";
 
 export default function Login() {
   const [email, setEmail] = React.useState("");
@@ -18,13 +17,12 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
-      const result = await strapiLogin(email, password);
+      const result = await signIn({ email, password });
       if (result?.error) {
         setError(result.error.message || "Login failed");
         console.error("Login error:", result);
-      } else if (result?.jwt) {
-        setAuthToken(result.jwt);
-        setUserCookie(result.user);
+      } else if (result?.session) {
+        // Supabase handles session cookies automatically
         // force full reload to ensure server components pick up cookies if needed
         window.location.href = "/students";
       } else {

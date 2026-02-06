@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { removeAuthToken } from "@/lib/strapi/auth";
-import { clearAuthCookies } from "@/lib/cookies";
+import { signOut } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -12,7 +11,7 @@ export default function LogoutPage() {
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
-    clearAuthCookies();
+    await signOut();
 
     // Add a small delay for better UX
     setTimeout(() => {

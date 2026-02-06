@@ -9,9 +9,12 @@ import ProfileClubCard from "@/components/student-section/ProfileClubCard";
 import ProfileInternshipCard from "@/components/student-section/ProfileInternshipCard";
 import EditProfileModal from "@/components/student-section/EditProfileModal";
 import PostCard, { Post } from "@/components/student-section/PostCard";
-import { getAuthToken } from "@/lib/strapi/auth";
-import { getStudentProfile, Internship } from "@/lib/strapi/profile";
-import { getMediaUrl } from "@/lib/utils";
+import {
+  getCurrentUser,
+  getStudentProfile,
+  getPostsByStudentProfile,
+  getStudentProjects,
+} from "@/lib/supabase";
 
 type TabKey = "projects" | "clubs" | "internships" | "posts";
 
@@ -25,27 +28,8 @@ interface FollowerProfile {
   profileUrl: string;
 }
 
-interface StrapiImage {
-  id: string | number;
-  documentId?: string;
-  url: string;
-  name?: string;
-  alternativeText?: string;
-  width?: number;
-  height?: number;
-}
-
-interface StrapiPostData {
-  id: string | number;
-  documentId?: string;
-  createdAt: string;
-  description?: string;
-  likes?: number;
-  likedBy?: string[];
-  images?: StrapiImage[];
-}
-
 interface ProfileData {
+  id: string;
   name: string;
   email: string;
   initials: string;
@@ -82,8 +66,6 @@ interface ProfileData {
   posts: Post[];
 }
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-
 export default function ProfilePage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabKey>("projects");
@@ -94,33 +76,18 @@ export default function ProfilePage() {
 
   const loadProfile = useCallback(async () => {
     try {
-      const token = getAuthToken();
-      if (!token) {
+      // Get current user from Supabase
+      const { user, error: userError } = await getCurrentUser();
+      if (userError || !user) {
         router.push("/auth/login");
         return;
       }
 
-      // Get user ID from cookies
-      let studentId: string | null = null;
-      let userEmail = "user@example.com";
-      try {
-        const { getUserCookie } = await import("@/lib/cookies");
-        const user = getUserCookie();
-        if (user) {
-          studentId = user?.documentId || null;
-          userEmail = user?.email || userEmail;
-          setCurrentUserEmail(userEmail);
-        }
-      } catch (err) {
-        console.error("Failed to get user data:", err);
-      }
+      const userId = user.id;
+      setCurrentUserEmail(user.email);
 
-      if (!studentId) {
-        router.push("/auth/setup-profile");
-        return;
-      }
-
-      const profile = await getStudentProfile(studentId, token);
+      // Get student profile
+      const profile = await getStudentProfile(userId);
       console.log("Fetched profile", profile);
 
       if (!profile) {
@@ -131,57 +98,54 @@ export default function ProfilePage() {
       // Fetch user posts
       let userPosts: Post[] = [];
       try {
-        const postsResponse = await fetch(
-          `${BACKEND_URL}/api/posts?filters[author][studentId][$eq]=${studentId}&populate=*&sort=createdAt:desc`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (postsResponse.ok) {
-          const postsData = await postsResponse.json();
-          console.log("Fetched user posts:", postsData);
-
-          userPosts = (postsData.data || []).map((post: StrapiPostData) => ({
-            id: post.documentId || post.id,
-            author: {
-              name: profile.name || "Unknown",
-              initials: profile.name
-                ? profile.name
-                    .split(" ")
-                    .map((n: string) => n[0])
-                    .join("")
-                    .toUpperCase()
-                : "U",
-              avatarUrl: profile.profilePic?.url || null,
-              title: `${profile.course || ""} at ${
-                profile.college || ""
-              }`.trim(),
-            },
-            postedAgo: new Date(post.createdAt).toLocaleDateString(),
-            message: post.description || "",
-            images:
-              post.images
-                ?.map((img: StrapiImage) => getMediaUrl(img.url))
-                .filter((url): url is string => url !== null) || [],
-            stats: {
-              likes: Number(post.likes) || 0,
-              comments: 0, // You can populate this if you have comment count
-            },
-            isLiked: false,
-            likedBy: Array.isArray(post.likedBy) ? post.likedBy : [],
-          }));
-        }
+        const posts = await getPostsByStudentProfile(profile.id);
+        userPosts = posts.map((post) => ({
+          id: post.id,
+          author: {
+            name: profile.name || "Unknown",
+            initials: profile.name
+              ? profile.name
+                  .split(" ")
+                  .map((n: string) => n[0])
+                  .join("")
+                  .toUpperCase()
+              : "U",
+            avatarUrl: profile.profile_pic || null,
+            title: `${profile.course || ""} at ${profile.college || ""}`.trim(),
+          },
+          postedAgo: new Date(post.created_at).toLocaleDateString(),
+          message: post.description || "",
+          images: post.images || [],
+          stats: {
+            likes: Number(post.likes) || 0,
+            comments: 0,
+          },
+          isLiked: false,
+          likedBy: Array.isArray(post.liked_by) ? (post.liked_by as string[]) : [],
+        }));
       } catch (error) {
         console.error("Failed to fetch user posts:", error);
       }
+
+      // Fetch user projects
+      let userProjects: Array<{ title: string; description: string; status: string; tags: string[] }> = [];
+      try {
+        const projects = await getStudentProjects(profile.id);
+        userProjects = projects.map((proj) => ({
+          title: proj.title || "",
+          description: proj.description || "",
+          status: "Active",
+          tags: Array.isArray(proj.skills) ? (proj.skills as string[]) : [],
+        }));
+      } catch (error) {
+        console.error("Failed to fetch projects:", error);
+      }
+
       // Transform profile data
-      const data = {
+      const data: ProfileData = {
+        id: profile.id,
         name: profile.name || "User",
-        email: profile.email || userEmail,
+        email: profile.email || user.email,
         initials: profile.name
           ? profile.name
               .split(" ")
@@ -190,13 +154,13 @@ export default function ProfilePage() {
               .toUpperCase()
               .slice(0, 2)
           : "U",
-        backgroundImageUrl: getMediaUrl(profile.backgroundImg?.url),
-        profileImageUrl: getMediaUrl(profile.profilePic?.url),
+        backgroundImageUrl: profile.background_img,
+        profileImageUrl: profile.profile_pic,
         followers: [],
         following: [],
         institution: profile.college || "Not specified",
         major: profile.course || "Not specified",
-        graduationYear: profile.graduationYear || "Not specified",
+        graduationYear: profile.graduation_year?.toString() || "Not specified",
         location: profile.location || "Not specified",
         bio: profile.about || "No bio yet",
         skills: profile.skills || [],
@@ -207,28 +171,9 @@ export default function ProfilePage() {
           { key: "internships" as TabKey, label: "Internships" },
           { key: "posts" as TabKey, label: "Posts" },
         ],
-        projects: (profile.projects || []).map(
-          (proj: Record<string, unknown>) => ({
-            title: (proj.title as string) || "",
-            description: (proj.description as string) || "",
-            status: "Active",
-            tags: (proj.tags as string[]) || [],
-          })
-        ),
-        clubs: (profile.clubs || []).map((club: Record<string, unknown>) => ({
-          name: (club.title as string) || "",
-          description: (club.description as string) || "",
-          tags: (club.tags as string[]) || [],
-          badge: (club.badge as string) || undefined,
-        })),
-        internships: (profile.internships || []).map(
-          (internship: Internship) => ({
-            role: internship.role || "",
-            timeline: internship.timeline || "",
-            location: internship.location || "",
-            status: internship.status || "",
-          })
-        ),
+        projects: userProjects,
+        clubs: [], // TODO: Fetch clubs when implemented
+        internships: [], // TODO: Fetch internships when implemented
         posts: userPosts,
       };
 

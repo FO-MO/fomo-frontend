@@ -3,8 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { strapiRegister, setAuthToken } from "@/lib/strapi/auth";
-import { setUserCookie } from "@/lib/cookies";
+import { signUp } from "@/lib/supabase";
 
 export default function Signup() {
   const [name, setName] = React.useState("");
@@ -112,25 +111,25 @@ export default function Signup() {
 
     setLoading(true);
     try {
-      const result = await strapiRegister(
-        name || email,
+      const result = await signUp({
+        username: name || email,
         email,
         password,
-        "student"
-      );
+        usertype: "student",
+      });
       if (result?.error) {
         setError(result.error.message || "Registration failed");
         console.error("Sign up error:", result);
-      } else if (result?.jwt) {
-        // Immediately set token and redirect to profile setup
-        setAuthToken(result.jwt);
-        setUserCookie(result.user);
+      } else if (result?.session) {
+        // Supabase handles session cookies automatically
         setSuccess(true);
         window.location.href = "/auth/setup-profile";
-      } else {
-        // Strapi may require email confirmation depending on settings
+      } else if (result?.user) {
+        // User created but email confirmation required
         setSuccess(true);
         setError("Please check your email to confirm your account");
+      } else {
+        setError("Unexpected registration response");
       }
     } catch (err) {
       console.error(err);

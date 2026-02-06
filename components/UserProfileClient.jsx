@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { getAuthToken, fetchMe, removeAuthToken } from "@/lib/strapi/auth";
-import { clearAuthCookies } from "@/lib/cookies";
+import { getCurrentUser, signOut } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 
 export default function UserProfileClient() {
@@ -12,14 +11,9 @@ export default function UserProfileClient() {
 
   useEffect(() => {
     const load = async () => {
-      const token = getAuthToken();
-      if (!token) {
-        setLoading(false);
-        return;
-      }
       try {
-        const data = await fetchMe(token);
-        if (data && !data?.error) setUser(data);
+        const currentUser = await getCurrentUser();
+        if (currentUser) setUser(currentUser);
       } catch (e) {
         console.error(e);
       } finally {
@@ -29,8 +23,8 @@ export default function UserProfileClient() {
     load();
   }, []);
 
-  const handleSignOut = () => {
-    clearAuthCookies();
+  const handleSignOut = async () => {
+    await signOut();
     router.push("/");
     router.refresh();
   };
@@ -60,7 +54,7 @@ export default function UserProfileClient() {
     <div className="flex items-center gap-4">
       <div className="text-sm">
         <p className="font-medium text-gray-900">
-          {user.username || user.email}
+          {user.user_metadata?.username || user.email}
         </p>
         <p className="text-gray-600">{user.email}</p>
       </div>

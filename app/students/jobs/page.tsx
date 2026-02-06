@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 import React, { useState, useEffect } from 'react'
 import { HiOutlineBuildingOffice2 } from 'react-icons/hi2'
 import { FiMapPin, FiCalendar } from 'react-icons/fi'
-import { fetchData } from '@/lib/strapi/strapiData'
+import { getCollegeJobPostings } from '@/lib/supabase'
 import JobDetailsModal from '@/components/student-section/JobDetailsModal'
 
 interface Job {
@@ -26,18 +26,6 @@ interface Job {
   benefits: string[]
 }
 
-interface JobData {
-  title: string
-  jobType: string
-  experience: string
-  location: string
-  deadline: string | null
-  description: string
-  skills: string[]
-  requirements: string[]
-  benefits: string[]
-}
-
 export default function JobsPage() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -47,63 +35,25 @@ export default function JobsPage() {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const token = localStorage.getItem('fomo_token')
-        const data = (await fetchData(
-          token,
-          'collegejobpostings?populate=*'
-        )) as {
-          data?: Array<{
-            id?: number
-            data?: string // JSON string containing the job data
-            createdAt?: string
-            updatedAt?: string
-          }>
-        }
+        const data = await getCollegeJobPostings()
 
-        console.log(data)
-        const fetchedJobs: Job[] = (data.data || []).map((job) => {
-          // Parse the JSON data field
-          let jobData: Partial<JobData> = {}
-          try {
-            if (job.data) {
-              // Check if data is already an object or a string
-              if (typeof job.data === 'string') {
-                // Remove any extra quotes or whitespace that might cause parsing issues
-                const cleanedData = job.data.trim()
-                if (cleanedData.startsWith('"') && cleanedData.endsWith('"')) {
-                  // Remove surrounding quotes if present
-                  jobData = JSON.parse(cleanedData.slice(1, -1))
-                } else {
-                  jobData = JSON.parse(cleanedData)
-                }
-              } else if (typeof job.data === 'object') {
-                jobData = job.data as JobData
-              }
-            }
-          } catch (error) {
-            console.error('Failed to parse job data:', error)
-            console.error('Raw data:', job.data)
-            jobData = {}
-          }
-
-          return {
-            id: job.id || 0,
-            title: jobData.title || 'Unknown Job',
-            company: 'Company Name', // You might need to add this field to your data structure
-            location: jobData.location || 'Unknown Location',
-            postedDate: 'Recently', // You might need to add this field or calculate from createdAt
-            description: jobData.description || 'No description',
-            salary: 'Not specified', // Add salary field to your data structure if needed
-            tags: jobData.skills || [],
-            type: jobData.jobType || 'internship',
-            jobType: jobData.jobType || 'Unknown',
-            experience: jobData.experience || 'Not specified',
-            deadline: jobData.deadline || null,
-            skills: jobData.skills || [],
-            requirements: jobData.requirements || [],
-            benefits: jobData.benefits || [],
-          }
-        })
+        const fetchedJobs: Job[] = (data || []).map((job) => ({
+          id: typeof job.id === 'string' ? parseInt(job.id) : job.id,
+          title: job.title || 'Unknown Job',
+          company: job.company_name || 'Company Name',
+          location: job.location || 'Unknown Location',
+          postedDate: job.created_at ? new Date(job.created_at).toLocaleDateString() : 'Recently',
+          description: job.description || 'No description',
+          salary: job.salary_range || 'Not specified',
+          tags: job.skills_required || [],
+          type: job.job_type || 'internship',
+          jobType: job.job_type || 'Unknown',
+          experience: job.experience_level || 'Not specified',
+          deadline: job.application_deadline || null,
+          skills: job.skills_required || [],
+          requirements: job.requirements || [],
+          benefits: job.benefits || [],
+        }))
 
         // Sort jobs: active jobs first (by deadline if available), then expired jobs
         const sortedJobs = fetchedJobs.sort((a, b) => {

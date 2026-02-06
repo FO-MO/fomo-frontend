@@ -5,9 +5,7 @@ export const dynamic = "force-dynamic";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Building2, Upload, Globe, MapPin, Users, Tag } from "lucide-react";
-import { uploadImage } from "@/lib/strapi/strapiData";
-
-const STRAPI_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+import { getCurrentUser, createEmployerProfile, uploadEmployerLogo, uploadEmployerBackgroundImage } from "@/lib/supabase";
 
 // Industry options
 const INDUSTRIES = [
@@ -94,18 +92,14 @@ export default function EmployerSetupProfile() {
   // Check if user is authenticated and populate email
   useEffect(() => {
     const checkAuth = async () => {
-      const { getAuthTokenCookie, getUserCookie } = await import(
-        "@/lib/cookies"
-      );
-      const token = getAuthTokenCookie();
-      if (!token) {
+      const { user } = await getCurrentUser();
+      if (!user) {
         router.push("/auth/employerlogin");
         return;
       }
 
       // Populate email from user data if available
-      const user = getUserCookie();
-      if (user?.email) {
+      if (user.email) {
         setFormData((prev) => ({ ...prev, email: user.email || "" }));
       }
     };
@@ -227,115 +221,50 @@ export default function EmployerSetupProfile() {
     setLoading(true);
 
     try {
-      const { getAuthTokenCookie } = await import("@/lib/cookies");
-      const token = getAuthTokenCookie();
-      if (!token) {
-        throw new Error("No authentication token found");
+      const { user } = await getCurrentUser();
+      if (!user) {
+        throw new Error("No authenticated user found");
       }
 
-      // Get current user
-      const userResponse = await fetch(`${STRAPI_URL}/api/users/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!userResponse.ok) {
-        throw new Error("Failed to fetch user data");
-      }
-
-      const userData = await userResponse.json();
-
-      // Create employer profile (matching the schema)
+      // Create employer profile using Supabase
       const profileData = {
-        data: {
-          name: formData.name,
-          description: formData.description,
-          website: formData.website || null,
-          industry: formData.industry,
-          location: formData.location,
-          noOfEmployers: formData.noOfEmployers
-            ? parseInt(formData.noOfEmployers)
-            : null,
-          specialties: formData.specialties.join(", "),
-          email: formData.email,
-          phoneNumber: formData.phoneNumber
-            ? parseInt(formData.phoneNumber)
-            : null,
-          country_code: formData.country_code
-            ? parseInt(formData.country_code.replace("+", ""))
-            : null,
-          user: userData.id,
-        },
+        user_id: user.id,
+        company_name: formData.name,
+        description: formData.description,
+        website: formData.website || null,
+        industry: formData.industry,
+        location: formData.location,
+        company_size: formData.noOfEmployers || null,
+        specialties: formData.specialties,
+        email: formData.email,
+        phone: formData.phoneNumber ? `${formData.country_code}${formData.phoneNumber}` : null,
       };
 
-      const profileResponse = await fetch(
-        `${STRAPI_URL}/api/employer-profiles`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(profileData),
-        }
-      );
-
-      if (!profileResponse.ok) {
-        const errorData = await profileResponse.json();
-        throw new Error(errorData.error?.message || "Failed to create profile");
+      const createdProfile = await createEmployerProfile(profileData);
+      
+      if (!createdProfile) {
+        throw new Error("Failed to create profile");
       }
 
-      const createdProfile = await profileResponse.json();
-      const profileId = createdProfile.data.id;
-
-      // Upload images if provided (using the same pattern as student profile)
+      // Upload images if provided
       if (profilePicFile) {
-        uploadImage(
-          token,
-          "api::employer-profile.employer-profile",
-          profileId,
-          "profilePic",
-          profilePicFile
-        ).catch((error) => {
+        try {
+          await uploadEmployerLogo(createdProfile.id, profilePicFile);
+        } catch (error) {
           console.error("Failed to upload profile picture:", error);
-        });
+        }
       }
 
       if (backgroundImgFile) {
-        uploadImage(
-          token,
-          "api::employer-profile.employer-profile",
-          profileId,
-          "backgroundImg",
-          backgroundImgFile
-        ).catch((error) => {
+        try {
+          await uploadEmployerBackgroundImage(createdProfile.id, backgroundImgFile);
+        } catch (error) {
           console.error("Failed to upload background image:", error);
-        });
+        }
       }
 
-      // Update user with hasProfile flag
-      try {
-        await fetch(`${STRAPI_URL}/api/users/${userData.id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            hasProfile: true,
-          }),
-        });
-      } catch (error) {
-        console.error("Failed to update user profile flag:", error);
-      }
-
-      // Show success message and redirect
-
-      // Small delay to allow image uploads to start
-      setTimeout(() => {
-        router.push("/employers/overview");
-      }, 500);
+      // Redirect to employers overview
+      router.push("/employers/overview");
     } catch (error) {
       console.error("Error creating profile:", error);
       alert(

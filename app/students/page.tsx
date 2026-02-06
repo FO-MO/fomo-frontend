@@ -5,12 +5,15 @@ export const dynamic = "force-dynamic";
 import PostCard from "@/components/student-section/PostCard";
 import JobPostingCard from "@/components/student-section/JobPostingCard";
 import { useEffect, useState } from "react";
-import { getMediaUrl } from "@/lib/utils";
 import { GlobalJob, Post } from "@/lib/interfaces";
-import { fetchColleges } from "@/lib/strapi/strapiData";
-
-// Access environment variables from .env.local
-const STRAPI_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+import {
+  getCurrentUser,
+  getRecentPosts,
+  getGlobalJobPostings,
+  type Post as SupabasePost,
+  type StudentProfile,
+  type Json,
+} from "@/lib/supabase";
 
 export default function StudentsHomePage() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -19,23 +22,15 @@ export default function StudentsHomePage() {
   const [combinedFeed, setCombinedFeed] = useState<
     Array<{ type: "post" | "job"; data: Post | GlobalJob; timestamp: number }>
   >([]);
-  //fetching posts
+
+  // Fetch current user
   useEffect(() => {
-    // Compute initials from current user's name stored in cookies
     const fetchUser = async () => {
       try {
-        const { getUserCookie } = await import("@/lib/cookies");
-        const parsed = getUserCookie();
-        if (parsed) {
-          // Try common fields for name
-          const name =
-            (parsed && (parsed.name || parsed.username || parsed.email)) ||
-            "User";
-          // If email, strip domain
-          const cleanedName =
-            typeof name === "string" && name.includes("@")
-              ? name.split("@")[0]
-              : String(name);
+        const { user } = await getCurrentUser();
+        if (user) {
+          const name = user.username || user.email || "User";
+          const cleanedName = name.includes("@") ? name.split("@")[0] : name;
           setNameVal(cleanedName);
         }
       } catch {
@@ -45,81 +40,17 @@ export default function StudentsHomePage() {
     fetchUser();
   }, []);
 
+  // Fetch posts from Supabase
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const { getAuthTokenCookie } = await import("@/lib/cookies");
-        const token = getAuthTokenCookie();
-        const test = await fetchColleges(token);
-        console.log("============================", Object.values(test));
-        const response = await fetch(
-          `${STRAPI_URL}/api/posts?populate=*&sort=createdAt:desc`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const postsData = await getRecentPosts(20);
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch posts: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        const rawPosts = data.data || [];
-
-        // Transform Strapi posts to match Post type
-        const transformedPosts: Post[] = rawPosts.map(
-          (post: {
-            user?: {
-              name?: string;
-              username?: string;
-              avatar?: { url?: string };
-              profilePic?: { url?: string };
-              title?: string;
-              bio?: string;
-              course?: string;
-            };
-            author?: {
-              name?: string;
-              username?: string;
-              avatar?: { url?: string };
-              profilePic?: { url?: string };
-              title?: string;
-              bio?: string;
-              course?: string;
-            };
-            images?: Array<{ url?: string }>;
-            title?: string;
-            content?: string;
-            description?: string;
-            documentId?: string | number;
-            id?: string | number;
-            createdAt?: string;
-            publishedAt?: string;
-            likes?: Array<unknown>;
-            comments?: Array<unknown>;
-            likesCount?: number;
-            commentsCount?: number;
-            shares?: Array<unknown>;
-            sharesCount?: number;
-            isLiked?: boolean;
-            likedBy?: Array<unknown>;
-          }) => {
-            // Get user data
-            const user = (post.user || post.author || {}) as {
-              name?: string;
-              username?: string;
-              avatar?: { url?: string };
-              profilePic?: { url?: string };
-              title?: string;
-              bio?: string;
-              course?: string;
-            };
-            const userName = (user.name ||
-              user.username ||
-              "Unknown User") as string;
+        // Transform Supabase posts to match Post type
+        const transformedPosts: Post[] = postsData.map(
+          (post: SupabasePost & { author: StudentProfile | null }) => {
+            const author = post.author;
+            const userName = author?.name || "Unknown User";
             const userInitials = userName
               .split(" ")
               .map((n: string) => n[0])
@@ -127,22 +58,8 @@ export default function StudentsHomePage() {
               .toUpperCase()
               .slice(0, 2);
 
-            // Get avatar URL
-            const avatarUrl = getMediaUrl(
-              user.avatar?.url || user.profilePic?.url
-            );
-
-            // Get images - handle both array and single image
-            const images: string[] = post.images
-              ? post.images
-                  .map((img: { url?: string }) => getMediaUrl(img.url))
-                  .filter((url): url is string => url !== null)
-              : [];
-
             // Format date
-            const createdAt = new Date(
-              post.createdAt || post.publishedAt || Date.now()
-            );
+            const createdAt = new Date(post.created_at);
             const now = new Date();
             const diffInSeconds = Math.floor(
               (now.getTime() - createdAt.getTime()) / 1000
@@ -153,9 +70,7 @@ export default function StudentsHomePage() {
               postedAgo = "just now";
             } else if (diffInSeconds < 3600) {
               const minutes = Math.floor(diffInSeconds / 60);
-              postedAgo = `${minutes} ${
-                minutes === 1 ? "minute" : "minutes"
-              } ago`;
+              postedAgo = `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
             } else if (diffInSeconds < 86400) {
               const hours = Math.floor(diffInSeconds / 3600);
               postedAgo = `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
@@ -165,24 +80,23 @@ export default function StudentsHomePage() {
             }
 
             return {
-              id:
-                post.documentId?.toString() || post.id?.toString() || "unknown",
+              id: post.id,
               author: {
                 name: userName,
                 initials: userInitials,
-                avatarUrl: avatarUrl,
-                title: user.title || user.bio || user.course || undefined,
+                avatarUrl: author?.profile_pic || null,
+                title: author?.course || undefined,
               },
-              postedAgo: postedAgo,
+              postedAgo,
               message: post.description || "",
-              images: images.length > 0 ? images : undefined,
+              images: post.images || undefined,
               stats: {
-                likes: post.likes || post.likesCount || 0,
-                comments: post.comments || post.commentsCount || 0,
-                shares: post.shares || post.sharesCount || 0,
+                likes: post.likes || 0,
+                comments: 0,
+                shares: 0,
               },
-              isLiked: post.isLiked || false,
-              likedBy: post.likedBy,
+              isLiked: false,
+              likedBy: post.liked_by as string[] | undefined,
             };
           }
         );
@@ -196,55 +110,29 @@ export default function StudentsHomePage() {
     fetchPosts();
   }, []);
 
-  // Fetch global job postings
+  // Fetch global job postings from Supabase
   useEffect(() => {
     const fetchGlobalJobs = async () => {
       try {
-        const { getAuthTokenCookie } = await import("@/lib/cookies");
-        const token = getAuthTokenCookie();
-        const response = await fetch(
-          `${STRAPI_URL}/api/globaljobpostings?populate=*&sort=createdAt:desc`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        const data = await response.json();
-        const mockJobs: GlobalJob[] = data.data.map(
-          (item: {
-            data: {
-              title?: string;
-              jobType?: string;
-              experience?: string;
-              location?: string;
-              deadline?: string;
-              description?: string;
-              skills?: string[];
-              requirements?: string[];
-              benefits?: string[];
-              status?: string;
-              companyName?: string;
-              [key: string]: unknown;
-            };
-            [key: string]: unknown;
-          }) => ({
-            id: Math.random(),
-            title: item.data.title || "Unknown Job",
-            jobType: item.data.jobType || "Full-time",
-            experience: item.data.experience || "Entry Level",
-            location: item.data.location || "Remote",
-            deadline: item.data.deadline || new Date().toISOString(),
-            description: item.data.description || "",
-            skills: item.data.skills || [],
-            requirements: item.data.requirements || [],
-            benefits: item.data.benefits || [],
-            status: item.data.status || "Open",
-            companyName: item.data.companyName || "Unknown Company",
-            createdAt: item.createdAt,
-          })
-        );
+        const jobsData = await getGlobalJobPostings();
+        const mockJobs: GlobalJob[] = jobsData.map((item) => {
+          const data = (item.data as Record<string, unknown>) || {};
+          return {
+            id: item.id,
+            title: (data.title as string) || "Unknown Job",
+            jobType: (data.jobType as string) || "Full-time",
+            experience: (data.experience as string) || "Entry Level",
+            location: (data.location as string) || "Remote",
+            deadline: (data.deadline as string) || new Date().toISOString(),
+            description: (data.description as string) || "",
+            skills: (data.skills as string[]) || [],
+            requirements: (data.requirements as string[]) || [],
+            benefits: (data.benefits as string[]) || [],
+            status: (data.status as string) || "Open",
+            companyName: (data.companyName as string) || "Unknown Company",
+            createdAt: item.created_at,
+          };
+        });
         setGlobalJobs(mockJobs);
       } catch (error) {
         console.error("Error fetching global jobs:", error);

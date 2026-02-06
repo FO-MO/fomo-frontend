@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { getAuthToken } from "@/lib/strapi/auth";
-import { getStudentProfile_2 } from "@/lib/strapi/profile";
+import { getCurrentUser, getStudentProfile } from "@/lib/supabase";
 
 export interface VerificationState {
   isLoading: boolean;
@@ -31,32 +30,15 @@ export function useVerificationCheck(): VerificationState {
         return;
       }
 
-      const token = getAuthToken();
-      if (!token) {
-        setIsLoading(false);
-        return;
-      }
-
-      // Get user ID from cookies
-      let studentId: string | null = null;
-      try {
-        const { getUserCookie } = await import("@/lib/cookies");
-        const user = getUserCookie();
-        if (user) {
-          studentId = user?.documentId || null;
-        }
-      } catch (err) {
-        console.error("Failed to get user data:", err);
-      }
-
-      if (!studentId) {
+      const { user } = await getCurrentUser();
+      if (!user) {
         setIsLoading(false);
         return;
       }
 
       try {
         // Fetch student profile to get verification status
-        const profile = await getStudentProfile_2(studentId, token);
+        const profile = await getStudentProfile(user.id);
         const status = profile?.verification ?? 0; // Default to pending if not set
 
         setVerificationStatus(status);

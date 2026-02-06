@@ -7,9 +7,8 @@ import { useParams, useRouter } from "next/navigation";
 import { RefreshCw, Plus } from "lucide-react";
 import VideoPlayer from "@/components/student-section/VideoPlayer";
 import UploadVideoModal from "@/components/student-section/UploadVideoModal";
-import { fetchData } from "@/lib/strapi/strapiData";
+import { getClub } from "@/lib/supabase";
 import { getMediaUrl } from "@/lib/utils";
-import { getAuthTokenCookie } from "@/lib/cookies";
 
 type Video = {
   id: string;
@@ -30,8 +29,6 @@ type ClubDetails = {
   videos: Video[];
 };
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-
 export default function ClubVideosPage() {
   const params = useParams();
   const router = useRouter();
@@ -46,76 +43,29 @@ export default function ClubVideosPage() {
     const fetchClubVideos = async () => {
       try {
         setLoading(true);
-        const token = getAuthTokenCookie();
 
-        // Fetch specific club by documentId (clubId from URL)
-        const result = (await fetchData(
-          token,
-          `clubs/${clubId}?populate=*`
-        )) as {
-          data?: {
-            documentId?: string;
-            title?: string;
-            description?: string;
-            author?: string;
-            videos?: Array<{
-              id?: string | number;
-              name?: string;
-              title?: string;
-              thumbnail?: { url?: string };
-              createdAt?: string;
-              url?: string;
-            }>;
-            thumbnail?: Array<{ url?: string }>;
-          };
-        };
-        console.log("Fetched club data:", result);
-        console.log(
-          "Fetched club videos:",
-          getMediaUrl(result.data?.videos?.[0]?.url) || "No video URL"
-        );
+        // Fetch specific club by ID
+        const clubData = await getClub(clubId);
+        
+        if (!clubData) {
+          setClubDetails({
+            id: clubId,
+            name: "Club",
+            description: "Join expert-led clubs to access curated learning resources",
+            videos: [],
+          });
+          setLoading(false);
+          return;
+        }
 
         // Transform the data to match our ClubDetails type
-        const clubData = result.data || {};
         const transformedClub: ClubDetails = {
-          id: clubData.documentId || "unknown",
-          name: clubData.title || "Club",
-          description:
-            clubData.description ||
-            "Join expert-led clubs to access curated learning resources",
-          videos:
-            clubData.videos?.map(
-              (
-                video: {
-                  id?: string | number;
-                  name?: string;
-                  title?: string;
-                  thumbnail?: { url?: string };
-                  createdAt?: string;
-                  url?: string;
-                },
-                index: number
-              ) => ({
-                id: video.id?.toString() || index.toString(),
-                title: video.name || video.title || "Video",
-                thumbnailUrl:
-                  getMediaUrl(result.data?.thumbnail?.[index]?.url) ||
-                  undefined,
-                author: {
-                  name: clubData.author || "Unknown",
-                  avatarUrl: undefined,
-                },
-                date: video.createdAt
-                  ? new Date(video.createdAt).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })
-                  : "Recently",
-                videoUrl: getMediaUrl(video.url) || undefined,
-              })
-            ) || [],
+          id: clubData.id || "unknown",
+          name: clubData.name || "Club",
+          description: clubData.description || "Join expert-led clubs to access curated learning resources",
+          videos: [], // Club videos would come from a separate table if needed
         };
+        
         setClubDetails(transformedClub);
       } catch (error) {
         console.error("Error fetching club videos:", error);
@@ -140,44 +90,17 @@ export default function ClubVideosPage() {
   const handleRefresh = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("fomo_token");
+      const clubData = await getClub(clubId);
 
-      const response = await fetch(
-        `${BACKEND_URL}/api/clubs/${clubId}?populate=*`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch club data");
+      if (clubData) {
+        const transformedClub: ClubDetails = {
+          id: clubData.id || clubId,
+          name: clubData.name || "Club",
+          description: clubData.description || "Join expert-led clubs to access curated learning resources",
+          videos: [],
+        };
+        setClubDetails(transformedClub);
       }
-
-      const result = await response.json();
-      const clubData = result.data;
-
-      const transformedClub: ClubDetails = {
-        id: clubData.documentId,
-        name: clubData.title || "Club",
-        description:
-          clubData.description ||
-          "Join expert-led clubs to access curated learning resources",
-        videos:
-          clubData.videos?.map(
-            (
-              video: {
-                id?: string | number;
-                name?: string;
-                title?: string;
-                thumbnail?: { url?: string };
-                createdAt?: string;
-                url?: string;
-              },
-              index: number
-            ) => ({
-              id: video.id?.toString() || index.toString(),
-              title: video.name || video.title || "Video",
-              thumbnailUrl: getMediaUrl(video.thumbnail?.url) || undefined,
               author: {
                 name: clubData.author || "Unknown",
                 avatarUrl: undefined,

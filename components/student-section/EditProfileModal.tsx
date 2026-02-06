@@ -3,12 +3,7 @@ export const dynamic = "force-dynamic";
 
 import { X, Check, Camera, Image as ImageIcon, User } from "lucide-react";
 import { useState } from "react";
-import { getAuthToken } from "@/lib/strapi/auth";
-import { uploadImage } from "@/lib/strapi/strapiData";
-
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  "https://tbs9k5m4-1337.inc1.devtunnels.ms";
+import { getCurrentUser, getStudentProfile, updateStudentProfile, uploadProfilePic, uploadBackgroundImage } from "@/lib/supabase";
 
 // Predefined options
 const AVAILABLE_SKILLS = [
@@ -443,153 +438,47 @@ export default function EditProfileModal({
     e.preventDefault();
 
     try {
-      const token = getAuthToken();
-      if (!token) {
+      const { user } = await getCurrentUser();
+      if (!user) {
         alert("You must be signed in to update your profile.");
         return;
       }
 
-      // Get studentId from stored user
-      let studentId: string | null = null;
-      try {
-        const { getUserCookie } = await import("@/lib/cookies");
-        const parsed = getUserCookie();
-        if (parsed) {
-          studentId = (parsed?.documentId ?? parsed?.id ?? null) as
-            | string
-            | null;
-        }
-      } catch {
-        // ignore parse errors
-      }
-
       // Check for existing profile
-      let recordId: string | null = null;
-      if (studentId) {
-        const q = `${BACKEND_URL}/api/student-profiles?filters[studentId][$eq]=${encodeURIComponent(
-          studentId ?? ""
-        )}&populate=*`;
-        const res = await fetch(q, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) {
-          const json = await res.json();
-          const rec = json?.data?.[0];
-          recordId = rec?.documentId ?? null;
-        } else {
-          console.warn("Failed to check existing profile", res.status);
-        }
+      const existingProfile = await getStudentProfile(user.id);
+      
+      if (!existingProfile) {
+        alert("Profile not found. Please complete your profile setup first.");
+        return;
       }
 
-      // Build payload for Strapi (do NOT include email to prevent changes)
-      const payload: Record<string, unknown> = {
+      // Build payload for Supabase
+      const updateData = {
         name,
         about: bio,
-        college: institution,
+        college_id: institution, // This should ideally be a UUID from colleges table
         course: major,
-        graduationYear,
+        graduation_year: graduationYear ? parseInt(graduationYear) : undefined,
         location,
         skills: selectedSkills,
         interests: selectedInterests,
       };
 
-      // If record exists, try update. If update returns 404, fallback to create.
-      if (recordId) {
-        console.log({ data: payload });
-        const updateRes = await fetch(
-          `${BACKEND_URL}/api/student-profiles/${recordId}`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ data: payload }),
-          }
-        );
-
-        if (!updateRes.ok) {
-          const body = await updateRes.text();
-          console.warn("Update failed", updateRes.status, body);
-          if (updateRes.status === 404) {
-            // fallback to create
-            const createRes = await fetch(
-              `${BACKEND_URL}/api/student-profiles`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ data: { ...payload, studentId } }),
-              }
-            );
-            if (!createRes.ok) {
-              console.error("Create fallback failed", await createRes.text());
-              alert(
-                "Failed to create profile after update failed. See console."
-              );
-              return;
-            }
-          } else {
-            alert("Failed to update profile. See console for details.");
-            return;
-          }
-        }
-      } else {
-        // No record -> create
-        const createRes = await fetch(`${BACKEND_URL}/api/student-profiles`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ data: { ...payload, studentId } }),
-        });
-        if (!createRes.ok) {
-          console.error("Create failed", await createRes.text());
-          alert("Failed to create profile. See console for details.");
-          return;
-        }
+      // Update profile
+      const updatedProfile = await updateStudentProfile(existingProfile.id, updateData);
+      
+      if (!updatedProfile) {
+        alert("Failed to update profile. Please try again.");
+        return;
       }
 
       // Upload images only if new files are selected
-      if (profilePicFile || backgroundImgFile) {
-        // Get the profile ID for image upload
-        const profileRes = await fetch(
-          `${BACKEND_URL}/api/student-profiles?filters[studentId][$eq]=${encodeURIComponent(
-            studentId ?? ""
-          )}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+      if (profilePicFile) {
+        await uploadProfilePic(existingProfile.id, profilePicFile);
+      }
 
-        if (profileRes.ok) {
-          const profileData = await profileRes.json();
-          const profile = profileData?.data?.[0];
-          const profileId = profile?.id;
-
-          if (profileId && profilePicFile) {
-            await uploadImage(
-              token,
-              "api::student-profile.student-profile",
-              profileId,
-              "profilePic",
-              profilePicFile
-            );
-          }
-
-          if (profileId && backgroundImgFile) {
-            await uploadImage(
-              token,
-              "api::student-profile.student-profile",
-              profileId,
-              "backgroundImg",
-              backgroundImgFile
-            );
-          }
-        }
+      if (backgroundImgFile) {
+        await uploadBackgroundImage(existingProfile.id, backgroundImgFile);
       }
 
       // call parent onSave so UI updates locally (still include email for UI)

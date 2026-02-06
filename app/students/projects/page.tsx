@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 import React, { useState, useEffect } from "react";
 import ProjectCard, { Project } from "@/components/student-section/ProjectCard";
 import CreateProjectModal from "@/components/student-section/CreateProjectModal";
-import { fetchData } from "@/lib/strapi/strapiData";
+import { getProjects, getCurrentUser } from "@/lib/supabase";
 import { getMediaUrl } from "@/lib/utils";
 
 export default function StudentsPage() {
@@ -20,47 +20,36 @@ export default function StudentsPage() {
         setLoading(true);
         setError(null);
 
-        const { getAuthTokenCookie } = await import("@/lib/cookies");
-        const token = getAuthTokenCookie();
+        const { user } = await getCurrentUser();
 
-        if (!token) {
+        if (!user) {
           setError("Please log in to view projects");
           setProjects([]);
           setLoading(false);
           return;
         }
 
-        const data = (await fetchData(token, "projects?populate=*")) as {
-          data?: Array<{
-            documentId?: string;
-            title?: string;
-            description?: string;
-            author?: string;
-            skills?: string[];
-            no_member?: number;
-            image?: { url?: string };
-          }>;
-        };
+        const data = await getProjects();
 
-        if (!data || !data.data) {
+        if (!data) {
           setProjects([]);
           setLoading(false);
           return;
         }
 
-        const mockProjects: Project[] = data.data.map((project) => {
+        const mockProjects: Project[] = data.map((project) => {
           return {
-            id: project.documentId || "unknown",
+            id: project.id || "unknown",
             title: project.title || "Untitled Project",
             description: project.description || "No description",
             tags: ["Project"],
             creator: {
-              name: project.author || "Unknown Author",
+              name: project.owner_name || "Unknown Author",
               avatarUrl: null,
             },
-            skills: project.skills || [],
-            membersCount: project.no_member || 0,
-            imageUrl: getMediaUrl(project.image?.url),
+            skills: project.technologies || [],
+            membersCount: project.team_size || 0,
+            imageUrl: getMediaUrl(project.image_url),
             actions: [{ label: "Join Project", href: "#" }],
           };
         });

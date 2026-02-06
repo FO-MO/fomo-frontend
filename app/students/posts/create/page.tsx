@@ -6,8 +6,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { X, Image as ImageIcon, Smile, AtSign } from "lucide-react";
-import { postData, uploadImage } from "@/lib/strapi/strapiData";
-import { getStudentProfile } from "@/lib/strapi/profile";
+import { getCurrentUser, getStudentProfile, createPost, uploadPostMedia } from "@/lib/supabase";
 
 export default function CreatePostPage() {
   const router = useRouter();
@@ -25,10 +24,9 @@ export default function CreatePostPage() {
   React.useEffect(() => {
     const fetchUser = async () => {
       try {
-        const { getUserCookie } = await import("@/lib/cookies");
-        const user = getUserCookie();
+        const { user } = await getCurrentUser();
         if (user) {
-          const name = user?.username || "User";
+          const name = user.username || user.email || "User";
           setUserName(name);
           setUserInitials(
             name
@@ -98,82 +96,48 @@ export default function CreatePostPage() {
     setIsSubmitting(true);
 
     try {
-      const { getAuthTokenCookie, getUserCookie } = await import(
-        "@/lib/cookies"
-      );
-      const token = getAuthTokenCookie();
+      const { user } = await getCurrentUser();
 
-      if (!token) {
+      if (!user) {
         alert("You must be logged in to create a post");
         setIsSubmitting(false);
         router.push("/auth/login");
         return;
       }
 
-      // Get current user info for the post
-      const user = getUserCookie();
-      const profile = await getStudentProfile(user?.documentId || "", token);
+      // Get student profile
+      const profile = await getStudentProfile(user.id);
 
-      let userId = null;
-      if (user) {
-        userId = user?.documentId || user?.id;
+      if (!profile) {
+        alert("Please complete your profile first");
+        setIsSubmitting(false);
+        router.push("/auth/setup-profile");
+        return;
       }
 
-      // Create the post first without images
-      const postPayload = {
-        data: {
-          description: message,
-          user: {
-            connect: [userId],
-          },
-          author: {
-            connect: [profile?.documentId || profile?.id],
-          },
-        },
-      };
+      // Create the post
+      const post = await createPost({
+        student_profile_id: profile.id,
+        content: message,
+        post_type: 'text',
+      });
 
-      console.log(
-        "Creating post with payload:",
-        JSON.stringify(postPayload, null, 2)
-      );
-
-      const response = (await postData(token, "posts", postPayload)) as {
-        data?: { id: number | string; [key: string]: unknown };
-        error?: { message?: string; [key: string]: unknown };
-      };
-
-      if (response?.error) {
-        console.error("Error creating post:", response.error);
-        alert(
-          `Failed to create post: ${response.error?.message || "Unknown error"}`
-        );
+      if (!post) {
+        alert("Failed to create post. Please try again.");
         setIsSubmitting(false);
         return;
       }
 
-      console.log("Post created successfully:", response);
+      console.log("Post created successfully:", post);
 
-      // Now upload images if there are any, using the post ID
-      if (imageFiles.length > 0 && response?.data?.id) {
+      // Now upload images if there are any
+      if (imageFiles.length > 0) {
         console.log(`Uploading ${imageFiles.length} images to post...`);
         try {
-          // Upload each image and associate it with the post
           for (let i = 0; i < imageFiles.length; i++) {
             const file = imageFiles[i];
-            console.log(
-              `Uploading image ${i + 1}/${imageFiles.length}:`,
-              file.name
-            );
-
-            console.log("Calling data id:", response.data.id);
-
-            await uploadImage(
-              token,
-              "api::post.post",
-              Number(response.data.id),
-              "images",
-              file
-            );
+            console.log(`Uploading image ${i + 1}/${imageFiles.length}:`, file.name);
+            await uploadPostMedia(post.id, file);
           }
           console.log("All images uploaded successfully");
         } catch (error) {

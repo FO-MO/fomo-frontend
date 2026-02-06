@@ -6,7 +6,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import SearchCard, { Profile } from "@/components/student-section/SearchCard";
 import { Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { fetchData } from "@/lib/strapi/strapiData";
+import { createBrowserClient } from "@/lib/supabase/client";
 
 export default function SearchPage() {
   const router = useRouter();
@@ -21,35 +21,29 @@ export default function SearchPage() {
     const fetchProfiles = async () => {
       try {
         setLoading(true);
-        const { getAuthTokenCookie } = await import("@/lib/cookies");
-        const token = getAuthTokenCookie();
-        const data = (await fetchData(
-          token,
-          "student-profiles?populate=*"
-        )) as {
-          data?: Array<{
-            id?: string | number;
-            documentId?: string;
-            studentId?: string;
-            name?: string;
-            email?: string;
-            skills?: string[];
-            followers?: unknown[];
-            following?: unknown[];
-          }>;
-        };
+        const supabase = createBrowserClient();
+        
+        const { data, error } = await supabase
+          .from('student_profiles')
+          .select('*');
 
-        const fetchedProfiles: Profile[] = (data.data || []).map((search) => ({
-          id: Number(search.id) || 0,
-          documentId: search.studentId?.toString(),
-          studentId: search.studentId || "unknown",
-          name: search.name || "Unknown User",
-          email: search.email || "No email",
-          skills: search.skills || [],
-          followers: (search.followers || []).map(String),
-          following: (search.following || []).map(String),
+        if (error) {
+          console.error("Error fetching profiles:", error);
+          setProfiles([]);
+          return;
+        }
+
+        const fetchedProfiles: Profile[] = (data || []).map((profile) => ({
+          id: profile.id || 0,
+          documentId: profile.user_id,
+          studentId: profile.user_id || "unknown",
+          name: profile.name || "Unknown User",
+          email: profile.email || "No email",
+          skills: profile.skills || [],
+          followers: [],
+          following: [],
           isFollowing: false,
-          avatarUrl: null,
+          avatarUrl: profile.profile_pic_url || null,
         }));
 
         setProfiles(fetchedProfiles);

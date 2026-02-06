@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { getAuthToken } from '@/lib/strapi/auth'
-import { getStudentProfile } from '@/lib/strapi/profile'
+import { getCurrentUser, getStudentProfile } from '@/lib/supabase'
 
 /**
  * Hook to check if user has completed their profile
@@ -25,8 +24,8 @@ export function useProfileCheck(redirectIfIncomplete: boolean = true) {
         return
       }
 
-      const token = getAuthToken()
-      if (!token) {
+      const { user } = await getCurrentUser()
+      if (!user) {
         // Not authenticated, redirect to login
         if (redirectIfIncomplete) {
           router.push('/auth/login')
@@ -35,36 +34,15 @@ export function useProfileCheck(redirectIfIncomplete: boolean = true) {
         return
       }
 
-      // Get user ID from cookies
-      let studentId: string | null = null
-      try {
-        const { getUserCookie } = await import('@/lib/cookies')
-        const user = getUserCookie()
-        if (user) {
-          studentId = user?.documentId || null
-        }
-      } catch (err) {
-        console.error('Failed to get user data:', err)
-      }
-
-      if (!studentId) {
-        setIsLoading(false)
-        setHasProfile(false)
-        if (redirectIfIncomplete) {
-          router.push('/auth/setup-profile')
-        }
-        return
-      }
-
       // Check if profile exists and is complete
-      const profile = await getStudentProfile(studentId, token)
+      const profile = await getStudentProfile(user.id)
 
       const isComplete = !!(
         profile &&
         profile.name &&
         profile.college &&
         profile.course &&
-        profile.graduationYear &&
+        profile.graduation_year &&
         profile.about
       )
 
@@ -87,17 +65,16 @@ export function useProfileCheck(redirectIfIncomplete: boolean = true) {
  * Simple function to check if profile exists (non-hook version for server components)
  */
 export async function checkProfileExists(
-  studentId: string,
-  token: string
+  userId: string
 ): Promise<boolean> {
   try {
-    const profile = await getStudentProfile(studentId, token)
+    const profile = await getStudentProfile(userId)
     return !!(
       profile &&
       profile.name &&
       profile.college &&
       profile.course &&
-      profile.graduationYear &&
+      profile.graduation_year &&
       profile.about
     )
   } catch (err) {

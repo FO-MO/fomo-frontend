@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { getAuthToken, fetchMe } from "@/lib/strapi/auth";
+import { getCurrentUser, getEmployerProfile } from "@/lib/supabase";
 import EditEmployerProfileModal from "@/components/employee-section/EditEmployerProfileModal";
 import { getMediaUrl } from "@/lib/utils";
 
@@ -24,32 +24,6 @@ interface ProfileData {
   specialties: string;
 }
 
-interface EmployerProfile {
-  name?: string;
-  description?: string;
-  website?: string;
-  industry?: string;
-  location?: string;
-  phone?: string;
-  phoneNumber?: string;
-  email?: string;
-  noOfEmployers?: number;
-  specialties?: string;
-  profilePic?: {
-    url: string;
-  };
-  backgroundImg?: {
-    url: string;
-  };
-}
-
-interface UserMeResponse {
-  email?: string;
-  employer_profile?: EmployerProfile;
-}
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-
 export default function EmployerProfilePage() {
   const router = useRouter();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -58,66 +32,43 @@ export default function EmployerProfilePage() {
 
   const loadProfile = useCallback(async () => {
     try {
-      const token = getAuthToken();
-      if (!token) {
+      const { user } = await getCurrentUser();
+      if (!user) {
         router.push("/auth/employerlogin");
         return;
       }
 
-      // Get user data from API
-      let employerProfile: EmployerProfile | null = null;
-      let userEmail = "company@example.com";
-      try {
-        const data: UserMeResponse = await fetchMe(token);
-        if (data && data.employer_profile) {
-          employerProfile = data.employer_profile;
-          userEmail = data?.email || userEmail;
-        }
-      } catch (err) {
-        console.error("Failed to fetch user data:", err);
-      }
+      // Get employer profile from Supabase
+      const employerProfile = await getEmployerProfile(user.id);
 
       if (!employerProfile) {
-        router.push("/auth/employerlogin");
+        router.push("/auth/employer-setup-profile");
         return;
       }
-
-      // Transform profile data directly from employer_profile
-      const employerInfo: EmployerProfile = {
-        name: employerProfile.name || "Company Name",
-        description: employerProfile.description || "No description yet",
-        website: employerProfile.website || "Not specified",
-        industry: employerProfile.industry || "Not specified",
-        location: employerProfile.location || "Not specified",
-        phone: employerProfile.phoneNumber || employerProfile.phone || "N/A",
-        email: employerProfile.email || userEmail,
-        noOfEmployers: employerProfile.noOfEmployers || 0,
-        specialties: employerProfile.specialties || "Not specified",
-        profilePic: employerProfile.profilePic,
-        backgroundImg: employerProfile.backgroundImg,
-      };
 
       // Transform profile data
       const data: ProfileData = {
-        name: employerInfo.name || "Company Name",
-        email: userEmail,
-        phone: employerInfo.phone || "Not specified",
-        initials: employerInfo.name
-          ? employerInfo.name
+        name: employerProfile.company_name || "Company Name",
+        email: user.email || "company@example.com",
+        phone: employerProfile.phone || "Not specified",
+        initials: employerProfile.company_name
+          ? employerProfile.company_name
               .split(" ")
               .map((n: string) => n[0])
               .join("")
               .toUpperCase()
               .slice(0, 2)
           : "CO",
-        backgroundImageUrl: getMediaUrl(employerInfo.backgroundImg?.url),
-        profileImageUrl: getMediaUrl(employerInfo.profilePic?.url),
-        description: employerInfo.description || "No description yet",
-        website: employerInfo.website || "Not specified",
-        industry: employerInfo.industry || "Not specified",
-        location: employerInfo.location || "Not specified",
-        noOfEmployers: employerInfo.noOfEmployers || 0,
-        specialties: employerInfo.specialties || "Not specified",
+        backgroundImageUrl: getMediaUrl(employerProfile.background_image_url),
+        profileImageUrl: getMediaUrl(employerProfile.logo_url),
+        description: employerProfile.description || "No description yet",
+        website: employerProfile.website || "Not specified",
+        industry: employerProfile.industry || "Not specified",
+        location: employerProfile.location || "Not specified",
+        noOfEmployers: employerProfile.company_size ? parseInt(employerProfile.company_size) : 0,
+        specialties: Array.isArray(employerProfile.specialties) 
+          ? employerProfile.specialties.join(", ") 
+          : employerProfile.specialties || "Not specified",
       };
 
       setProfileData(data);
@@ -155,7 +106,7 @@ export default function EmployerProfilePage() {
         <div className="text-center">
           <p className="text-gray-600 font-medium mb-4">No profile found</p>
           <button
-            onClick={() => router.push("/auth/setup-profile")}
+            onClick={() => router.push("/auth/employer-setup-profile")}
             className="px-6 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800"
           >
             Create Profile

@@ -4,13 +4,7 @@ export const dynamic = "force-dynamic";
 
 import React, { useState, useEffect } from "react";
 import SubBar from "@/components/subBar";
-import {
-  fetchFromBackend,
-  postFetchFromBackend,
-  deleteglobaljobposting,
-  putglobaljobposting,
-} from "@/lib/tools";
-import { getAuthToken, fetchMe } from "@/lib/strapi/auth";
+import { getCurrentUser, getEmployerProfile, getEmployerGlobalJobPostings, createGlobalJobPosting, updateGlobalJobPosting, deleteGlobalJobPosting } from "@/lib/supabase";
 
 // Define types for the job data
 interface JobData {
@@ -36,6 +30,7 @@ export default function JobPostingsPage() {
   const [toastMessage, setToastMessage] = useState("Job posted successfully!");
   const [jobs, setJobs] = useState<Array<Record<string, unknown>>>([]);
   const [loading, setLoading] = useState(true);
+  const [employerProfileId, setEmployerProfileId] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{
     isOpen: boolean;
     jobId: string;
@@ -56,14 +51,30 @@ export default function JobPostingsPage() {
     const fetchJobs = async () => {
       try {
         setLoading(true);
-        // const user = await fetchMe();
-        // const test = getEmployerProfile(user.employer_profile);
-        const res = await fetchFromBackend(
-          "employer-profiles/snc25a7at88l2rb59r924wg1?populate=*"
-        );
-        const sortedJobs = sortJobsByIdDesc(res.globaljobpostings || []);
-        setJobs(sortedJobs);
-        // setJobs(res.globaljobpostings || []);
+        
+        const { user } = await getCurrentUser();
+        if (!user) {
+          setJobs([]);
+          setLoading(false);
+          return;
+        }
+
+        const profile = await getEmployerProfile(user.id);
+        if (!profile) {
+          setJobs([]);
+          setLoading(false);
+          return;
+        }
+
+        setEmployerProfileId(profile.id);
+        const jobPostings = await getEmployerGlobalJobPostings(profile.id);
+        
+        // Sort jobs by created_at desc (newest first)
+        const sortedJobs = (jobPostings || []).sort((a, b) => {
+          return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+        });
+        
+        setJobs(sortedJobs as unknown as Array<Record<string, unknown>>);
       } catch (error) {
         console.error("Error fetching jobs:", error);
         setJobs([]);
@@ -117,41 +128,38 @@ export default function JobPostingsPage() {
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
-    // Your Strapi collection only has ONE field called 'data' which is JSON YUUUHH THAS THE POINT
+    if (!employerProfileId) {
+      alert("Please complete your employer profile first");
+      return;
+    }
 
-    //every payload has a data field, and that contains all the data of fields you made...
-    //Here data is a json field you made..your just dumping some data in it
     const payload = {
-      data: {
-        data: {
-          // This goes into your JSON field
-          title: formData.title,
-          jobType: formData.jobType,
-          experience: formData.experience,
-          location: formData.location,
-          deadline: formData.deadline || null,
-          description: formData.description,
-          skills: formData.skills,
-          requirements: formData.requirements,
-          benefits: formData.benefits,
-          status: "Active",
-        },
-      },
+      employer_profile_id: employerProfileId,
+      title: formData.title,
+      job_type: formData.jobType,
+      experience_level: formData.experience,
+      location: formData.location,
+      application_deadline: formData.deadline || null,
+      description: formData.description,
+      skills_required: formData.skills,
+      requirements: formData.requirements,
+      benefits: formData.benefits,
+      status: "active",
     };
 
-    console.log(" Sending to JSON field:", JSON.stringify(payload, null, 2));
+    console.log("Sending payload:", JSON.stringify(payload, null, 2));
 
     try {
       let result;
 
       if (isEditing) {
-        // Use PUT request for editing existing job
+        // Use update for editing existing job
         console.log("Updating job with ID:", editingJobId);
-        result = await putglobaljobposting(editingJobId, payload);
+        result = await updateGlobalJobPosting(editingJobId, payload);
         console.log("Job updated successfully:", result);
       } else {
-        // Use POST request for creating new job
-        result = await postFetchFromBackend("globaljobpostings", payload);
+        // Use create for new job
+        result = await createGlobalJobPosting(payload);
         console.log("Job posted successfully:", result);
       }
 
@@ -178,9 +186,11 @@ export default function JobPostingsPage() {
       });
 
       // Refetch jobs to update the list
-      const updatedRes = await fetchFromBackend("globaljobpostings?populate=*");
-      const sortedUpdatedJobs = sortJobsByIdDesc(updatedRes || []);
-      setJobs(sortedUpdatedJobs);
+      const updatedJobs = await getEmployerGlobalJobPostings(employerProfileId);
+      const sortedUpdatedJobs = (updatedJobs || []).sort((a, b) => {
+        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+      });
+      setJobs(sortedUpdatedJobs as unknown as Array<Record<string, unknown>>);
     } catch (error) {
       console.error(
         isEditing ? " Error updating job:" : " Error posting job:",
@@ -221,7 +231,7 @@ export default function JobPostingsPage() {
     setIsDeleting(true);
 
     try {
-      const result = await deleteglobaljobposting(deleteConfirm.jobId);
+      const result = await deleteGlobalJobPosting(deleteConfirm.jobId);
       console.log("Delete function returned:", result);
 
       console.log("Job deleted successfully");
@@ -239,9 +249,13 @@ export default function JobPostingsPage() {
       setTimeout(() => setShowToast(false), 3000);
 
       // Refetch jobs to update the list
-      const updatedRes = await fetchFromBackend("globaljobpostings?populate=*");
-      const sortedUpdatedJobs = sortJobsByIdDesc(updatedRes || []);
-      setJobs(sortedUpdatedJobs);
+      if (employerProfileId) {
+        const updatedJobs = await getEmployerGlobalJobPostings(employerProfileId);
+        const sortedUpdatedJobs = (updatedJobs || []).sort((a, b) => {
+          return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+        });
+        setJobs(sortedUpdatedJobs as unknown as Array<Record<string, unknown>>);
+      }
     } catch (error) {
       console.error("Error deleting job:", error);
       alert(
@@ -264,8 +278,18 @@ export default function JobPostingsPage() {
 
   // Edit job handler
   const handleEditClick = (jobData: Record<string, unknown>) => {
-    const job = jobData.data as JobData;
-    const jobId = jobData.documentId as string;
+    const job = {
+      title: jobData.title as string,
+      jobType: jobData.job_type as string,
+      experience: jobData.experience_level as string,
+      location: jobData.location as string,
+      description: jobData.description as string,
+      skills: jobData.skills_required as string[],
+      requirements: jobData.requirements as string[],
+      benefits: jobData.benefits as string[],
+      deadline: jobData.application_deadline as string,
+    };
+    const jobId = jobData.id as string;
 
     console.log("Edit clicked for job:", job.title, "ID:", jobId);
 

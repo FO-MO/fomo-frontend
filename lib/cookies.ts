@@ -41,7 +41,7 @@ export function removeAuthTokenCookie(): void {
 
 interface UserData {
   documentId?: string;
-  id?: number;
+  id?: string | number;
   username?: string;
   email?: string;
   [key: string]: unknown; // Allow for additional properties

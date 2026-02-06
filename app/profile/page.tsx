@@ -6,10 +6,16 @@ import ProfileProjectCard from "@/components/student-section/ProfileProjectCard"
 import ProfileClubCard from "@/components/student-section/ProfileClubCard";
 import ProfileInternshipCard from "@/components/student-section/ProfileInternshipCard";
 import EditProfileModal from "@/components/student-section/EditProfileModal";
-import { getAuthToken } from "@/lib/strapi/auth";
-import { Internship, getStudentProfile_2 } from "@/lib/strapi/profile";
+import { getCurrentUser, getStudentProfile, getStudentProjects, getClubs } from "@/lib/supabase";
 
 type TabKey = "projects" | "clubs" | "internships";
+
+interface Internship {
+  role: string;
+  timeline?: string;
+  location?: string;
+  status?: string;
+}
 
 interface ProfileData {
   name: string;
@@ -26,7 +32,6 @@ interface ProfileData {
   bio: string;
   skills: string[];
   interests: string[];
-  // tabs: { key: TabKey; label: string }[];
   projects: {
     title: string;
     description: string;
@@ -54,40 +59,70 @@ function ProfilePageContent() {
 
   const loadProfile = useCallback(async () => {
     try {
-      const token = getAuthToken();
-      if (!token) {
+      const { user: currentUser, error: authError } = await getCurrentUser();
+      if (authError || !currentUser) {
         router.push("/auth/login");
         return;
       }
 
-      // If no userId in URL, redirect to login or show error
-      if (!userId) {
-        router.push("/auth/login");
-        return;
-      }
-
-      // Get current logged-in user ID to check if viewing own profile
-      let currentUserId: string | null = null;
-      try {
-        const userStr = localStorage.getItem("fomo_user");
-        if (userStr) {
-          const user = JSON.parse(userStr);
-          currentUserId = user?.documentId || user?.id || null;
-        }
-      } catch (err) {
-        console.error("Failed to parse user data:", err);
-      }
+      // If no userId in URL, use current user's ID
+      const profileUserId = userId || currentUser.id;
 
       // Check if viewing own profile
-      setIsOwnProfile(userId === currentUserId);
+      setIsOwnProfile(profileUserId === currentUser.id);
 
-      // Transform profile data
-      const data = await getStudentProfile_2(userId, token);
-      if (!data) {
+      // Fetch student profile
+      const profile = await getStudentProfile(profileUserId);
+      if (!profile) {
         setProfileData(null);
         setLoading(false);
         return;
       }
+
+      // Fetch related data
+      const [projects, clubs] = await Promise.all([
+        getStudentProjects(profile.id),
+        getClubs(),
+      ]);
+
+      // Transform profile data
+      const data: ProfileData = {
+        name: profile.name || "Unknown User",
+        email: currentUser.email || "",
+        initials: profile.name
+          ? profile.name
+              .split(" ")
+              .map((n: string) => n[0])
+              .join("")
+              .toUpperCase()
+              .slice(0, 2)
+          : "??",
+        backgroundImageUrl: profile.background_img || null,
+        profileImageUrl: profile.profile_pic || null,
+        followers: 0,
+        following: 0,
+        institution: profile.college || "Not specified",
+        major: profile.course || "Not specified",
+        graduationYear: profile.graduation_year?.toString() || "Not specified",
+        location: profile.location || "Not specified",
+        bio: profile.about || "",
+        skills: profile.skills || [],
+        interests: profile.interests || [],
+        projects: (projects || []).map((p: { title?: string | null; description?: string | null; skills?: unknown }) => ({
+          title: p.title || "Untitled",
+          description: p.description || "",
+          status: "ongoing",
+          tags: Array.isArray(p.skills) ? p.skills : [],
+        })),
+        clubs: (clubs || []).map((c: { title?: string | null; description?: string | null; skills?: unknown }) => ({
+          name: c.title || "Unknown Club",
+          description: c.description || "",
+          tags: Array.isArray(c.skills) ? c.skills : [],
+          badge: null,
+        })),
+        internships: [],
+      };
+
       setProfileData(data);
     } catch (err) {
       console.error("Failed to load profile:", err);

@@ -18,48 +18,8 @@ import {
   ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
-import { fetchData } from "@/lib/strapi/strapiData";
-import { getAuthTokenCookie } from "@/lib/cookies";
-
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  "https://tbs9k5m4-1337.inc1.devtunnels.ms";
-const token = getAuthTokenCookie();
-// const res = await fetch(`${BACKEND_URL}/api/project-details?populate=*`, {
-//   headers: { Authorization: `Bearer ${token}` },
-// });
-// const data = await res.json();
-
-// console.log("Fetched projects:", data.data);
-
-// const mockProject: ProjectDetails[] = data.data.map((project: any) => {
-//   return {
-//     id: project.documentId,
-//     title: project.title,
-//     description: project.description,
-//     githubUrl: project.githubURL,
-//     createdDate: project.date,
-//     owner: {
-//       name: project.Owner,
-//       // avatarUrl:
-//     },
-//     skills: project.skills,
-//     imageUrl: `${BACKEND_URL}${
-//       project.image?.formats?.medium?.url || project.image?.url
-//     }`,
-//     contributors: project.contributors || [],
-//     stats: {
-//       stars: project.stars,
-//       members: project.contributors.length || 0,
-//     },
-//     needHelp: project.needHelp?.map((item: any) => ({
-//       title: item.title,
-//       description: item.description,
-//       skills: item.skills,
-//     })),
-//     detailsMarkdown: project.projectDetail,
-//   };
-// });
+import { getProject, getProjectMembers } from "@/lib/supabase";
+import { getMediaUrl } from "@/lib/utils";
 
 // Configuration: Set to true to fetch data from GitHub
 const USE_GITHUB_DATA = false;
@@ -115,49 +75,51 @@ export default function ProjectDetailsPage() {
   }, [projectId]);
 
   const func = async () => {
-    const response = await fetchData(token, `projects/${projectId}?populate=*`);
-    console.log(response.data, projectId);
-    const responseData = response.data as Record<string, unknown>;
-    const project = responseData.project_detail as Record<string, unknown>; // single object
-    const imageData = responseData.image as { url?: string } | undefined;
-    const projectImage = project.image as { url?: string } | undefined;
-    const formattedProject: ProjectDetails = {
-      id: (project.documentId as string) || "",
-      title: (project.title as string) || "",
-      description: (project.description as string) || "",
-      githubUrl: project.githubURL as string | undefined,
-      createdDate: (project.date as string) || "",
-      owner: { name: (project.Owner as string) || "" },
-      skills: (project.skills as string[]) || [],
-      imageUrl: `${BACKEND_URL}${imageData?.url || projectImage?.url || ""}`,
-      contributors: (
-        (responseData.contributors as Record<string, unknown>[]) || []
-      ).map((contributor: Record<string, unknown>) => ({
-        name: (contributor.name as string) || "",
-        avatarUrl: "/icons/Profile.svg",
-        profileUrl: `/profile?userId=${contributor.studentId as string}`,
-      })),
-      stats: {
-        stars: (project.stars as number) || 0,
-        members: ((project.contributors as unknown[])?.length || 0) + 1,
-      },
-      needHelp:
-        (project.needHelp as Record<string, unknown>[])?.map(
-          (item: Record<string, unknown>) => ({
-            title: (item.title as string) || "",
-            description: (item.description as string) || "",
-            skills: (item.skills as string[]) || [],
-          })
-        ) || [],
-      detailsMarkdown: (project.projectDetail as string) || "",
-    };
-    setProject(formattedProject);
+    try {
+      const projectData = await getProject(projectId);
+      
+      if (!projectData) {
+        setError("Project not found");
+        setLoading(false);
+        return;
+      }
 
-    setLoading(false);
+      // Get project members
+      const members = await getProjectMembers(projectId);
+      
+      const formattedProject: ProjectDetails = {
+        id: projectData.id || "",
+        title: projectData.title || "",
+        description: projectData.description || "",
+        githubUrl: projectData.github_url || undefined,
+        createdDate: projectData.created_at || "",
+        owner: { name: projectData.owner_name || "" },
+        skills: projectData.technologies || [],
+        imageUrl: getMediaUrl(projectData.image_url),
+        contributors: (members || []).map((member) => ({
+          name: (member as { student_profile?: { name?: string } }).student_profile?.name || "",
+          avatarUrl: "/icons/Profile.svg",
+          profileUrl: `/profile?userId=${(member as { student_profile?: { user_id?: string } }).student_profile?.user_id || ""}`,
+        })),
+        stats: {
+          stars: 0,
+          members: (members?.length || 0) + 1,
+        },
+        needHelp: [], // This would come from a separate table if needed
+        detailsMarkdown: projectData.long_description || "",
+      };
+      
+      setProject(formattedProject);
+      setLoading(false);
 
-    // If GitHub integration is enabled, fetch additional data
-    if (USE_GITHUB_DATA && formattedProject.githubUrl) {
-      fetchGitHubData(formattedProject.githubUrl);
+      // If GitHub integration is enabled, fetch additional data
+      if (USE_GITHUB_DATA && formattedProject.githubUrl) {
+        fetchGitHubData(formattedProject.githubUrl);
+      }
+    } catch (err) {
+      console.error("Error fetching project:", err);
+      setError("Failed to load project");
+      setLoading(false);
     }
   };
 
