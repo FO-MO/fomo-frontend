@@ -13,48 +13,48 @@ export type Json =
 
 // Enum types matching the SQL schema
 export type IndustryEnum =
-  | 'Technology'
-  | 'Finance'
-  | 'Healthcare'
-  | 'Education'
-  | 'E-commerce'
-  | 'Manufacturing'
-  | 'Consulting'
-  | 'Marketing'
-  | 'Real Estate'
-  | 'Hospitality'
-  | 'Retail'
-  | 'Entertainment'
-  | 'Automotive'
-  | 'Energy'
-  | 'Telecommunications'
-  | 'Agriculture'
-  | 'Construction'
-  | 'Pharmaceuticals'
-  | 'Aerospace'
-  | 'Other';
+  | "Technology"
+  | "Finance"
+  | "Healthcare"
+  | "Education"
+  | "E-commerce"
+  | "Manufacturing"
+  | "Consulting"
+  | "Marketing"
+  | "Real Estate"
+  | "Hospitality"
+  | "Retail"
+  | "Entertainment"
+  | "Automotive"
+  | "Energy"
+  | "Telecommunications"
+  | "Agriculture"
+  | "Construction"
+  | "Pharmaceuticals"
+  | "Aerospace"
+  | "Other";
 
 export type CompanySizeEnum =
-  | 'employees_1to10'
-  | 'employees_11to50'
-  | 'employees_51to200'
-  | 'employees_201to500'
-  | 'employees_501to1000'
-  | 'employees_1001to5000'
-  | 'employees_5001to10000'
-  | 'employees_10000plus';
+  | "employees_1to10"
+  | "employees_11to50"
+  | "employees_51to200"
+  | "employees_201to500"
+  | "employees_501to1000"
+  | "employees_1001to5000"
+  | "employees_5001to10000"
+  | "employees_10000plus";
 
 export type CompanyTypeEnum =
-  | 'Startup'
-  | 'Small Business'
-  | 'Mid-size Company'
-  | 'Enterprise'
-  | 'Non-profit'
-  | 'Government'
-  | 'Educational Institution'
-  | 'Self-employed';
+  | "Startup"
+  | "Small Business"
+  | "Mid-size Company"
+  | "Enterprise"
+  | "Non-profit"
+  | "Government"
+  | "Educational Institution"
+  | "Self-employed";
 
-export type WorkModelEnum = 'Remote' | 'Hybrid' | 'On-site' | 'Flexible';
+export type WorkModelEnum = "Remote" | "Hybrid" | "On-site" | "Flexible";
 
 export interface Database {
   public: {
@@ -934,22 +934,25 @@ export interface Database {
 }
 
 // Helper types for easier usage
-export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row'];
-export type InsertTables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Insert'];
-export type UpdateTables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Update'];
+export type Tables<T extends keyof Database["public"]["Tables"]> =
+  Database["public"]["Tables"][T]["Row"];
+export type InsertTables<T extends keyof Database["public"]["Tables"]> =
+  Database["public"]["Tables"][T]["Insert"];
+export type UpdateTables<T extends keyof Database["public"]["Tables"]> =
+  Database["public"]["Tables"][T]["Update"];
 
 // Convenience type aliases
-export type UserProfile = Tables<'user_profiles'>;
-export type StudentProfile = Tables<'student_profiles'>;
-export type EmployerProfile = Tables<'employer_profiles'>;
-export type CollegeProfile = Tables<'college_profiles'>;
-export type CompanyProfile = Tables<'company_profiles'>;
-export type Post = Tables<'posts'>;
-export type Comment = Tables<'comments'>;
-export type Project = Tables<'projects'>;
-export type ProjectDetail = Tables<'project_details'>;
-export type Club = Tables<'clubs'>;
-export type Job = Tables<'jobs'>;
-export type GlobalJobPosting = Tables<'global_job_postings'>;
-export type CollegeSet = Tables<'college_sets'>;
-export type Certificate = Tables<'certificates'>;
+export type UserProfile = Tables<"user_profiles">;
+export type StudentProfile = Tables<"student_profiles">;
+export type EmployerProfile = Tables<"employer_profiles">;
+export type CollegeProfile = Tables<"college_profiles">;
+export type CompanyProfile = Tables<"company_profiles">;
+export type Post = Tables<"posts">;
+export type Comment = Tables<"comments">;
+export type Project = Tables<"projects">;
+export type ProjectDetail = Tables<"project_details">;
+export type Club = Tables<"clubs">;
+export type Job = Tables<"jobs">;
+export type GlobalJobPosting = Tables<"global_job_postings">;
+export type CollegeSet = Tables<"college_sets">;
+export type Certificate = Tables<"certificates">;

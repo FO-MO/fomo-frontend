@@ -4,7 +4,14 @@ export const dynamic = "force-dynamic";
 
 import React, { useState, useEffect } from "react";
 import SubBar from "@/components/subBar";
-import { getCurrentUser, getEmployerProfile, getEmployerGlobalJobPostings, createGlobalJobPosting, updateGlobalJobPosting, deleteGlobalJobPosting } from "@/lib/supabase";
+import {
+  getCurrentUser,
+  getEmployerProfile,
+  getEmployerGlobalJobPostings,
+  createGlobalJobPosting,
+  updateGlobalJobPosting,
+  deleteGlobalJobPosting,
+} from "@/lib/supabase";
 
 // Define types for the job data
 interface JobData {
@@ -30,7 +37,9 @@ export default function JobPostingsPage() {
   const [toastMessage, setToastMessage] = useState("Job posted successfully!");
   const [jobs, setJobs] = useState<Array<Record<string, unknown>>>([]);
   const [loading, setLoading] = useState(true);
-  const [employerProfileId, setEmployerProfileId] = useState<string | null>(null);
+  const [employerProfileId, setEmployerProfileId] = useState<string | null>(
+    null,
+  );
   const [deleteConfirm, setDeleteConfirm] = useState<{
     isOpen: boolean;
     jobId: string;
@@ -51,7 +60,7 @@ export default function JobPostingsPage() {
     const fetchJobs = async () => {
       try {
         setLoading(true);
-        
+
         const { user } = await getCurrentUser();
         if (!user) {
           setJobs([]);
@@ -68,12 +77,15 @@ export default function JobPostingsPage() {
 
         setEmployerProfileId(profile.id);
         const jobPostings = await getEmployerGlobalJobPostings(profile.id);
-        
+
         // Sort jobs by created_at desc (newest first)
         const sortedJobs = (jobPostings || []).sort((a, b) => {
-          return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+          return (
+            new Date(b.created_at || 0).getTime() -
+            new Date(a.created_at || 0).getTime()
+          );
         });
-        
+
         setJobs(sortedJobs as unknown as Array<Record<string, unknown>>);
       } catch (error) {
         console.error("Error fetching jobs:", error);
@@ -168,7 +180,7 @@ export default function JobPostingsPage() {
       setIsEditing(false);
       setEditingJobId("");
       setToastMessage(
-        isEditing ? "Job updated successfully!" : "Job posted successfully!"
+        isEditing ? "Job updated successfully!" : "Job posted successfully!",
       );
       setShowToast(true);
 
@@ -188,18 +200,21 @@ export default function JobPostingsPage() {
       // Refetch jobs to update the list
       const updatedJobs = await getEmployerGlobalJobPostings(employerProfileId);
       const sortedUpdatedJobs = (updatedJobs || []).sort((a, b) => {
-        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+        return (
+          new Date(b.created_at || 0).getTime() -
+          new Date(a.created_at || 0).getTime()
+        );
       });
       setJobs(sortedUpdatedJobs as unknown as Array<Record<string, unknown>>);
     } catch (error) {
       console.error(
         isEditing ? " Error updating job:" : " Error posting job:",
-        error
+        error,
       );
       alert(
         `Failed to ${isEditing ? "update" : "post"} job: ${
           error instanceof Error ? error.message : String(error)
-        }`
+        }`,
       );
     } finally {
       setTimeout(() => setShowToast(false), 3000);
@@ -250,9 +265,13 @@ export default function JobPostingsPage() {
 
       // Refetch jobs to update the list
       if (employerProfileId) {
-        const updatedJobs = await getEmployerGlobalJobPostings(employerProfileId);
+        const updatedJobs =
+          await getEmployerGlobalJobPostings(employerProfileId);
         const sortedUpdatedJobs = (updatedJobs || []).sort((a, b) => {
-          return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+          return (
+            new Date(b.created_at || 0).getTime() -
+            new Date(a.created_at || 0).getTime()
+          );
         });
         setJobs(sortedUpdatedJobs as unknown as Array<Record<string, unknown>>);
       }
@@ -261,7 +280,7 @@ export default function JobPostingsPage() {
       alert(
         `Failed to delete job: ${
           error instanceof Error ? error.message : String(error)
-        }`
+        }`,
       );
     } finally {
       setIsDeleting(false);
@@ -324,7 +343,7 @@ export default function JobPostingsPage() {
 
   const addItem = (
     field: "skills" | "requirements" | "benefits",
-    value: string
+    value: string,
   ) => {
     if (!value.trim()) return;
     setFormData({ ...formData, [field]: [...formData[field], value.trim()] });
@@ -465,7 +484,7 @@ export default function JobPostingsPage() {
                           <span>
                             Posted{" "}
                             {new Date(
-                              job.postedDate || Date.now()
+                              job.postedDate || Date.now(),
                             ).toLocaleDateString()}
                           </span>
                           {job.deadline && (
@@ -503,7 +522,7 @@ export default function JobPostingsPage() {
                                 "DocumentId:",
                                 x.documentId,
                                 "Id:",
-                                x.id
+                                x.id,
                               )
                             }
                           >

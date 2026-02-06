@@ -4,7 +4,7 @@
  */
 
 // Client
-export { getSupabaseClient, supabase } from './client';
+export { getSupabaseClient, supabase } from "./client";
 
 // Auth
 export {
@@ -23,7 +23,7 @@ export {
   type AuthResponse,
   type SignUpOptions,
   type SignInOptions,
-} from './auth';
+} from "./auth";
 
 // Database operations
 export {
@@ -94,7 +94,7 @@ export {
   fetchData,
   postData,
   putData,
-} from './database';
+} from "./database";
 
 // Storage
 export {
@@ -122,7 +122,7 @@ export {
   type BucketName,
   type UploadResult,
   type UploadOptions,
-} from './storage';
+} from "./storage";
 
 // Types
 export type {
@@ -149,4 +149,4 @@ export type {
   CompanySizeEnum,
   CompanyTypeEnum,
   WorkModelEnum,
-} from './types';
+} from "./types";

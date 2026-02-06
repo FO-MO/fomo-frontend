@@ -18,7 +18,7 @@ export function useVerificationCheck(): VerificationState {
   const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(true);
   const [verificationStatus, setVerificationStatus] = useState<number | null>(
-    null
+    null,
   );
 
   useEffect(() => {

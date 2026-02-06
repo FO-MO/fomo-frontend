@@ -5,7 +5,12 @@ export const dynamic = "force-dynamic";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Building2, Upload, Globe, MapPin, Users, Tag } from "lucide-react";
-import { getCurrentUser, createEmployerProfile, uploadEmployerLogo, uploadEmployerBackgroundImage } from "@/lib/supabase";
+import {
+  getCurrentUser,
+  createEmployerProfile,
+  uploadEmployerLogo,
+  uploadEmployerBackgroundImage,
+} from "@/lib/supabase";
 
 // Industry options
 const INDUSTRIES = [
@@ -78,7 +83,7 @@ export default function EmployerSetupProfile() {
   });
 
   const [profilePicPreview, setProfilePicPreview] = useState<string | null>(
-    null
+    null,
   );
   const [backgroundImgPreview, setBackgroundImgPreview] = useState<
     string | null
@@ -121,7 +126,7 @@ export default function EmployerSetupProfile() {
 
   // Handle background image upload
   const handleBackgroundImgChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -162,7 +167,7 @@ export default function EmployerSetupProfile() {
   const filteredSpecialties = COMMON_SPECIALTIES.filter(
     (s) =>
       s.toLowerCase().includes(specialtySearch.toLowerCase()) &&
-      !formData.specialties.includes(s)
+      !formData.specialties.includes(s),
   );
 
   // Validate step
@@ -237,11 +242,13 @@ export default function EmployerSetupProfile() {
         company_size: formData.noOfEmployers || null,
         specialties: formData.specialties,
         email: formData.email,
-        phone: formData.phoneNumber ? `${formData.country_code}${formData.phoneNumber}` : null,
+        phone: formData.phoneNumber
+          ? `${formData.country_code}${formData.phoneNumber}`
+          : null,
       };
 
       const createdProfile = await createEmployerProfile(profileData);
-      
+
       if (!createdProfile) {
         throw new Error("Failed to create profile");
       }
@@ -257,7 +264,10 @@ export default function EmployerSetupProfile() {
 
       if (backgroundImgFile) {
         try {
-          await uploadEmployerBackgroundImage(createdProfile.id, backgroundImgFile);
+          await uploadEmployerBackgroundImage(
+            createdProfile.id,
+            backgroundImgFile,
+          );
         } catch (error) {
           console.error("Failed to upload background image:", error);
         }
@@ -270,7 +280,7 @@ export default function EmployerSetupProfile() {
       alert(
         `Failed to create profile: ${
           error instanceof Error ? error.message : "Unknown error"
-        }`
+        }`,
       );
     } finally {
       setLoading(false);

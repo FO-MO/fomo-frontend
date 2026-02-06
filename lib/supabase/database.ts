@@ -2,7 +2,7 @@
  * Supabase Database Utilities
  * CRUD operations for all tables - replaces Strapi API calls
  */
-import { getSupabaseClient } from './client';
+import { getSupabaseClient } from "./client";
 import type {
   StudentProfile,
   EmployerProfile,
@@ -20,7 +20,7 @@ import type {
   InsertTables,
   UpdateTables,
   Json,
-} from './types';
+} from "./types";
 
 // ============================================
 // STUDENT PROFILES
@@ -30,17 +30,19 @@ import type {
  * Get student profile by user ID
  * Replaces: getStudentProfile(studentId, token)
  */
-export async function getStudentProfile(userId: string): Promise<StudentProfile | null> {
+export async function getStudentProfile(
+  userId: string,
+): Promise<StudentProfile | null> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
-    .from('student_profiles')
-    .select('*')
-    .eq('user_id', userId)
+    .from("student_profiles")
+    .select("*")
+    .eq("user_id", userId)
     .single();
 
   if (error) {
-    console.error('Failed to fetch student profile:', error);
+    console.error("Failed to fetch student profile:", error);
     return null;
   }
 
@@ -50,17 +52,19 @@ export async function getStudentProfile(userId: string): Promise<StudentProfile 
 /**
  * Get student profile by student ID (legacy support)
  */
-export async function getStudentProfileByStudentId(studentId: string): Promise<StudentProfile | null> {
+export async function getStudentProfileByStudentId(
+  studentId: string,
+): Promise<StudentProfile | null> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
-    .from('student_profiles')
-    .select('*')
-    .eq('student_id', studentId)
+    .from("student_profiles")
+    .select("*")
+    .eq("student_id", studentId)
     .single();
 
   if (error) {
-    console.error('Failed to fetch student profile:', error);
+    console.error("Failed to fetch student profile:", error);
     return null;
   }
 
@@ -70,31 +74,33 @@ export async function getStudentProfileByStudentId(studentId: string): Promise<S
 /**
  * Get student profile with certificates
  */
-export async function getStudentProfileWithCertificates(userId: string): Promise<{
+export async function getStudentProfileWithCertificates(
+  userId: string,
+): Promise<{
   profile: StudentProfile | null;
   certificates: Certificate[];
 }> {
   const supabase = getSupabaseClient();
 
   const { data: profile, error: profileError } = await supabase
-    .from('student_profiles')
-    .select('*')
-    .eq('user_id', userId)
+    .from("student_profiles")
+    .select("*")
+    .eq("user_id", userId)
     .single();
 
   if (profileError) {
-    console.error('Failed to fetch student profile:', profileError);
+    console.error("Failed to fetch student profile:", profileError);
     return { profile: null, certificates: [] };
   }
 
   const { data: certificates, error: certError } = await supabase
-    .from('certificates')
-    .select('*')
-    .eq('student_profile_id', profile.id)
-    .order('sort_order', { ascending: true });
+    .from("certificates")
+    .select("*")
+    .eq("student_profile_id", profile.id)
+    .order("sort_order", { ascending: true });
 
   if (certError) {
-    console.error('Failed to fetch certificates:', certError);
+    console.error("Failed to fetch certificates:", certError);
     return { profile, certificates: [] };
   }
 
@@ -106,18 +112,18 @@ export async function getStudentProfileWithCertificates(userId: string): Promise
  * Replaces: createStudentProfile(data, token)
  */
 export async function createStudentProfile(
-  data: InsertTables<'student_profiles'>
+  data: InsertTables<"student_profiles">,
 ): Promise<StudentProfile | null> {
   const supabase = getSupabaseClient();
 
   const { data: profile, error } = await supabase
-    .from('student_profiles')
+    .from("student_profiles")
     .insert(data)
     .select()
     .single();
 
   if (error) {
-    console.error('Failed to create student profile:', error);
+    console.error("Failed to create student profile:", error);
     return null;
   }
 
@@ -130,19 +136,19 @@ export async function createStudentProfile(
  */
 export async function updateStudentProfile(
   profileId: string,
-  data: UpdateTables<'student_profiles'>
+  data: UpdateTables<"student_profiles">,
 ): Promise<StudentProfile | null> {
   const supabase = getSupabaseClient();
 
   const { data: profile, error } = await supabase
-    .from('student_profiles')
+    .from("student_profiles")
     .update({ ...data, updated_at: new Date().toISOString() })
-    .eq('id', profileId)
+    .eq("id", profileId)
     .select()
     .single();
 
   if (error) {
-    console.error('Failed to update student profile:', error);
+    console.error("Failed to update student profile:", error);
     return null;
   }
 
@@ -153,7 +159,9 @@ export async function updateStudentProfile(
  * Check if student has completed profile
  * Replaces: hasCompletedProfile(studentId, token)
  */
-export async function hasCompletedStudentProfile(userId: string): Promise<boolean> {
+export async function hasCompletedStudentProfile(
+  userId: string,
+): Promise<boolean> {
   const profile = await getStudentProfile(userId);
   if (!profile) return false;
 
@@ -173,17 +181,19 @@ export async function hasCompletedStudentProfile(userId: string): Promise<boolea
 /**
  * Get employer profile by user ID
  */
-export async function getEmployerProfile(userId: string): Promise<EmployerProfile | null> {
+export async function getEmployerProfile(
+  userId: string,
+): Promise<EmployerProfile | null> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
-    .from('employer_profiles')
-    .select('*')
-    .eq('user_id', userId)
+    .from("employer_profiles")
+    .select("*")
+    .eq("user_id", userId)
     .single();
 
   if (error) {
-    console.error('Failed to fetch employer profile:', error);
+    console.error("Failed to fetch employer profile:", error);
     return null;
   }
 
@@ -194,18 +204,18 @@ export async function getEmployerProfile(userId: string): Promise<EmployerProfil
  * Create employer profile
  */
 export async function createEmployerProfile(
-  data: InsertTables<'employer_profiles'>
+  data: InsertTables<"employer_profiles">,
 ): Promise<EmployerProfile | null> {
   const supabase = getSupabaseClient();
 
   const { data: profile, error } = await supabase
-    .from('employer_profiles')
+    .from("employer_profiles")
     .insert(data)
     .select()
     .single();
 
   if (error) {
-    console.error('Failed to create employer profile:', error);
+    console.error("Failed to create employer profile:", error);
     return null;
   }
 
@@ -217,19 +227,19 @@ export async function createEmployerProfile(
  */
 export async function updateEmployerProfile(
   profileId: string,
-  data: UpdateTables<'employer_profiles'>
+  data: UpdateTables<"employer_profiles">,
 ): Promise<EmployerProfile | null> {
   const supabase = getSupabaseClient();
 
   const { data: profile, error } = await supabase
-    .from('employer_profiles')
+    .from("employer_profiles")
     .update({ ...data, updated_at: new Date().toISOString() })
-    .eq('id', profileId)
+    .eq("id", profileId)
     .select()
     .single();
 
   if (error) {
-    console.error('Failed to update employer profile:', error);
+    console.error("Failed to update employer profile:", error);
     return null;
   }
 
@@ -244,17 +254,19 @@ export async function updateEmployerProfile(
  * Get college profile by user ID
  * Replaces: getCollegeProfile(token) and getCollegeProfileById(token, userId)
  */
-export async function getCollegeProfile(userId: string): Promise<CollegeProfile | null> {
+export async function getCollegeProfile(
+  userId: string,
+): Promise<CollegeProfile | null> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
-    .from('college_profiles')
-    .select('*')
-    .eq('user_id', userId)
+    .from("college_profiles")
+    .select("*")
+    .eq("user_id", userId)
     .single();
 
   if (error) {
-    console.error('Failed to fetch college profile:', error);
+    console.error("Failed to fetch college profile:", error);
     return null;
   }
 
@@ -266,18 +278,18 @@ export async function getCollegeProfile(userId: string): Promise<CollegeProfile 
  * Replaces: createCollegeProfile(data, token)
  */
 export async function createCollegeProfile(
-  data: InsertTables<'college_profiles'>
+  data: InsertTables<"college_profiles">,
 ): Promise<CollegeProfile | null> {
   const supabase = getSupabaseClient();
 
   const { data: profile, error } = await supabase
-    .from('college_profiles')
+    .from("college_profiles")
     .insert(data)
     .select()
     .single();
 
   if (error) {
-    console.error('Failed to create college profile:', error);
+    console.error("Failed to create college profile:", error);
     return null;
   }
 
@@ -290,19 +302,19 @@ export async function createCollegeProfile(
  */
 export async function updateCollegeProfile(
   profileId: string,
-  data: UpdateTables<'college_profiles'>
+  data: UpdateTables<"college_profiles">,
 ): Promise<CollegeProfile | null> {
   const supabase = getSupabaseClient();
 
   const { data: profile, error } = await supabase
-    .from('college_profiles')
+    .from("college_profiles")
     .update({ ...data, updated_at: new Date().toISOString() })
-    .eq('id', profileId)
+    .eq("id", profileId)
     .select()
     .single();
 
   if (error) {
-    console.error('Failed to update college profile:', error);
+    console.error("Failed to update college profile:", error);
     return null;
   }
 
@@ -313,16 +325,18 @@ export async function updateCollegeProfile(
  * Delete college profile
  * Replaces: deleteCollegeProfile(documentId, token)
  */
-export async function deleteCollegeProfile(profileId: string): Promise<boolean> {
+export async function deleteCollegeProfile(
+  profileId: string,
+): Promise<boolean> {
   const supabase = getSupabaseClient();
 
   const { error } = await supabase
-    .from('college_profiles')
+    .from("college_profiles")
     .delete()
-    .eq('id', profileId);
+    .eq("id", profileId);
 
   if (error) {
-    console.error('Failed to delete college profile:', error);
+    console.error("Failed to delete college profile:", error);
     return false;
   }
 
@@ -340,28 +354,32 @@ export async function deleteCollegeProfile(profileId: string): Promise<boolean> 
 export async function getCollegeNames(): Promise<string[]> {
   const supabase = getSupabaseClient();
 
-  const { data, error } = await supabase
-    .from('college_sets')
-    .select('name');
+  const { data, error } = await supabase.from("college_sets").select("name");
 
   if (error) {
-    console.error('Failed to fetch college names:', error);
+    console.error("Failed to fetch college names:", error);
     return [];
   }
 
-  return (data as Array<{ name: string | null }>)?.map((entry) => entry.name).filter((name): name is string => !!name) || [];
+  return (
+    (data as Array<{ name: string | null }>)
+      ?.map((entry) => entry.name)
+      .filter((name): name is string => !!name) || []
+  );
 }
 
 /**
  * Check if college code exists
  */
-export async function checkCollegeCode(code: string): Promise<{ found: boolean; name?: string }> {
+export async function checkCollegeCode(
+  code: string,
+): Promise<{ found: boolean; name?: string }> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
-    .from('college_sets')
-    .select('name')
-    .eq('code', code)
+    .from("college_sets")
+    .select("name")
+    .eq("code", code)
     .single();
 
   if (error || !data) {
@@ -379,12 +397,12 @@ export async function getCollegeSets(): Promise<CollegeSet[]> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
-    .from('college_sets')
-    .select('*')
-    .order('name', { ascending: true });
+    .from("college_sets")
+    .select("*")
+    .order("name", { ascending: true });
 
   if (error) {
-    console.error('Failed to fetch college sets:', error);
+    console.error("Failed to fetch college sets:", error);
     return [];
   }
 
@@ -399,22 +417,28 @@ export async function getCollegeSets(): Promise<CollegeSet[]> {
  * Get recent posts with author info
  * Replaces: fetching posts from /api/posts?populate=*&sort=createdAt:desc
  */
-export async function getRecentPosts(limit = 20): Promise<Array<Post & { 
-  author: StudentProfile | null;
-}>> {
+export async function getRecentPosts(limit = 20): Promise<
+  Array<
+    Post & {
+      author: StudentProfile | null;
+    }
+  >
+> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
-    .from('posts')
-    .select(`
+    .from("posts")
+    .select(
+      `
       *,
       author:student_profiles!author_id (*)
-    `)
-    .order('created_at', { ascending: false })
+    `,
+    )
+    .order("created_at", { ascending: false })
     .limit(limit);
 
   if (error) {
-    console.error('Failed to fetch posts:', error);
+    console.error("Failed to fetch posts:", error);
     return [];
   }
 
@@ -428,13 +452,13 @@ export async function getUserPosts(userId: string): Promise<Post[]> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
-    .from('posts')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false });
+    .from("posts")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
 
   if (error) {
-    console.error('Failed to fetch user posts:', error);
+    console.error("Failed to fetch user posts:", error);
     return [];
   }
 
@@ -444,17 +468,19 @@ export async function getUserPosts(userId: string): Promise<Post[]> {
 /**
  * Get posts by student profile
  */
-export async function getPostsByStudentProfile(studentProfileId: string): Promise<Post[]> {
+export async function getPostsByStudentProfile(
+  studentProfileId: string,
+): Promise<Post[]> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
-    .from('posts')
-    .select('*')
-    .eq('author_id', studentProfileId)
-    .order('created_at', { ascending: false });
+    .from("posts")
+    .select("*")
+    .eq("author_id", studentProfileId)
+    .order("created_at", { ascending: false });
 
   if (error) {
-    console.error('Failed to fetch posts:', error);
+    console.error("Failed to fetch posts:", error);
     return [];
   }
 
@@ -464,17 +490,19 @@ export async function getPostsByStudentProfile(studentProfileId: string): Promis
 /**
  * Create a post
  */
-export async function createPost(data: InsertTables<'posts'>): Promise<Post | null> {
+export async function createPost(
+  data: InsertTables<"posts">,
+): Promise<Post | null> {
   const supabase = getSupabaseClient();
 
   const { data: post, error } = await supabase
-    .from('posts')
+    .from("posts")
     .insert(data)
     .select()
     .single();
 
   if (error) {
-    console.error('Failed to create post:', error);
+    console.error("Failed to create post:", error);
     return null;
   }
 
@@ -486,19 +514,19 @@ export async function createPost(data: InsertTables<'posts'>): Promise<Post | nu
  */
 export async function updatePost(
   postId: string,
-  data: UpdateTables<'posts'>
+  data: UpdateTables<"posts">,
 ): Promise<Post | null> {
   const supabase = getSupabaseClient();
 
   const { data: post, error } = await supabase
-    .from('posts')
+    .from("posts")
     .update({ ...data, updated_at: new Date().toISOString() })
-    .eq('id', postId)
+    .eq("id", postId)
     .select()
     .single();
 
   if (error) {
-    console.error('Failed to update post:', error);
+    console.error("Failed to update post:", error);
     return null;
   }
 
@@ -511,13 +539,10 @@ export async function updatePost(
 export async function deletePost(postId: string): Promise<boolean> {
   const supabase = getSupabaseClient();
 
-  const { error } = await supabase
-    .from('posts')
-    .delete()
-    .eq('id', postId);
+  const { error } = await supabase.from("posts").delete().eq("id", postId);
 
   if (error) {
-    console.error('Failed to delete post:', error);
+    console.error("Failed to delete post:", error);
     return false;
   }
 
@@ -527,18 +552,21 @@ export async function deletePost(postId: string): Promise<boolean> {
 /**
  * Like a post
  */
-export async function likePost(postId: string, userId: string): Promise<boolean> {
+export async function likePost(
+  postId: string,
+  userId: string,
+): Promise<boolean> {
   const supabase = getSupabaseClient();
 
   // First, get the current post data
   const { data: post, error: fetchError } = await supabase
-    .from('posts')
-    .select('likes, liked_by')
-    .eq('id', postId)
+    .from("posts")
+    .select("likes, liked_by")
+    .eq("id", postId)
     .single();
 
   if (fetchError || !post) {
-    console.error('Failed to fetch post:', fetchError);
+    console.error("Failed to fetch post:", fetchError);
     return false;
   }
 
@@ -548,15 +576,15 @@ export async function likePost(postId: string, userId: string): Promise<boolean>
   }
 
   const { error } = await supabase
-    .from('posts')
+    .from("posts")
     .update({
       likes: post.likes + 1,
       liked_by: [...likedBy, userId],
     })
-    .eq('id', postId);
+    .eq("id", postId);
 
   if (error) {
-    console.error('Failed to like post:', error);
+    console.error("Failed to like post:", error);
     return false;
   }
 
@@ -566,17 +594,20 @@ export async function likePost(postId: string, userId: string): Promise<boolean>
 /**
  * Unlike a post
  */
-export async function unlikePost(postId: string, userId: string): Promise<boolean> {
+export async function unlikePost(
+  postId: string,
+  userId: string,
+): Promise<boolean> {
   const supabase = getSupabaseClient();
 
   const { data: post, error: fetchError } = await supabase
-    .from('posts')
-    .select('likes, liked_by')
-    .eq('id', postId)
+    .from("posts")
+    .select("likes, liked_by")
+    .eq("id", postId)
     .single();
 
   if (fetchError || !post) {
-    console.error('Failed to fetch post:', fetchError);
+    console.error("Failed to fetch post:", fetchError);
     return false;
   }
 
@@ -586,15 +617,15 @@ export async function unlikePost(postId: string, userId: string): Promise<boolea
   }
 
   const { error } = await supabase
-    .from('posts')
+    .from("posts")
     .update({
       likes: Math.max(0, post.likes - 1),
-      liked_by: likedBy.filter(id => id !== userId),
+      liked_by: likedBy.filter((id) => id !== userId),
     })
-    .eq('id', postId);
+    .eq("id", postId);
 
   if (error) {
-    console.error('Failed to unlike post:', error);
+    console.error("Failed to unlike post:", error);
     return false;
   }
 
@@ -612,13 +643,13 @@ export async function getPostComments(postId: string): Promise<Comment[]> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
-    .from('comments')
-    .select('*')
-    .eq('post_id', postId)
-    .order('created_at', { ascending: true });
+    .from("comments")
+    .select("*")
+    .eq("post_id", postId)
+    .order("created_at", { ascending: true });
 
   if (error) {
-    console.error('Failed to fetch comments:', error);
+    console.error("Failed to fetch comments:", error);
     return [];
   }
 
@@ -628,17 +659,19 @@ export async function getPostComments(postId: string): Promise<Comment[]> {
 /**
  * Create a comment
  */
-export async function createComment(data: InsertTables<'comments'>): Promise<Comment | null> {
+export async function createComment(
+  data: InsertTables<"comments">,
+): Promise<Comment | null> {
   const supabase = getSupabaseClient();
 
   const { data: comment, error } = await supabase
-    .from('comments')
+    .from("comments")
     .insert(data)
     .select()
     .single();
 
   if (error) {
-    console.error('Failed to create comment:', error);
+    console.error("Failed to create comment:", error);
     return null;
   }
 
@@ -652,12 +685,12 @@ export async function deleteComment(commentId: string): Promise<boolean> {
   const supabase = getSupabaseClient();
 
   const { error } = await supabase
-    .from('comments')
+    .from("comments")
     .delete()
-    .eq('id', commentId);
+    .eq("id", commentId);
 
   if (error) {
-    console.error('Failed to delete comment:', error);
+    console.error("Failed to delete comment:", error);
     return false;
   }
 
@@ -675,12 +708,12 @@ export async function getProjects(): Promise<Project[]> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
-    .from('projects')
-    .select('*')
-    .order('created_at', { ascending: false });
+    .from("projects")
+    .select("*")
+    .order("created_at", { ascending: false });
 
   if (error) {
-    console.error('Failed to fetch projects:', error);
+    console.error("Failed to fetch projects:", error);
     return [];
   }
 
@@ -690,17 +723,19 @@ export async function getProjects(): Promise<Project[]> {
 /**
  * Get projects by student profile
  */
-export async function getStudentProjects(studentProfileId: string): Promise<Project[]> {
+export async function getStudentProjects(
+  studentProfileId: string,
+): Promise<Project[]> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
-    .from('projects')
-    .select('*')
-    .eq('student_profile_id', studentProfileId)
-    .order('created_at', { ascending: false });
+    .from("projects")
+    .select("*")
+    .eq("student_profile_id", studentProfileId)
+    .order("created_at", { ascending: false });
 
   if (error) {
-    console.error('Failed to fetch student projects:', error);
+    console.error("Failed to fetch student projects:", error);
     return [];
   }
 
@@ -717,24 +752,24 @@ export async function getProjectWithDetails(projectId: string): Promise<{
   const supabase = getSupabaseClient();
 
   const { data: project, error: projectError } = await supabase
-    .from('projects')
-    .select('*')
-    .eq('id', projectId)
+    .from("projects")
+    .select("*")
+    .eq("id", projectId)
     .single();
 
   if (projectError) {
-    console.error('Failed to fetch project:', projectError);
+    console.error("Failed to fetch project:", projectError);
     return { project: null, details: null };
   }
 
   const { data: details, error: detailsError } = await supabase
-    .from('project_details')
-    .select('*')
-    .eq('project_id', projectId)
+    .from("project_details")
+    .select("*")
+    .eq("project_id", projectId)
     .single();
 
-  if (detailsError && detailsError.code !== 'PGRST116') {
-    console.error('Failed to fetch project details:', detailsError);
+  if (detailsError && detailsError.code !== "PGRST116") {
+    console.error("Failed to fetch project details:", detailsError);
   }
 
   return { project, details: details || null };
@@ -743,17 +778,19 @@ export async function getProjectWithDetails(projectId: string): Promise<{
 /**
  * Create a project
  */
-export async function createProject(data: InsertTables<'projects'>): Promise<Project | null> {
+export async function createProject(
+  data: InsertTables<"projects">,
+): Promise<Project | null> {
   const supabase = getSupabaseClient();
 
   const { data: project, error } = await supabase
-    .from('projects')
+    .from("projects")
     .insert(data)
     .select()
     .single();
 
   if (error) {
-    console.error('Failed to create project:', error);
+    console.error("Failed to create project:", error);
     return null;
   }
 
@@ -765,19 +802,19 @@ export async function createProject(data: InsertTables<'projects'>): Promise<Pro
  */
 export async function updateProject(
   projectId: string,
-  data: UpdateTables<'projects'>
+  data: UpdateTables<"projects">,
 ): Promise<Project | null> {
   const supabase = getSupabaseClient();
 
   const { data: project, error } = await supabase
-    .from('projects')
+    .from("projects")
     .update({ ...data, updated_at: new Date().toISOString() })
-    .eq('id', projectId)
+    .eq("id", projectId)
     .select()
     .single();
 
   if (error) {
-    console.error('Failed to update project:', error);
+    console.error("Failed to update project:", error);
     return null;
   }
 
@@ -791,12 +828,12 @@ export async function deleteProject(projectId: string): Promise<boolean> {
   const supabase = getSupabaseClient();
 
   const { error } = await supabase
-    .from('projects')
+    .from("projects")
     .delete()
-    .eq('id', projectId);
+    .eq("id", projectId);
 
   if (error) {
-    console.error('Failed to delete project:', error);
+    console.error("Failed to delete project:", error);
     return false;
   }
 
@@ -814,12 +851,12 @@ export async function getClubs(): Promise<Club[]> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
-    .from('clubs')
-    .select('*')
-    .order('created_at', { ascending: false });
+    .from("clubs")
+    .select("*")
+    .order("created_at", { ascending: false });
 
   if (error) {
-    console.error('Failed to fetch clubs:', error);
+    console.error("Failed to fetch clubs:", error);
     return [];
   }
 
@@ -833,13 +870,13 @@ export async function getClub(clubId: string): Promise<Club | null> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
-    .from('clubs')
-    .select('*')
-    .eq('id', clubId)
+    .from("clubs")
+    .select("*")
+    .eq("id", clubId)
     .single();
 
   if (error) {
-    console.error('Failed to fetch club:', error);
+    console.error("Failed to fetch club:", error);
     return null;
   }
 
@@ -849,17 +886,19 @@ export async function getClub(clubId: string): Promise<Club | null> {
 /**
  * Create a club
  */
-export async function createClub(data: InsertTables<'clubs'>): Promise<Club | null> {
+export async function createClub(
+  data: InsertTables<"clubs">,
+): Promise<Club | null> {
   const supabase = getSupabaseClient();
 
   const { data: club, error } = await supabase
-    .from('clubs')
+    .from("clubs")
     .insert(data)
     .select()
     .single();
 
   if (error) {
-    console.error('Failed to create club:', error);
+    console.error("Failed to create club:", error);
     return null;
   }
 
@@ -877,12 +916,12 @@ export async function getJobs(): Promise<Job[]> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
-    .from('jobs')
-    .select('*')
-    .order('created_at', { ascending: false });
+    .from("jobs")
+    .select("*")
+    .order("created_at", { ascending: false });
 
   if (error) {
-    console.error('Failed to fetch jobs:', error);
+    console.error("Failed to fetch jobs:", error);
     return [];
   }
 
@@ -896,13 +935,13 @@ export async function getJob(jobId: string): Promise<Job | null> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
-    .from('jobs')
-    .select('*')
-    .eq('id', jobId)
+    .from("jobs")
+    .select("*")
+    .eq("id", jobId)
     .single();
 
   if (error) {
-    console.error('Failed to fetch job:', error);
+    console.error("Failed to fetch job:", error);
     return null;
   }
 
@@ -912,17 +951,19 @@ export async function getJob(jobId: string): Promise<Job | null> {
 /**
  * Create a job
  */
-export async function createJob(data: InsertTables<'jobs'>): Promise<Job | null> {
+export async function createJob(
+  data: InsertTables<"jobs">,
+): Promise<Job | null> {
   const supabase = getSupabaseClient();
 
   const { data: job, error } = await supabase
-    .from('jobs')
+    .from("jobs")
     .insert(data)
     .select()
     .single();
 
   if (error) {
-    console.error('Failed to create job:', error);
+    console.error("Failed to create job:", error);
     return null;
   }
 
@@ -940,12 +981,12 @@ export async function getGlobalJobPostings(): Promise<GlobalJobPosting[]> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
-    .from('global_job_postings')
-    .select('*')
-    .order('created_at', { ascending: false });
+    .from("global_job_postings")
+    .select("*")
+    .order("created_at", { ascending: false });
 
   if (error) {
-    console.error('Failed to fetch global job postings:', error);
+    console.error("Failed to fetch global job postings:", error);
     return [];
   }
 
@@ -956,18 +997,18 @@ export async function getGlobalJobPostings(): Promise<GlobalJobPosting[]> {
  * Get global job postings by employer
  */
 export async function getEmployerGlobalJobPostings(
-  employerProfileId: string
+  employerProfileId: string,
 ): Promise<GlobalJobPosting[]> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
-    .from('global_job_postings')
-    .select('*')
-    .eq('employer_profile_id', employerProfileId)
-    .order('created_at', { ascending: false });
+    .from("global_job_postings")
+    .select("*")
+    .eq("employer_profile_id", employerProfileId)
+    .order("created_at", { ascending: false });
 
   if (error) {
-    console.error('Failed to fetch employer job postings:', error);
+    console.error("Failed to fetch employer job postings:", error);
     return [];
   }
 
@@ -978,18 +1019,18 @@ export async function getEmployerGlobalJobPostings(
  * Create global job posting
  */
 export async function createGlobalJobPosting(
-  data: InsertTables<'global_job_postings'>
+  data: InsertTables<"global_job_postings">,
 ): Promise<GlobalJobPosting | null> {
   const supabase = getSupabaseClient();
 
   const { data: posting, error } = await supabase
-    .from('global_job_postings')
+    .from("global_job_postings")
     .insert(data)
     .select()
     .single();
 
   if (error) {
-    console.error('Failed to create global job posting:', error);
+    console.error("Failed to create global job posting:", error);
     return null;
   }
 
@@ -1008,13 +1049,13 @@ export async function getDataSet(dataSetId: string): Promise<Json | null> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
-    .from('data_sets')
-    .select('data')
-    .eq('id', dataSetId)
+    .from("data_sets")
+    .select("data")
+    .eq("id", dataSetId)
     .maybeSingle();
 
   if (error) {
-    console.error('Failed to fetch data set:', error);
+    console.error("Failed to fetch data set:", error);
     return null;
   }
 
@@ -1028,13 +1069,13 @@ export async function getDataSetByName(name: string): Promise<Json | null> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
-    .from('data_sets')
-    .select('data')
-    .eq('name', name)
+    .from("data_sets")
+    .select("data")
+    .eq("name", name)
     .maybeSingle();
 
   if (error) {
-    console.error('Failed to fetch data set:', error);
+    console.error("Failed to fetch data set:", error);
     return null;
   }
 
@@ -1048,17 +1089,19 @@ export async function getDataSetByName(name: string): Promise<Json | null> {
 /**
  * Get company profile by user ID
  */
-export async function getCompanyProfile(userId: string): Promise<CompanyProfile | null> {
+export async function getCompanyProfile(
+  userId: string,
+): Promise<CompanyProfile | null> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
-    .from('company_profiles')
-    .select('*')
-    .eq('user_id', userId)
+    .from("company_profiles")
+    .select("*")
+    .eq("user_id", userId)
     .single();
 
   if (error) {
-    console.error('Failed to fetch company profile:', error);
+    console.error("Failed to fetch company profile:", error);
     return null;
   }
 
@@ -1068,17 +1111,19 @@ export async function getCompanyProfile(userId: string): Promise<CompanyProfile 
 /**
  * Get company profile by slug
  */
-export async function getCompanyProfileBySlug(slug: string): Promise<CompanyProfile | null> {
+export async function getCompanyProfileBySlug(
+  slug: string,
+): Promise<CompanyProfile | null> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
-    .from('company_profiles')
-    .select('*')
-    .eq('slug', slug)
+    .from("company_profiles")
+    .select("*")
+    .eq("slug", slug)
     .single();
 
   if (error) {
-    console.error('Failed to fetch company profile:', error);
+    console.error("Failed to fetch company profile:", error);
     return null;
   }
 
@@ -1089,18 +1134,18 @@ export async function getCompanyProfileBySlug(slug: string): Promise<CompanyProf
  * Create company profile
  */
 export async function createCompanyProfile(
-  data: InsertTables<'company_profiles'>
+  data: InsertTables<"company_profiles">,
 ): Promise<CompanyProfile | null> {
   const supabase = getSupabaseClient();
 
   const { data: profile, error } = await supabase
-    .from('company_profiles')
+    .from("company_profiles")
     .insert(data)
     .select()
     .single();
 
   if (error) {
-    console.error('Failed to create company profile:', error);
+    console.error("Failed to create company profile:", error);
     return null;
   }
 
@@ -1112,19 +1157,19 @@ export async function createCompanyProfile(
  */
 export async function updateCompanyProfile(
   profileId: string,
-  data: UpdateTables<'company_profiles'>
+  data: UpdateTables<"company_profiles">,
 ): Promise<CompanyProfile | null> {
   const supabase = getSupabaseClient();
 
   const { data: profile, error } = await supabase
-    .from('company_profiles')
+    .from("company_profiles")
     .update({ ...data, updated_at: new Date().toISOString() })
-    .eq('id', profileId)
+    .eq("id", profileId)
     .select()
     .single();
 
   if (error) {
-    console.error('Failed to update company profile:', error);
+    console.error("Failed to update company profile:", error);
     return null;
   }
 
@@ -1139,18 +1184,18 @@ export async function updateCompanyProfile(
  * Add certificate to student profile
  */
 export async function addCertificate(
-  data: InsertTables<'certificates'>
+  data: InsertTables<"certificates">,
 ): Promise<Certificate | null> {
   const supabase = getSupabaseClient();
 
   const { data: cert, error } = await supabase
-    .from('certificates')
+    .from("certificates")
     .insert(data)
     .select()
     .single();
 
   if (error) {
-    console.error('Failed to add certificate:', error);
+    console.error("Failed to add certificate:", error);
     return null;
   }
 
@@ -1160,16 +1205,18 @@ export async function addCertificate(
 /**
  * Delete certificate
  */
-export async function deleteCertificate(certificateId: string): Promise<boolean> {
+export async function deleteCertificate(
+  certificateId: string,
+): Promise<boolean> {
   const supabase = getSupabaseClient();
 
   const { error } = await supabase
-    .from('certificates')
+    .from("certificates")
     .delete()
-    .eq('id', certificateId);
+    .eq("id", certificateId);
 
   if (error) {
-    console.error('Failed to delete certificate:', error);
+    console.error("Failed to delete certificate:", error);
     return false;
   }
 
@@ -1185,12 +1232,12 @@ export async function deleteCertificate(certificateId: string): Promise<boolean>
  * Replaces: fetchData(token, endpoint)
  */
 export async function fetchData<T>(
-  table: keyof import('./types').Database['public']['Tables'],
-  filters?: { column: string; value: unknown }[]
+  table: keyof import("./types").Database["public"]["Tables"],
+  filters?: { column: string; value: unknown }[],
 ): Promise<T[]> {
   const supabase = getSupabaseClient();
 
-  let query = supabase.from(table).select('*');
+  let query = supabase.from(table).select("*");
 
   if (filters) {
     for (const filter of filters) {
@@ -1213,8 +1260,8 @@ export async function fetchData<T>(
  * Replaces: postData(token, endpoint, data)
  */
 export async function postData<T>(
-  table: keyof import('./types').Database['public']['Tables'],
-  data: Record<string, unknown>
+  table: keyof import("./types").Database["public"]["Tables"],
+  data: Record<string, unknown>,
 ): Promise<T | null> {
   const supabase = getSupabaseClient();
 
@@ -1237,16 +1284,16 @@ export async function postData<T>(
  * Replaces: putData(token, endpoint, data)
  */
 export async function putData<T>(
-  table: keyof import('./types').Database['public']['Tables'],
+  table: keyof import("./types").Database["public"]["Tables"],
   id: string,
-  data: Record<string, unknown>
+  data: Record<string, unknown>,
 ): Promise<T | null> {
   const supabase = getSupabaseClient();
 
   const { data: result, error } = await supabase
     .from(table)
     .update(data)
-    .eq('id', id)
+    .eq("id", id)
     .select()
     .single();
 

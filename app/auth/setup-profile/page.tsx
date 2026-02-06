@@ -327,7 +327,7 @@ export default function SetupProfilePage() {
 
   const toggleSkill = (skill: string) => {
     setSelectedSkills((prev) =>
-      prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
+      prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill],
     );
   };
 
@@ -335,7 +335,7 @@ export default function SetupProfilePage() {
     setSelectedInterests((prev) =>
       prev.includes(interest)
         ? prev.filter((i) => i !== interest)
-        : [...prev, interest]
+        : [...prev, interest],
     );
   };
 
@@ -363,19 +363,19 @@ export default function SetupProfilePage() {
     setCollegeSearch("");
   };
   const filteredColleges = colleges.filter((college) =>
-    college.toLowerCase().includes(collegeSearch.toLowerCase())
+    college.toLowerCase().includes(collegeSearch.toLowerCase()),
   );
 
   const filteredCourses = AVAILABLE_COURSES.filter((course) =>
-    course.toLowerCase().includes(courseSearch.toLowerCase())
+    course.toLowerCase().includes(courseSearch.toLowerCase()),
   );
 
   const filteredSkills = AVAILABLE_SKILLS.filter((skill) =>
-    skill.toLowerCase().includes(skillSearch.toLowerCase())
+    skill.toLowerCase().includes(skillSearch.toLowerCase()),
   );
 
   const filteredInterests = AVAILABLE_INTERESTS.filter((interest) =>
-    interest.toLowerCase().includes(interestSearch.toLowerCase())
+    interest.toLowerCase().includes(interestSearch.toLowerCase()),
   );
 
   const handleProfilePicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -391,7 +391,7 @@ export default function SetupProfilePage() {
   };
 
   const handleBackgroundImgChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -409,7 +409,7 @@ export default function SetupProfilePage() {
       case 1:
         if (!name.trim() || !email.trim()) {
           setError(
-            "Name and email are required. Please log in again if missing."
+            "Name and email are required. Please log in again if missing.",
           );
           return false;
         }
@@ -477,7 +477,10 @@ export default function SetupProfilePage() {
       let backgroundImgUrl: string | null = null;
 
       if (profilePicFile) {
-        const { url, error: uploadError } = await uploadProfilePic(profilePicFile, userId);
+        const { url, error: uploadError } = await uploadProfilePic(
+          profilePicFile,
+          userId,
+        );
         if (uploadError) {
           console.error("Failed to upload profile pic:", uploadError);
         } else {
@@ -486,7 +489,10 @@ export default function SetupProfilePage() {
       }
 
       if (backgroundImgFile) {
-        const { url, error: uploadError } = await uploadBackgroundImage(backgroundImgFile, userId);
+        const { url, error: uploadError } = await uploadBackgroundImage(
+          backgroundImgFile,
+          userId,
+        );
         if (uploadError) {
           console.error("Failed to upload background image:", uploadError);
         } else {

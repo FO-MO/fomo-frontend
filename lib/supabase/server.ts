@@ -2,10 +2,10 @@
  * Supabase Client for server-side usage
  * Use this in Server Components, Route Handlers, and Server Actions
  */
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
-import { createClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
-import type { Database } from './types';
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
+import type { Database } from "./types";
 
 export async function createSupabaseServerClient() {
   const cookieStore = await cookies();
@@ -27,13 +27,13 @@ export async function createSupabaseServerClient() {
         },
         remove(name: string, options: CookieOptions) {
           try {
-            cookieStore.set({ name, value: '', ...options });
+            cookieStore.set({ name, value: "", ...options });
           } catch {
             // Handle cookies in read-only context
           }
         },
       },
-    }
+    },
   );
 }
 
@@ -46,7 +46,7 @@ export function createSupabaseAdminClient() {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error('Missing Supabase admin environment variables');
+    throw new Error("Missing Supabase admin environment variables");
   }
 
   return createClient<Database>(supabaseUrl, serviceRoleKey, {

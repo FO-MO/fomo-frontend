@@ -65,9 +65,11 @@ export default function EmployerProfilePage() {
         website: employerProfile.website || "Not specified",
         industry: employerProfile.industry || "Not specified",
         location: employerProfile.location || "Not specified",
-        noOfEmployers: employerProfile.company_size ? parseInt(employerProfile.company_size) : 0,
-        specialties: Array.isArray(employerProfile.specialties) 
-          ? employerProfile.specialties.join(", ") 
+        noOfEmployers: employerProfile.company_size
+          ? parseInt(employerProfile.company_size)
+          : 0,
+        specialties: Array.isArray(employerProfile.specialties)
+          ? employerProfile.specialties.join(", ")
           : employerProfile.specialties || "Not specified",
       };
 

@@ -121,14 +121,21 @@ export default function ProfilePage() {
             comments: 0,
           },
           isLiked: false,
-          likedBy: Array.isArray(post.liked_by) ? (post.liked_by as string[]) : [],
+          likedBy: Array.isArray(post.liked_by)
+            ? (post.liked_by as string[])
+            : [],
         }));
       } catch (error) {
         console.error("Failed to fetch user posts:", error);
       }
 
       // Fetch user projects
-      let userProjects: Array<{ title: string; description: string; status: string; tags: string[] }> = [];
+      let userProjects: Array<{
+        title: string;
+        description: string;
+        status: string;
+        tags: string[];
+      }> = [];
       try {
         const projects = await getStudentProjects(profile.id);
         userProjects = projects.map((proj) => ({
@@ -470,7 +477,7 @@ export default function ProfilePage() {
                       >
                         {interest}
                       </span>
-                    )
+                    ),
                   )}
                 </div>
               </div>

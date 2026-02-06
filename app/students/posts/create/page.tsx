@@ -6,7 +6,12 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { X, Image as ImageIcon, Smile, AtSign } from "lucide-react";
-import { getCurrentUser, getStudentProfile, createPost, uploadPostMedia } from "@/lib/supabase";
+import {
+  getCurrentUser,
+  getStudentProfile,
+  createPost,
+  uploadPostMedia,
+} from "@/lib/supabase";
 
 export default function CreatePostPage() {
   const router = useRouter();
@@ -34,7 +39,7 @@ export default function CreatePostPage() {
               .map((n: string) => n[0])
               .join("")
               .toUpperCase()
-              .slice(0, 2)
+              .slice(0, 2),
           );
         }
       } catch (err) {
@@ -119,7 +124,7 @@ export default function CreatePostPage() {
       const post = await createPost({
         student_profile_id: profile.id,
         content: message,
-        post_type: 'text',
+        post_type: "text",
       });
 
       if (!post) {
@@ -136,7 +141,10 @@ export default function CreatePostPage() {
         try {
           for (let i = 0; i < imageFiles.length; i++) {
             const file = imageFiles[i];
-            console.log(`Uploading image ${i + 1}/${imageFiles.length}:`, file.name);
+            console.log(
+              `Uploading image ${i + 1}/${imageFiles.length}:`,
+              file.name,
+            );
             await uploadPostMedia(post.id, file);
           }
           console.log("All images uploaded successfully");
@@ -145,7 +153,7 @@ export default function CreatePostPage() {
           // Don&apos;t fail the post creation if image upload fails
           // The post is already created, just warn the user
           alert(
-            "Post created, but some images failed to upload. You can try adding them again by editing the post."
+            "Post created, but some images failed to upload. You can try adding them again by editing the post.",
           );
         }
       }
@@ -162,7 +170,7 @@ export default function CreatePostPage() {
   const handleCancel = () => {
     if (message.trim() || images.length > 0) {
       const confirm = window.confirm(
-        "Are you sure you want to discard this post?"
+        "Are you sure you want to discard this post?",
       );
       if (confirm) {
         router.back();
@@ -238,8 +246,8 @@ export default function CreatePostPage() {
                       images.length === 1
                         ? "grid-cols-1"
                         : images.length === 2
-                        ? "grid-cols-2"
-                        : "grid-cols-3"
+                          ? "grid-cols-2"
+                          : "grid-cols-3"
                     }`}
                   >
                     {images.map((img, index) => (

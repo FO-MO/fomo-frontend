@@ -62,7 +62,7 @@ export default function StudentsHomePage() {
             const createdAt = new Date(post.created_at);
             const now = new Date();
             const diffInSeconds = Math.floor(
-              (now.getTime() - createdAt.getTime()) / 1000
+              (now.getTime() - createdAt.getTime()) / 1000,
             );
             let postedAgo = "";
 
@@ -98,7 +98,7 @@ export default function StudentsHomePage() {
               isLiked: false,
               likedBy: post.liked_by as string[] | undefined,
             };
-          }
+          },
         );
 
         setPosts(transformedPosts);

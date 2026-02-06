@@ -6,7 +6,12 @@ import ProfileProjectCard from "@/components/student-section/ProfileProjectCard"
 import ProfileClubCard from "@/components/student-section/ProfileClubCard";
 import ProfileInternshipCard from "@/components/student-section/ProfileInternshipCard";
 import EditProfileModal from "@/components/student-section/EditProfileModal";
-import { getCurrentUser, getStudentProfile, getStudentProjects, getClubs } from "@/lib/supabase";
+import {
+  getCurrentUser,
+  getStudentProfile,
+  getStudentProjects,
+  getClubs,
+} from "@/lib/supabase";
 
 type TabKey = "projects" | "clubs" | "internships";
 
@@ -108,18 +113,30 @@ function ProfilePageContent() {
         bio: profile.about || "",
         skills: profile.skills || [],
         interests: profile.interests || [],
-        projects: (projects || []).map((p: { title?: string | null; description?: string | null; skills?: unknown }) => ({
-          title: p.title || "Untitled",
-          description: p.description || "",
-          status: "ongoing",
-          tags: Array.isArray(p.skills) ? p.skills : [],
-        })),
-        clubs: (clubs || []).map((c: { title?: string | null; description?: string | null; skills?: unknown }) => ({
-          name: c.title || "Unknown Club",
-          description: c.description || "",
-          tags: Array.isArray(c.skills) ? c.skills : [],
-          badge: null,
-        })),
+        projects: (projects || []).map(
+          (p: {
+            title?: string | null;
+            description?: string | null;
+            skills?: unknown;
+          }) => ({
+            title: p.title || "Untitled",
+            description: p.description || "",
+            status: "ongoing",
+            tags: Array.isArray(p.skills) ? p.skills : [],
+          }),
+        ),
+        clubs: (clubs || []).map(
+          (c: {
+            title?: string | null;
+            description?: string | null;
+            skills?: unknown;
+          }) => ({
+            name: c.title || "Unknown Club",
+            description: c.description || "",
+            tags: Array.isArray(c.skills) ? c.skills : [],
+            badge: null,
+          }),
+        ),
         internships: [],
       };
 
@@ -167,7 +184,7 @@ function ProfilePageContent() {
                       tags={project.tags}
                     />
                   </div>
-                )
+                ),
               )
             ) : (
               <div className="col-span-2 text-center py-12">
@@ -198,7 +215,7 @@ function ProfilePageContent() {
                       // badge={club.badge}
                     />
                   </div>
-                )
+                ),
               )
             ) : (
               <div className="col-span-2 text-center py-12">
@@ -405,7 +422,7 @@ function ProfilePageContent() {
                       >
                         {interest}
                       </span>
-                    )
+                    ),
                   )}
                 </div>
               </div>

@@ -22,10 +22,10 @@ export default function SearchPage() {
       try {
         setLoading(true);
         const supabase = createBrowserClient();
-        
+
         const { data, error } = await supabase
-          .from('student_profiles')
-          .select('*');
+          .from("student_profiles")
+          .select("*");
 
         if (error) {
           console.error("Error fetching profiles:", error);
@@ -70,8 +70,8 @@ export default function SearchPage() {
           profile.name.toLowerCase().includes(query) ||
           profile.email?.toLowerCase().includes(query) ||
           profile.skills?.some((skill: string) =>
-            skill.toLowerCase().includes(query)
-          )
+            skill.toLowerCase().includes(query),
+          ),
       );
     }
 

@@ -77,7 +77,7 @@ export default function ProjectDetailsPage() {
   const func = async () => {
     try {
       const projectData = await getProject(projectId);
-      
+
       if (!projectData) {
         setError("Project not found");
         setLoading(false);
@@ -86,7 +86,7 @@ export default function ProjectDetailsPage() {
 
       // Get project members
       const members = await getProjectMembers(projectId);
-      
+
       const formattedProject: ProjectDetails = {
         id: projectData.id || "",
         title: projectData.title || "",
@@ -97,7 +97,9 @@ export default function ProjectDetailsPage() {
         skills: projectData.technologies || [],
         imageUrl: getMediaUrl(projectData.image_url),
         contributors: (members || []).map((member) => ({
-          name: (member as { student_profile?: { name?: string } }).student_profile?.name || "",
+          name:
+            (member as { student_profile?: { name?: string } }).student_profile
+              ?.name || "",
           avatarUrl: "/icons/Profile.svg",
           profileUrl: `/profile?userId=${(member as { student_profile?: { user_id?: string } }).student_profile?.user_id || ""}`,
         })),
@@ -108,7 +110,7 @@ export default function ProjectDetailsPage() {
         needHelp: [], // This would come from a separate table if needed
         detailsMarkdown: projectData.long_description || "",
       };
-      
+
       setProject(formattedProject);
       setLoading(false);
 
@@ -137,7 +139,7 @@ export default function ProjectDetailsPage() {
 
       // Fetch GitHub stats
       const repoRes = await fetch(
-        `https://api.github.com/repos/${owner}/${cleanRepo}`
+        `https://api.github.com/repos/${owner}/${cleanRepo}`,
       );
 
       if (repoRes.ok) {
@@ -152,7 +154,7 @@ export default function ProjectDetailsPage() {
                   members: prev.contributors.length,
                 },
               }
-            : null
+            : null,
         );
       }
     } catch (err) {

@@ -3,7 +3,13 @@ export const dynamic = "force-dynamic";
 
 import { X, Check, Camera, Image as ImageIcon, User } from "lucide-react";
 import { useState } from "react";
-import { getCurrentUser, getStudentProfile, updateStudentProfile, uploadProfilePic, uploadBackgroundImage } from "@/lib/supabase";
+import {
+  getCurrentUser,
+  getStudentProfile,
+  updateStudentProfile,
+  uploadProfilePic,
+  uploadBackgroundImage,
+} from "@/lib/supabase";
 
 // Predefined options
 const AVAILABLE_SKILLS = [
@@ -307,7 +313,7 @@ const KERALA_COLLEGES = [
 // Generate years from current year to next 10 years
 const currentYear = new Date().getFullYear();
 const GRADUATION_YEARS = Array.from({ length: 11 }, (_, i) =>
-  (currentYear + i).toString()
+  (currentYear + i).toString(),
 );
 
 interface EditProfileModalProps {
@@ -350,23 +356,23 @@ export default function EditProfileModal({
   const [institution, setInstitution] = useState(currentData.institution || "");
   const [major, setMajor] = useState(currentData.major || "");
   const [graduationYear, setGraduationYear] = useState(
-    currentData.graduationYear || ""
+    currentData.graduationYear || "",
   );
   const [location, setLocation] = useState(currentData.location || "");
   const [bio, setBio] = useState(currentData.bio || "");
   const [selectedSkills, setSelectedSkills] = useState<string[]>(
-    currentData.skills || []
+    currentData.skills || [],
   );
   const [selectedInterests, setSelectedInterests] = useState<string[]>(
-    currentData.interests || []
+    currentData.interests || [],
   );
   const [profilePicFile, setProfilePicFile] = useState<File | null>(null);
   const [backgroundImgFile, setBackgroundImgFile] = useState<File | null>(null);
   const [profilePicPreview, setProfilePicPreview] = useState<string>(
-    currentData.profileImageUrl || ""
+    currentData.profileImageUrl || "",
   );
   const [backgroundImgPreview, setBackgroundImgPreview] = useState<string>(
-    currentData.backgroundImageUrl || ""
+    currentData.backgroundImageUrl || "",
   );
 
   // Search states
@@ -379,24 +385,24 @@ export default function EditProfileModal({
 
   // Filter functions for search
   const filteredColleges = KERALA_COLLEGES.filter((college) =>
-    college.toLowerCase().includes(collegeSearch.toLowerCase())
+    college.toLowerCase().includes(collegeSearch.toLowerCase()),
   );
 
   const filteredCourses = AVAILABLE_COURSES.filter((course) =>
-    course.toLowerCase().includes(courseSearch.toLowerCase())
+    course.toLowerCase().includes(courseSearch.toLowerCase()),
   );
 
   const filteredSkills = AVAILABLE_SKILLS.filter((skill) =>
-    skill.toLowerCase().includes(skillSearch.toLowerCase())
+    skill.toLowerCase().includes(skillSearch.toLowerCase()),
   );
 
   const filteredInterests = AVAILABLE_INTERESTS.filter((interest) =>
-    interest.toLowerCase().includes(interestSearch.toLowerCase())
+    interest.toLowerCase().includes(interestSearch.toLowerCase()),
   );
 
   const toggleSkill = (skill: string) => {
     setSelectedSkills((prev) =>
-      prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
+      prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill],
     );
   };
 
@@ -404,7 +410,7 @@ export default function EditProfileModal({
     setSelectedInterests((prev) =>
       prev.includes(interest)
         ? prev.filter((i) => i !== interest)
-        : [...prev, interest]
+        : [...prev, interest],
     );
   };
 
@@ -421,7 +427,7 @@ export default function EditProfileModal({
   };
 
   const handleBackgroundImgChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -446,7 +452,7 @@ export default function EditProfileModal({
 
       // Check for existing profile
       const existingProfile = await getStudentProfile(user.id);
-      
+
       if (!existingProfile) {
         alert("Profile not found. Please complete your profile setup first.");
         return;
@@ -465,8 +471,11 @@ export default function EditProfileModal({
       };
 
       // Update profile
-      const updatedProfile = await updateStudentProfile(existingProfile.id, updateData);
-      
+      const updatedProfile = await updateStudentProfile(
+        existingProfile.id,
+        updateData,
+      );
+
       if (!updatedProfile) {
         alert("Failed to update profile. Please try again.");
         return;

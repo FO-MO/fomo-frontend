@@ -2,9 +2,9 @@
  * Supabase Authentication Utilities
  * Replaces the Strapi auth helper functions
  */
-import { getSupabaseClient } from './client';
-import type { UserProfile } from './types';
-import { setUserCookie, clearAuthCookies } from '@/lib/cookies';
+import { getSupabaseClient } from "./client";
+import type { UserProfile } from "./types";
+import { setUserCookie, clearAuthCookies } from "@/lib/cookies";
 
 export interface AuthResponse {
   user: UserProfile | null;
@@ -22,7 +22,7 @@ export interface SignUpOptions {
   username: string;
   email: string;
   password: string;
-  usertype?: 'student' | 'employer' | 'college';
+  usertype?: "student" | "employer" | "college";
 }
 
 export interface SignInOptions {
@@ -38,7 +38,7 @@ export async function signUp({
   username,
   email,
   password,
-  usertype = 'student',
+  usertype = "student",
 }: SignUpOptions): Promise<AuthResponse> {
   const supabase = getSupabaseClient();
 
@@ -76,21 +76,25 @@ export async function signUp({
   }
 
   return {
-    user: data.user ? {
-      id: data.user.id,
-      email: data.user.email || email,
-      username: username,
-      usertype: usertype,
-      confirmed: !!data.user.email_confirmed_at,
-      blocked: false,
-      provider: 'email',
-      created_at: data.user.created_at,
-      updated_at: data.user.updated_at || data.user.created_at,
-    } : null,
-    session: data.session ? {
-      access_token: data.session.access_token,
-      refresh_token: data.session.refresh_token,
-    } : null,
+    user: data.user
+      ? {
+          id: data.user.id,
+          email: data.user.email || email,
+          username: username,
+          usertype: usertype,
+          confirmed: !!data.user.email_confirmed_at,
+          blocked: false,
+          provider: "email",
+          created_at: data.user.created_at,
+          updated_at: data.user.updated_at || data.user.created_at,
+        }
+      : null,
+    session: data.session
+      ? {
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
+        }
+      : null,
     error: null,
   };
 }
@@ -125,19 +129,19 @@ export async function signIn({
   let userProfile: UserProfile | null = null;
   if (data.user) {
     const { data: profile } = await supabase
-      .from('user_profiles')
-      .select('*')
-      .eq('id', data.user.id)
+      .from("user_profiles")
+      .select("*")
+      .eq("id", data.user.id)
       .single();
 
     userProfile = (profile as UserProfile) || {
       id: data.user.id,
       email: data.user.email || email,
-      username: data.user.user_metadata?.username || email.split('@')[0],
-      usertype: data.user.user_metadata?.usertype || 'student',
+      username: data.user.user_metadata?.username || email.split("@")[0],
+      usertype: data.user.user_metadata?.usertype || "student",
       confirmed: !!data.user.email_confirmed_at,
       blocked: false,
-      provider: 'email',
+      provider: "email",
       created_at: data.user.created_at,
       updated_at: data.user.updated_at || data.user.created_at,
     };
@@ -156,10 +160,12 @@ export async function signIn({
 
   return {
     user: userProfile,
-    session: data.session ? {
-      access_token: data.session.access_token,
-      refresh_token: data.session.refresh_token,
-    } : null,
+    session: data.session
+      ? {
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
+        }
+      : null,
     error: null,
   };
 }
@@ -168,7 +174,9 @@ export async function signIn({
  * Sign out the current user
  * Replaces: removeAuthToken() + clearAuthCookies()
  */
-export async function signOut(): Promise<{ error: { message: string } | null }> {
+export async function signOut(): Promise<{
+  error: { message: string } | null;
+}> {
   const supabase = getSupabaseClient();
 
   const { error } = await supabase.auth.signOut();
@@ -193,7 +201,10 @@ export async function getCurrentUser(): Promise<{
 }> {
   const supabase = getSupabaseClient();
 
-  const { data: { user }, error } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
   if (error || !user) {
     return {
@@ -204,9 +215,9 @@ export async function getCurrentUser(): Promise<{
 
   // Fetch full user profile
   const { data: profile, error: profileError } = await supabase
-    .from('user_profiles')
-    .select('*')
-    .eq('id', user.id)
+    .from("user_profiles")
+    .select("*")
+    .eq("id", user.id)
     .single();
 
   if (profileError || !profile) {
@@ -214,12 +225,13 @@ export async function getCurrentUser(): Promise<{
     return {
       user: {
         id: user.id,
-        email: user.email || '',
-        username: user.user_metadata?.username || user.email?.split('@')[0] || '',
-        usertype: user.user_metadata?.usertype || 'student',
+        email: user.email || "",
+        username:
+          user.user_metadata?.username || user.email?.split("@")[0] || "",
+        usertype: user.user_metadata?.usertype || "student",
         confirmed: !!user.email_confirmed_at,
         blocked: false,
-        provider: user.app_metadata?.provider || 'email',
+        provider: user.app_metadata?.provider || "email",
         created_at: user.created_at,
         updated_at: user.updated_at || user.created_at,
       },
@@ -238,7 +250,10 @@ export async function getCurrentUser(): Promise<{
  */
 export async function getSession() {
   const supabase = getSupabaseClient();
-  const { data: { session }, error } = await supabase.auth.getSession();
+  const {
+    data: { session },
+    error,
+  } = await supabase.auth.getSession();
 
   return {
     session,
@@ -279,7 +294,9 @@ export async function refreshSession() {
 /**
  * Send password reset email
  */
-export async function resetPassword(email: string): Promise<{ error: { message: string } | null }> {
+export async function resetPassword(
+  email: string,
+): Promise<{ error: { message: string } | null }> {
   const supabase = getSupabaseClient();
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -296,7 +313,9 @@ export async function resetPassword(email: string): Promise<{ error: { message: 
 /**
  * Update user password
  */
-export async function updatePassword(newPassword: string): Promise<{ error: { message: string } | null }> {
+export async function updatePassword(
+  newPassword: string,
+): Promise<{ error: { message: string } | null }> {
   const supabase = getSupabaseClient();
 
   const { error } = await supabase.auth.updateUser({
@@ -313,7 +332,9 @@ export async function updatePassword(newPassword: string): Promise<{ error: { me
 /**
  * Update user email
  */
-export async function updateEmail(newEmail: string): Promise<{ error: { message: string } | null }> {
+export async function updateEmail(
+  newEmail: string,
+): Promise<{ error: { message: string } | null }> {
   const supabase = getSupabaseClient();
 
   const { error } = await supabase.auth.updateUser({
@@ -331,26 +352,41 @@ export async function updateEmail(newEmail: string): Promise<{ error: { message:
  * Listen to auth state changes
  */
 export function onAuthStateChange(
-  callback: (event: string, session: unknown) => void
+  callback: (event: string, session: unknown) => void,
 ) {
   const supabase = getSupabaseClient();
 
-  const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, session: { user?: { id: string; email?: string; user_metadata?: { username?: string; usertype?: string } } } | null) => {
-    callback(event, session);
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange(
+    (
+      event: string,
+      session: {
+        user?: {
+          id: string;
+          email?: string;
+          user_metadata?: { username?: string; usertype?: string };
+        };
+      } | null,
+    ) => {
+      callback(event, session);
 
-    // Sync user cookie on auth changes
-    if (event === 'SIGNED_IN' && session?.user) {
-      setUserCookie({
-        id: session.user.id,
-        documentId: session.user.id,
-        email: session.user.email,
-        username: session.user.user_metadata?.username || session.user.email?.split('@')[0],
-        usertype: session.user.user_metadata?.usertype,
-      });
-    } else if (event === 'SIGNED_OUT') {
-      clearAuthCookies();
-    }
-  });
+      // Sync user cookie on auth changes
+      if (event === "SIGNED_IN" && session?.user) {
+        setUserCookie({
+          id: session.user.id,
+          documentId: session.user.id,
+          email: session.user.email,
+          username:
+            session.user.user_metadata?.username ||
+            session.user.email?.split("@")[0],
+          usertype: session.user.user_metadata?.usertype,
+        });
+      } else if (event === "SIGNED_OUT") {
+        clearAuthCookies();
+      }
+    },
+  );
 
   return subscription;
 }
