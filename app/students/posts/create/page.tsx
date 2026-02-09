@@ -122,9 +122,9 @@ export default function CreatePostPage() {
 
       // Create the post
       const post = await createPost({
-        student_profile_id: profile.id,
-        content: message,
-        post_type: "text",
+        author_id: profile.id,
+        description: message,
+        user_id: user.id,
       });
 
       if (!post) {
@@ -145,7 +145,7 @@ export default function CreatePostPage() {
               `Uploading image ${i + 1}/${imageFiles.length}:`,
               file.name,
             );
-            await uploadPostMedia(post.id, file);
+            await uploadPostMedia(file, user.id, post.id);
           }
           console.log("All images uploaded successfully");
         } catch (error) {
