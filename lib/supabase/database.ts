@@ -864,6 +864,97 @@ export async function getClubs(): Promise<Club[]> {
 }
 
 /**
+ * Get all clubs with author information
+ */
+export async function getClubsWithAuthors(): Promise<any[]> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from("clubs")
+    .select(
+      `
+      *,
+      authors!clubs_author_id_fkey (
+        id,
+        user_id,
+        profile_pic,
+        user_profiles!authors_user_id_fkey (
+          username
+        )
+      )
+    `,
+    )
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Failed to fetch clubs with authors:", error);
+    return [];
+  }
+
+  return data || [];
+}
+
+/**
+ * Get club by ID with videos and author
+ */
+export async function getClubWithDetails(clubId: string): Promise<{
+  id: string;
+  title: string;
+  description: string;
+  fomo_videos?: Array<{
+    id: string;
+    title: string;
+    description: string;
+    video: string;
+    thumbnail: string;
+    created_at: string;
+    author_id: string;
+    user_profiles?: {
+      username: string;
+    };
+  }>;
+} | null> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from("clubs")
+    .select(
+      `
+      *,
+      authors!clubs_author_id_fkey (
+        id,
+        user_id,
+        profile_pic,
+        user_profiles!authors_user_id_fkey (
+          username
+        )
+      ),
+      fomo_videos (
+        id,
+        title,
+        description,
+        video,
+        thumbnail,
+        created_at,
+        author_id,
+        user_profiles!fomo_videos_author_id_fkey (
+          username
+        )
+      )
+    `,
+    )
+    .eq("id", clubId)
+    .single();
+
+  if (error) {
+    console.error("Failed to fetch club with details:", error);
+    return null;
+  }
+
+  return data;
+}
+
+/**
  * Get club by ID
  */
 export async function getClub(clubId: string): Promise<Club | null> {

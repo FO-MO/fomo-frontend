@@ -69,7 +69,9 @@ export {
   deleteProject,
   // Clubs
   getClubs,
+  getClubsWithAuthors,
   getClub,
+  getClubWithDetails,
   createClub,
   // Jobs
   getJobs,

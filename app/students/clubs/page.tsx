@@ -3,8 +3,27 @@
 export const dynamic = "force-dynamic";
 
 import React, { useState, useEffect } from "react";
-import ClubCard, { Club } from "@/components/student-section/ClubCard";
-import { backendurl, fetchFromBackend } from "@/lib/tools";
+import ClubCard from "@/components/student-section/ClubCard";
+import { Club } from "@/lib/interfaces";
+import { getClubsWithAuthors } from "@/lib/supabase/database";
+import { getMediaUrl } from "@/lib/utils";
+
+// Type for the raw club data from database
+interface ClubWithAuthor {
+  id: string;
+  title: string;
+  description: string;
+  no_member: number;
+  skills: string[];
+  pic: string;
+  authors?: {
+    id: string;
+    profile_pic: string;
+    user_profiles?: {
+      username: string;
+    };
+  };
+}
 
 export default function ClubsPage() {
   const [clubs, setClubs] = useState<Club[]>([]);
@@ -16,46 +35,40 @@ export default function ClubsPage() {
       try {
         setLoading(true);
         setError(null);
-        const data = await fetchFromBackend("clubs?populate=*");
+        const data = await getClubsWithAuthors();
 
         if (!data || !Array.isArray(data)) {
           setClubs([]);
           return;
         }
 
-        const mockClubs: Club[] = data.map((club: Record<string, unknown>) => {
-          const clubData = club as {
-            documentId: string;
-            title: string;
-            description: string;
-            skills: string[];
-            author: string;
-            no_member: number;
-            join: boolean;
-            image: { url: string };
-            videos: Array<{ url: string }>;
-          };
+        const transformedClubs: Club[] = data.map(
+          (clubData: ClubWithAuthor) => {
+            // Get author name from the joined data
+            const authorName =
+              clubData.authors?.user_profiles?.username || "Unknown Author";
+            const authorPic = clubData.authors?.profile_pic || null;
 
-          return {
-            id: clubData.documentId,
-            title: clubData.title,
-            description: clubData.description,
-            tags: clubData.skills || [],
-            leader: { name: clubData.author, avatarUrl: null },
-            membersCount: clubData.no_member || 0,
-            joined: clubData.join || false,
-            imageUrl: clubData.image?.url
-              ? `${backendurl}${clubData.image.url}`
-              : null,
-            badge: "Expert-led",
-            videos:
-              clubData.videos?.map(
-                (video: { url: string }) => `${backendurl}${video.url}`
-              ) || [],
-          };
-        });
+            return {
+              id: clubData.id,
+              name: clubData.title, // Club interface expects both name and title
+              title: clubData.title,
+              description: clubData.description,
+              tags: Array.isArray(clubData.skills) ? clubData.skills : [],
+              leader: {
+                name: authorName,
+                avatarUrl: authorPic ? getMediaUrl(authorPic) : null,
+              },
+              membersCount: clubData.no_member || 0,
+              joined: false, // Default to false since this field doesn't exist in schema
+              imageUrl: clubData.pic ? getMediaUrl(clubData.pic) : null,
+              badge: "Expert-led",
+              videos: [], // Videos are in separate table, would need additional query
+            };
+          },
+        );
 
-        setClubs(mockClubs);
+        setClubs(transformedClubs);
       } catch (err) {
         console.error("Failed to load clubs:", err);
         setError("Failed to load clubs. Please try again later.");

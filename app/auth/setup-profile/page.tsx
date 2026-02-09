@@ -1104,17 +1104,17 @@ export default function SetupProfilePage() {
   };
 
   return (
-    <div className="min-h-screen w-screen flex flex-col bg-gradient-to-br from-gray-50 to-white">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden flex flex-col bg-gradient-to-br from-gray-50 to-white">
       {/* Header */}
       <Link href="/">
-        <div className="w-full border-b border-gray-300 py-4 px-12">
+        <div className="w-full border-b border-gray-300 py-4 px-4 sm:px-12">
           <h1 className="text-black text-3xl font-bold">FOOMO</h1>
         </div>
       </Link>
 
       {/* Main Content */}
       <div className="flex flex-1 justify-center items-center p-4">
-        <div className="w-full max-w-2xl">
+        <div className="w-full max-w-2xl mx-auto">
           {/* Progress Bar */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-2">

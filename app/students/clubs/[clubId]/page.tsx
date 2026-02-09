@@ -4,11 +4,25 @@ export const dynamic = "force-dynamic";
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { RefreshCw, Plus } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import VideoPlayer from "@/components/student-section/VideoPlayer";
 import UploadVideoModal from "@/components/student-section/UploadVideoModal";
-import { getClub } from "@/lib/supabase";
+import { getClubWithDetails } from "@/lib/supabase";
 import { getMediaUrl } from "@/lib/utils";
+
+// Types for the raw data from database
+interface VideoData {
+  id: string;
+  title: string;
+  description: string;
+  video: string;
+  thumbnail: string;
+  created_at: string;
+  author_id: string;
+  user_profiles?: {
+    username: string;
+  };
+}
 
 type Video = {
   id: string;
@@ -44,28 +58,56 @@ export default function ClubVideosPage() {
       try {
         setLoading(true);
 
-        // Fetch specific club by ID
-        const clubData = await getClub(clubId);
-        
+        // Fetch specific club by ID with videos and author
+        const clubData = await getClubWithDetails(clubId);
+
         if (!clubData) {
           setClubDetails({
             id: clubId,
             name: "Club",
-            description: "Join expert-led clubs to access curated learning resources",
+            description:
+              "Join expert-led clubs to access curated learning resources",
             videos: [],
           });
           setLoading(false);
           return;
         }
 
+        // Transform videos data
+        const videos: Video[] = (clubData.fomo_videos || []).map(
+          (video: VideoData) => ({
+            id: video.id,
+            title: video.title || "Untitled Video",
+            thumbnailUrl: video.thumbnail
+              ? getMediaUrl(video.thumbnail) || undefined
+              : undefined,
+            author: {
+              name: video.user_profiles?.username || "Unknown Author",
+              avatarUrl: undefined,
+            },
+            date: video.created_at
+              ? new Date(video.created_at).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })
+              : "Recently",
+            videoUrl: video.video
+              ? getMediaUrl(video.video) || undefined
+              : undefined,
+          }),
+        );
+
         // Transform the data to match our ClubDetails type
         const transformedClub: ClubDetails = {
           id: clubData.id || "unknown",
-          name: clubData.name || "Club",
-          description: clubData.description || "Join expert-led clubs to access curated learning resources",
-          videos: [], // Club videos would come from a separate table if needed
+          name: clubData.title || "Club",
+          description:
+            clubData.description ||
+            "Join expert-led clubs to access curated learning resources",
+          videos: videos,
         };
-        
+
         setClubDetails(transformedClub);
       } catch (error) {
         console.error("Error fetching club videos:", error);
@@ -90,34 +132,44 @@ export default function ClubVideosPage() {
   const handleRefresh = async () => {
     try {
       setLoading(true);
-      const clubData = await getClub(clubId);
+      const clubData = await getClubWithDetails(clubId);
 
       if (clubData) {
+        // Transform videos data
+        const videos: Video[] = (clubData.fomo_videos || []).map(
+          (video: VideoData) => ({
+            id: video.id,
+            title: video.title || "Untitled Video",
+            thumbnailUrl: video.thumbnail
+              ? getMediaUrl(video.thumbnail) || undefined
+              : undefined,
+            author: {
+              name: video.user_profiles?.username || "Unknown Author",
+              avatarUrl: undefined,
+            },
+            date: video.created_at
+              ? new Date(video.created_at).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })
+              : "Recently",
+            videoUrl: video.video
+              ? getMediaUrl(video.video) || undefined
+              : undefined,
+          }),
+        );
+
         const transformedClub: ClubDetails = {
           id: clubData.id || clubId,
-          name: clubData.name || "Club",
-          description: clubData.description || "Join expert-led clubs to access curated learning resources",
-          videos: [],
+          name: clubData.title || "Club",
+          description:
+            clubData.description ||
+            "Join expert-led clubs to access curated learning resources",
+          videos: videos,
         };
         setClubDetails(transformedClub);
       }
-              author: {
-                name: clubData.author || "Unknown",
-                avatarUrl: undefined,
-              },
-              date: video.createdAt
-                ? new Date(video.createdAt).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })
-                : "Recently",
-              videoUrl: getMediaUrl(video.url) || undefined,
-            })
-          ) || [],
-      };
-
-      setClubDetails(transformedClub);
     } catch (error) {
       console.error("Error refreshing club videos:", error);
     } finally {
