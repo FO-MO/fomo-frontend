@@ -1,8 +1,17 @@
 "use client";
+/*
+ * @deprecated - This entire file is deprecated in favor of Supabase functions
+ * Use functions from lib/supabase/database.ts instead
+ * This file is kept temporarily for backward compatibility during migration
+ */
 import axios from "axios";
 import { getAuthTokenCookie } from "./cookies";
 
 //JSON---->
+/*
+ * @deprecated - Use Supabase database functions instead. See lib/supabase/database.ts
+ * This function is kept for backward compatibility but should be migrated to Supabase
+ */
 export async function fetchFromBackend(
   endpoint: string,
   {
@@ -13,7 +22,7 @@ export async function fetchFromBackend(
     backendUrl?: string;
     token?: string | null;
     options?: Record<string, unknown>;
-  } = {}
+  } = {},
 ) {
   try {
     const config = {
@@ -35,17 +44,20 @@ export async function fetchFromBackend(
   }
 }
 
-// POST request function for Strapi backend
+/*
+ * @deprecated - Use Supabase database functions instead. See lib/supabase/database.ts
+ * This function is kept for backward compatibility but should be migrated to Supabase
+ */
 export async function postFetchFromBackend(
   endpoint: string,
   payload: Record<string, unknown>,
   {
-    backendUrl = process.env.NEXT_PUBLIC_STRAPI_URL,
+    backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL,
     token = getAuthTokenCookie(),
   }: {
     backendUrl?: string;
     token?: string | null;
-  } = {}
+  } = {},
 ) {
   try {
     console.log(`🚀 POST to ${endpoint}:`, payload);
@@ -58,7 +70,7 @@ export async function postFetchFromBackend(
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     console.log(`📡 Response from ${endpoint}:`, response.data);
@@ -70,7 +82,10 @@ export async function postFetchFromBackend(
   }
 }
 
-// DELETE request for college job application...
+/*
+ * @deprecated - Use Supabase database functions instead. See lib/supabase/database.ts
+ * Use deleteJob() or deleteGlobalJobPosting() from lib/supabase/database.ts
+ */
 export async function deletecollegejobposting(id: string) {
   const token = getAuthTokenCookie();
   try {
@@ -80,7 +95,7 @@ export async function deletecollegejobposting(id: string) {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
     console.log("Deleted:", response.data);
   } catch (err) {
@@ -88,7 +103,10 @@ export async function deletecollegejobposting(id: string) {
   }
 }
 
-// DELETE request for global job application..
+/*
+ * @deprecated - Use Supabase database functions instead. See lib/supabase/database.ts
+ * Use deleteGlobalJobPosting() from lib/supabase/database.ts
+ */
 export async function deleteglobaljobposting(id: string) {
   const token = getAuthTokenCookie();
 
@@ -123,10 +141,13 @@ export async function deleteglobaljobposting(id: string) {
   }
 }
 
-//PUT request for global job application..
+/*
+ * @deprecated - Use Supabase database functions instead. See lib/supabase/database.ts
+ * Use updateGlobalJobPosting() from lib/supabase/database.ts
+ */
 export async function putglobaljobposting(
   id: string,
-  payload: Record<string, unknown>
+  payload: Record<string, unknown>,
 ) {
   const token = getAuthTokenCookie();
   try {
@@ -140,7 +161,7 @@ export async function putglobaljobposting(
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     console.log(`📡 PUT Response:`, response.data);
@@ -155,6 +176,10 @@ export async function putglobaljobposting(
   }
 }
 
+/*
+ * @deprecated - Use Supabase database functions instead. See lib/supabase/database.ts
+ * Legacy backend URL for backward compatibility
+ */
 export const backendurl =
   process.env.NEXT_PUBLIC_BACKEND_URL ||
   "https://tbs9k5m4-1337.inc1.devtunnels.ms";

@@ -120,24 +120,10 @@ export default function CreatePostPage() {
         return;
       }
 
-      // Create the post
-      const post = await createPost({
-        author_id: profile.id,
-        description: message,
-        user_id: user.id,
-      });
-
-      if (!post) {
-        alert("Failed to create post. Please try again.");
-        setIsSubmitting(false);
-        return;
-      }
-
-      console.log("Post created successfully:", post);
-
-      // Now upload images if there are any
+      // Upload images first and collect URLs
+      const imageUrls: string[] = [];
       if (imageFiles.length > 0) {
-        console.log(`Uploading ${imageFiles.length} images to post...`);
+        console.log(`Uploading ${imageFiles.length} images...`);
         try {
           for (let i = 0; i < imageFiles.length; i++) {
             const file = imageFiles[i];
@@ -145,18 +131,57 @@ export default function CreatePostPage() {
               `Uploading image ${i + 1}/${imageFiles.length}:`,
               file.name,
             );
-            await uploadPostMedia(file, user.id, post.id);
+            const uploadResult = await uploadPostMedia(file, user.id);
+
+            console.log(`Upload result for ${file.name}:`, uploadResult);
+
+            if (uploadResult.url) {
+              imageUrls.push(uploadResult.url);
+              console.log(
+                `Image ${i + 1} uploaded successfully:`,
+                uploadResult.url,
+              );
+            } else {
+              console.error(
+                `Image ${i + 1} upload failed:`,
+                uploadResult.error,
+              );
+              throw new Error(
+                `Failed to upload ${file.name}: ${uploadResult.error?.message || "Unknown error"}`,
+              );
+            }
           }
-          console.log("All images uploaded successfully");
+          console.log("All images uploaded successfully. URLs:", imageUrls);
         } catch (error) {
           console.error("Image upload failed:", error);
-          // Don&apos;t fail the post creation if image upload fails
-          // The post is already created, just warn the user
           alert(
-            "Post created, but some images failed to upload. You can try adding them again by editing the post.",
+            `Failed to upload images: ${error instanceof Error ? error.message : "Unknown error"}. Please try again.`,
           );
+          setIsSubmitting(false);
+          return;
         }
       }
+
+      // Create the post with image URLs
+      const postData = {
+        author_id: profile.id,
+        description: message,
+        user_id: user.id,
+        images: imageUrls.length > 0 ? imageUrls : null,
+        media: imageUrls.length > 0 ? imageUrls : null, // Some components might use media field
+      };
+
+      console.log("Creating post with data:", postData);
+
+      const post = await createPost(postData);
+
+      if (!post) {
+        alert("Failed to create post. Please try again.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      console.log("Post created successfully with images:", post);
 
       alert("Post created successfully!");
       router.push("/students");

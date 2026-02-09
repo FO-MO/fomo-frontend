@@ -10,6 +10,7 @@ import {
   Send,
   Loader2,
 } from "lucide-react";
+import { getMediaUrl } from "@/lib/utils";
 
 // Helper functions (moved outside component for consistency)
 const getInitials = (name: string) => {
@@ -30,11 +31,23 @@ const formatDate = (dateString: string) => {
   });
 };
 
+/*
+ * WARNING: This component still contains Strapi-specific logic and data structures
+ * TODO: Migrate to Supabase - Use these functions from lib/supabase/database.ts:
+ * - getPostComments() instead of manual fetch to /api/comments
+ * - createComment() instead of manual fetch to /api/comments
+ * - likePost()/unlikePost() instead of manual fetch to /api/posts
+ * - updatePost() instead of manual fetch to /api/posts
+ *
+ * The component also uses Strapi-specific data mapping (mapStrapiComment)
+ * which should be updated to work with Supabase schema
+ */
+
 // --- ENVIRONMENT & TYPES ---
 
 // Environment variable handling
-const STRAPI_URL =
-  (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_STRAPI_URL) ||
+// TODO: Remove this and use Supabase functions instead
+const BACKEND_URL =
   (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_BACKEND_URL) ||
   "https://tbs9k5m4-1337.inc1.devtunnels.ms";
 
@@ -79,7 +92,8 @@ type CommentData = {
   };
 };
 
-// Function to map the deeply nested Strapi API response into a flattened structure
+// TODO: Replace with Supabase comment data mapping
+// This function maps deeply nested Strapi API response - replace with Supabase schema
 const mapStrapiComment = (strapiComment: {
   id: string | number;
   attributes: {
@@ -122,7 +136,8 @@ const mapStrapiComment = (strapiComment: {
     user: {
       name: username,
       initials: initials,
-      avatarUrl: avatarUrl ? `${STRAPI_URL}${avatarUrl}` : undefined,
+      // TODO: Use Supabase Storage URL with getMediaUrl() from lib/utils.ts
+      avatarUrl: avatarUrl ? avatarUrl : undefined,
     },
   };
 };
@@ -157,9 +172,8 @@ export default function PostCard({ post, user }: Props) {
   useEffect(() => {
     const fetchAuth = async () => {
       if (typeof window !== "undefined") {
-        const { getAuthTokenCookie, getUserCookie } = await import(
-          "@/lib/cookies"
-        );
+        const { getAuthTokenCookie, getUserCookie } =
+          await import("@/lib/cookies");
         const authToken = getAuthTokenCookie();
         setToken(authToken);
 
@@ -224,7 +238,8 @@ export default function PostCard({ post, user }: Props) {
     };
 
     try {
-      const res = await fetch(`${STRAPI_URL}/api/posts/${id}`, {
+      // TODO: Replace with likePost()/unlikePost() from lib/supabase/database.ts
+      const res = await fetch(`${BACKEND_URL}/api/posts/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -259,8 +274,8 @@ export default function PostCard({ post, user }: Props) {
 
     setIsLoadingComments(true);
 
-    // Using populate=user to fetch the default Strapi User details
-    const apiUrl = `${STRAPI_URL}/api/comments?filters[blog][id][$eq]=ri0u7lqjvsoheov2qq83rn2z&populate=user&sort=sentAt:desc&pagination[limit]=10`;
+    // TODO: Replace with getPostComments() from lib/supabase/database.ts
+    const apiUrl = `${BACKEND_URL}/api/comments?filters[blog][id][$eq]=ri0u7lqjvsoheov2qq83rn2z&populate=user&sort=sentAt:desc&pagination[limit]=10`;
 
     try {
       const res = await fetch(apiUrl, {
@@ -274,7 +289,7 @@ export default function PostCard({ post, user }: Props) {
         const errorData = await res.json();
         console.error(
           `Failed to fetch comments. Status: ${res.status}. Error:`,
-          errorData
+          errorData,
         );
         // Throwing the error here will catch it below and stop execution
         throw new Error(`Failed to fetch comments (Status: ${res.status})`);
@@ -307,7 +322,7 @@ export default function PostCard({ post, user }: Props) {
     ) {
       console.error(
         "Comment post failed: Comment text or valid User ID missing.",
-        { commentText, userId }
+        { commentText, userId },
       );
       return;
     }
@@ -316,11 +331,12 @@ export default function PostCard({ post, user }: Props) {
 
     // IMPORTANT: Log the ID being sent to confirm the value
     console.log(
-      `Attempting to post comment for Post ID: ${id} using User ID: ${userId}`
+      `Attempting to post comment for Post ID: ${id} using User ID: ${userId}`,
     );
 
     try {
-      const res = await fetch(`${STRAPI_URL}/api/comments`, {
+      // TODO: Replace with createComment() from lib/supabase/database.ts
+      const res = await fetch(`${BACKEND_URL}/api/comments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -338,7 +354,7 @@ export default function PostCard({ post, user }: Props) {
 
       const data = await res.json();
       if (!res.ok) {
-        // Log the full error response from Strapi
+        // TODO: Update error handling for Supabase functions
         console.error("Failed to post comment:", data.error || data);
         return;
       }
@@ -416,7 +432,7 @@ export default function PostCard({ post, user }: Props) {
           {images.length === 1 && (
             <div className="w-full">
               <img
-                src={images[0]}
+                src={getMediaUrl(images[0]) || images[0]}
                 alt="Post content"
                 className="w-full max-h-[500px] object-cover rounded-lg"
               />
@@ -427,7 +443,7 @@ export default function PostCard({ post, user }: Props) {
               {images.map((img, idx) => (
                 <div key={idx} className="w-full">
                   <img
-                    src={img}
+                    src={getMediaUrl(img) || img}
                     alt={`Post content ${idx + 1}`}
                     className="w-full h-[300px] object-cover rounded-lg"
                   />
@@ -439,7 +455,7 @@ export default function PostCard({ post, user }: Props) {
             <div className="grid grid-cols-2 gap-2">
               <div className="col-span-2">
                 <img
-                  src={images[0]}
+                  src={getMediaUrl(images[0]) || images[0]}
                   alt="Post content 1"
                   className="w-full h-[300px] object-cover rounded-lg"
                 />
@@ -447,7 +463,7 @@ export default function PostCard({ post, user }: Props) {
               {images.slice(1).map((img, idx) => (
                 <div key={idx + 1} className="w-full">
                   <img
-                    src={img}
+                    src={getMediaUrl(img) || img}
                     alt={`Post content ${idx + 2}`}
                     className="w-full h-[200px] object-cover rounded-lg"
                   />
@@ -460,7 +476,7 @@ export default function PostCard({ post, user }: Props) {
               {images.slice(0, 4).map((img, idx) => (
                 <div key={idx} className="w-full relative">
                   <img
-                    src={img}
+                    src={getMediaUrl(img) || img}
                     alt={`Post content ${idx + 1}`}
                     className="w-full h-[250px] object-cover rounded-lg"
                   />
