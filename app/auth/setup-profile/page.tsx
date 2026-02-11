@@ -19,6 +19,7 @@ import {
   getCurrentUser,
   createStudentProfile,
   getCollegeNames,
+  checkCollegeCode,
   getDataSetByName,
   uploadProfilePic,
   uploadBackgroundImage,
@@ -309,6 +310,7 @@ export default function SetupProfilePage() {
         // Fetch colleges from backend
         const collegeNames = await getCollegeNames();
         if (collegeNames && collegeNames.length > 0) {
+          console.log("Loaded colleges:", collegeNames);
           setColleges(collegeNames);
         }
 
@@ -339,15 +341,16 @@ export default function SetupProfilePage() {
     );
   };
 
-  const handleVerificationCodeSubmit = () => {
+  const handleVerificationCodeSubmit = async () => {
     if (verificationCode.trim() === "") {
       setError("Please enter a verification code");
       return;
     }
 
+    const codeCheck = await checkCollegeCode(verificationCode.trim());
     // Check if code exists in college data keys
-    if (collegeData.hasOwnProperty(verificationCode)) {
-      const collegeName = collegeData[verificationCode];
+    if (codeCheck && codeCheck.found && codeCheck.name) {
+      const collegeName = codeCheck.name;
       setInstitution(collegeName);
       setVerification(1); // Mark as verified
       setVerificationCode("");

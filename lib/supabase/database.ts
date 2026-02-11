@@ -368,6 +368,22 @@ export async function getCollegeNames(): Promise<string[]> {
   );
 }
 
+export async function CheckCollegeNames(code: string): Promise<string[]> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from("college_sets")
+    .select("name")
+    .eq("code", code);
+
+  if (error) {
+    console.error("Failed to fetch college names:", error);
+    return [];
+  }
+
+  return data;
+}
+
 /**
  * Check if college code exists
  */
