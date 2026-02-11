@@ -7,7 +7,6 @@ import {
   MapPin,
   DollarSign,
   Calendar,
-  Briefcase,
   Building2,
   Clock,
 } from 'lucide-react'
@@ -22,12 +21,8 @@ interface Job {
   description: string
   tags: string[]
   type: string
-  jobType: string
-  experience: string
   deadline: string | null
   skills: string[]
-  requirements: string[]
-  benefits: string[]
 }
 
 interface JobDetailsModalProps {
@@ -98,28 +93,6 @@ export default function JobDetailsModal({
                 </span>
               </div>
               <p className='text-sm font-bold text-gray-900'>{job.location}</p>
-            </div>
-
-            <div className='bg-green-50 border border-green-200 rounded-xl p-4'>
-              <div className='flex items-center gap-2 text-green-600 mb-1'>
-                <Briefcase className='w-4 h-4' />
-                <span className='text-xs font-semibold uppercase'>
-                  Job Type
-                </span>
-              </div>
-              <p className='text-sm font-bold text-gray-900'>{job.jobType}</p>
-            </div>
-
-            <div className='bg-purple-50 border border-purple-200 rounded-xl p-4'>
-              <div className='flex items-center gap-2 text-purple-600 mb-1'>
-                <DollarSign className='w-4 h-4' />
-                <span className='text-xs font-semibold uppercase'>
-                  Experience
-                </span>
-              </div>
-              <p className='text-sm font-bold text-gray-900'>
-                {job.experience}
-              </p>
             </div>
           </div>
 

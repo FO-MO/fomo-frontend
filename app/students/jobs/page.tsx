@@ -5,25 +5,20 @@ export const dynamic = "force-dynamic";
 import React, { useState, useEffect } from "react";
 import { HiOutlineBuildingOffice2 } from "react-icons/hi2";
 import { FiMapPin, FiCalendar } from "react-icons/fi";
-import { getCollegeJobPostings } from "@/lib/supabase";
+import { getJobs } from "@/lib/supabase";
 import JobDetailsModal from "@/components/student-section/JobDetailsModal";
 
 interface Job {
-  id: number;
-  title: string;
-  company: string;
-  location: string;
-  salary: string;
-  postedDate: string;
-  description: string;
-  tags: string[];
-  type: string;
-  jobType: string;
-  experience: string;
-  deadline: string | null;
-  skills: string[];
-  requirements: string[];
-  benefits: string[];
+  id: string; // Matches the database type
+  title: string | null;
+  company: string | null;
+  location: string | null;
+  salary: number | null;
+  postedDate: string; // Derived from created_at
+  description: string | null;
+  tags: string[]; // Derived from skill
+  deadline: string | null; // Matches date
+  skills: string[]; // Derived from skill
 }
 
 export default function JobsPage() {
@@ -35,27 +30,110 @@ export default function JobsPage() {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const data = await getCollegeJobPostings();
+        const data = await getJobs();
 
-        const fetchedJobs: Job[] = (data || []).map((job) => ({
-          id: typeof job.id === "string" ? parseInt(job.id) : job.id,
-          title: job.title || "Unknown Job",
-          company: job.company_name || "Company Name",
-          location: job.location || "Unknown Location",
-          postedDate: job.created_at
-            ? new Date(job.created_at).toLocaleDateString()
-            : "Recently",
-          description: job.description || "No description",
-          salary: job.salary_range || "Not specified",
-          tags: job.skills_required || [],
-          type: job.job_type || "internship",
-          jobType: job.job_type || "Unknown",
-          experience: job.experience_level || "Not specified",
-          deadline: job.application_deadline || null,
-          skills: job.skills_required || [],
-          requirements: job.requirements || [],
-          benefits: job.benefits || [],
-        }));
+        if (!data || data.length === 0) {
+          const mockJobs: Job[] = [
+            {
+              id: "1",
+              title: "Software Engineer",
+              company: "Tech Corp",
+              location: "San Francisco, CA",
+              salary: 120000,
+              postedDate: "02/01/2026",
+              description: "Develop and maintain web applications.",
+              tags: ["JavaScript", "React", "Node.js"],
+              deadline: "02/20/2026",
+              skills: ["JavaScript", "React", "Node.js"],
+            },
+            {
+              id: "2",
+              title: "Data Analyst",
+              company: "Data Insights",
+              location: "New York, NY",
+              salary: 90000,
+              postedDate: "02/05/2026",
+              description: "Analyze and interpret complex data sets.",
+              tags: ["SQL", "Python", "Tableau"],
+              deadline: "02/25/2026",
+              skills: ["SQL", "Python", "Tableau"],
+            },
+            {
+              id: "3",
+              title: "Product Manager",
+              company: "Innovate Inc",
+              location: "Austin, TX",
+              salary: 110000,
+              postedDate: "02/07/2026",
+              description: "Lead product development teams.",
+              tags: ["Leadership", "Agile", "Scrum"],
+              deadline: "03/01/2026",
+              skills: ["Leadership", "Agile", "Scrum"],
+            },
+            {
+              id: "4",
+              title: "UX Designer",
+              company: "Creative Studio",
+              location: "Seattle, WA",
+              salary: 95000,
+              postedDate: "02/10/2026",
+              description: "Design user-friendly interfaces.",
+              tags: ["Figma", "Sketch", "UI/UX"],
+              deadline: "03/05/2026",
+              skills: ["Figma", "Sketch", "UI/UX"],
+            },
+            {
+              id: "5",
+              title: "DevOps Engineer",
+              company: "Cloud Solutions",
+              location: "Remote",
+              salary: 115000,
+              postedDate: "02/08/2026",
+              description: "Manage cloud infrastructure.",
+              tags: ["AWS", "Docker", "Kubernetes"],
+              deadline: "03/10/2026",
+              skills: ["AWS", "Docker", "Kubernetes"],
+            },
+            {
+              id: "6",
+              title: "Marketing Specialist",
+              company: "Brand Builders",
+              location: "Chicago, IL",
+              salary: 70000,
+              postedDate: "02/09/2026",
+              description: "Develop marketing strategies.",
+              tags: ["SEO", "Content Marketing", "Social Media"],
+              deadline: "03/15/2026",
+              skills: ["SEO", "Content Marketing", "Social Media"],
+            }
+          ];
+
+          setJobs(mockJobs);
+          return;
+        }
+
+        const fetchedJobs: Job[] = (data || []).map((job) => {
+          const skillArray = Array.isArray(job.skill)
+            ? job.skill.map(String)
+            : typeof job.skill === 'string'
+            ? [job.skill]
+            : [];
+          
+          return {
+            id: job.id,
+            title: job.title || "Unknown Job",
+            company: job.company || "Company Name",
+            location: job.location || "Unknown Location",
+            postedDate: job.created_at
+              ? new Date(job.created_at).toLocaleDateString()
+              : "Recently",
+            description: job.description || "No description",
+            salary: job.salary || null,
+            tags: skillArray,
+            deadline: job.date || null,
+            skills: skillArray,
+          };
+        });
 
         // Sort jobs: active jobs first (by deadline if available), then expired jobs
         const sortedJobs = fetchedJobs.sort((a, b) => {
@@ -92,6 +170,8 @@ export default function JobsPage() {
 
     fetchJobs();
   }, []);
+
+
 
   const handleJobClick = (job: Job) => {
     setSelectedJob(job);
@@ -173,12 +253,6 @@ export default function JobsPage() {
                           <span className="flex items-center gap-1">
                             <FiMapPin /> {job.location}
                           </span>
-                          <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
-                            {job.jobType}
-                          </span>
-                          <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
-                            {job.experience}
-                          </span>
                           {job.deadline && (
                             <span
                               className={`flex items-center gap-1 ${
@@ -250,12 +324,6 @@ export default function JobsPage() {
                             <FiMapPin className="w-3 h-3" /> {job.location}
                           </span>
                           <div className="flex gap-1 flex-wrap">
-                            <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
-                              {job.jobType}
-                            </span>
-                            <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
-                              {job.experience}
-                            </span>
                           </div>
                           {job.deadline && (
                             <span
