@@ -6,7 +6,8 @@ import React, { useState, useMemo, useEffect } from "react";
 import SearchCard, { Profile } from "@/components/student-section/SearchCard";
 import { Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { createBrowserClient } from "@/lib/supabase/client";
+import { getSupabaseClient } from "@/lib/supabase/client";
+import type { StudentProfile } from "@/lib/supabase/types";
 
 export default function SearchPage() {
   const router = useRouter();
@@ -21,7 +22,7 @@ export default function SearchPage() {
     const fetchProfiles = async () => {
       try {
         setLoading(true);
-        const supabase = createBrowserClient();
+        const supabase = getSupabaseClient();
 
         const { data, error } = await supabase
           .from("student_profiles")
@@ -33,18 +34,20 @@ export default function SearchPage() {
           return;
         }
 
-        const fetchedProfiles: Profile[] = (data || []).map((profile) => ({
-          id: profile.id || 0,
-          documentId: profile.user_id,
-          studentId: profile.user_id || "unknown",
-          name: profile.name || "Unknown User",
-          email: profile.email || "No email",
-          skills: profile.skills || [],
-          followers: [],
-          following: [],
-          isFollowing: false,
-          avatarUrl: profile.profile_pic_url || null,
-        }));
+        const fetchedProfiles: Profile[] = (data || []).map(
+          (profile: StudentProfile) => ({
+            id: profile.id || 0,
+            documentId: profile.user_id,
+            studentId: profile.user_id || "unknown",
+            name: profile.name || "Unknown User",
+            email: profile.email || "No email",
+            skills: profile.skills || [],
+            followers: [],
+            following: [],
+            isFollowing: false,
+            avatarUrl: profile.profile_pic || null,
+          }),
+        );
 
         setProfiles(fetchedProfiles);
       } catch (error) {

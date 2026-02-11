@@ -882,7 +882,20 @@ export async function getClubs(): Promise<Club[]> {
 /**
  * Get all clubs with author information
  */
-export async function getClubsWithAuthors(): Promise<any[]> {
+export async function getClubsWithAuthors(): Promise<
+  Array<
+    Club & {
+      authors: {
+        id: string;
+        user_id: string;
+        profile_pic: string | null;
+        user_profiles: {
+          username: string;
+        } | null;
+      } | null;
+    }
+  >
+> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase

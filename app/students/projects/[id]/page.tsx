@@ -8,7 +8,6 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
   ArrowLeft,
-  Github,
   Users,
   Calendar,
   User,
@@ -18,8 +17,9 @@ import {
   ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
-import { getProject, getProjectMembers } from "@/lib/supabase";
+import { getProjects } from "@/lib/supabase";
 import { getMediaUrl } from "@/lib/utils";
+import Image from "next/image";
 
 // Configuration: Set to true to fetch data from GitHub
 const USE_GITHUB_DATA = false;
@@ -47,7 +47,6 @@ interface ProjectDetails {
   id: string;
   title: string;
   description: string;
-  githubUrl?: string;
   createdDate: string;
   owner: {
     name: string;
@@ -76,90 +75,54 @@ export default function ProjectDetailsPage() {
 
   const func = async () => {
     try {
-      const projectData = await getProject(projectId);
+      const allProjects = await getProjects(); // Fetch all projects
+      const projectData = allProjects.find(
+        (project) => project.id === projectId,
+      ); // Find the specific project
 
       if (!projectData) {
-        setError("Project not found");
-        setLoading(false);
-        return;
+        throw new Error("Project not found");
       }
 
-      // Get project members
-      const members = await getProjectMembers(projectId);
+      const members = projectData.no_members || 0; // Define members based on no_members property
 
-      const formattedProject: ProjectDetails = {
-        id: projectData.id || "",
-        title: projectData.title || "",
-        description: projectData.description || "",
-        githubUrl: projectData.github_url || undefined,
-        createdDate: projectData.created_at || "",
-        owner: { name: projectData.owner_name || "" },
-        skills: projectData.technologies || [],
-        imageUrl: getMediaUrl(projectData.image_url),
-        contributors: (members || []).map((member) => ({
-          name:
-            (member as { student_profile?: { name?: string } }).student_profile
-              ?.name || "",
-          avatarUrl: "/icons/Profile.svg",
-          profileUrl: `/profile?userId=${(member as { student_profile?: { user_id?: string } }).student_profile?.user_id || ""}`,
-        })),
+      const project = {
+        id: projectData.id,
+        title: projectData.title || "Untitled",
+        description: projectData.description || "No description available",
+        createdDate: projectData.created_at || "Unknown Date",
+        owner: { name: projectData.author || "Unknown Author" },
+        skills: Array.isArray(projectData.skills)
+          ? projectData.skills.filter((skill) => typeof skill === "string")
+          : [],
+        imageUrl: getMediaUrl(projectData.image || null),
+        contributors: Array(members).fill({
+          name: "Contributor",
+          avatarUrl: null,
+        }),
+        members: members + 1,
         stats: {
+          views: 0,
+          likes: 0,
+          comments: 0,
           stars: 0,
-          members: (members?.length || 0) + 1,
-        },
-        needHelp: [], // This would come from a separate table if needed
-        detailsMarkdown: projectData.long_description || "",
+          members: 0,
+        } as ProjectStats,
+        needHelp: [] as NeedHelpItem[],
+        detailsMarkdown: "", // Added missing property
       };
 
-      setProject(formattedProject);
+      setProject(project);
       setLoading(false);
 
       // If GitHub integration is enabled, fetch additional data
-      if (USE_GITHUB_DATA && formattedProject.githubUrl) {
-        fetchGitHubData(formattedProject.githubUrl);
+      if (USE_GITHUB_DATA) {
+        // GitHub integration logic removed
       }
     } catch (err) {
       console.error("Error fetching project:", err);
       setError("Failed to load project");
       setLoading(false);
-    }
-  };
-
-  const fetchGitHubData = async (githubUrl: string) => {
-    try {
-      // Extract owner and repo from GitHub URL
-      const match = githubUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/);
-      if (!match) {
-        setError("Invalid GitHub URL");
-        return;
-      }
-
-      const [, owner, repo] = match;
-      const cleanRepo = repo.replace(/\.git$/, "");
-
-      // Fetch GitHub stats
-      const repoRes = await fetch(
-        `https://api.github.com/repos/${owner}/${cleanRepo}`,
-      );
-
-      if (repoRes.ok) {
-        const repoData = await repoRes.json();
-        // Update project stats with GitHub data
-        setProject((prev) =>
-          prev
-            ? {
-                ...prev,
-                stats: {
-                  stars: repoData.stargazers_count,
-                  members: prev.contributors.length,
-                },
-              }
-            : null,
-        );
-      }
-    } catch (err) {
-      console.error("Error fetching GitHub data:", err);
-      setError("Could not load GitHub data");
     }
   };
 
@@ -198,9 +161,11 @@ export default function ProjectDetailsPage() {
         {/* Cover Image */}
         <div className="h-64 bg-gradient-to-r from-teal-600 via-teal-700 to-cyan-700 relative flex items-center justify-center">
           {project.imageUrl ? (
-            <img
+            <Image
               src={project.imageUrl}
               alt={project.title}
+              width={800}
+              height={600}
               className="w-full h-full object-cover"
             />
           ) : (
@@ -239,19 +204,6 @@ export default function ProjectDetailsPage() {
           <p className="text-gray-700 text-lg leading-relaxed mb-6">
             {project.description}
           </p>
-
-          {/* GitHub Link */}
-          {project.githubUrl && (
-            <a
-              href={project.githubUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors"
-            >
-              <Github className="w-5 h-5" />
-              <span>View on GitHub</span>
-            </a>
-          )}
 
           {/* Skills */}
           {project.skills && project.skills.length > 0 && (
@@ -368,9 +320,11 @@ export default function ProjectDetailsPage() {
                 className="flex items-center gap-4 p-4 rounded-xl border border-gray-200 hover:border-teal-500 hover:shadow-md transition-all duration-200 group"
               >
                 <div className="relative">
-                  <img
+                  <Image
                     src={contributor.avatarUrl}
                     alt={contributor.name}
+                    width={64}
+                    height={64}
                     className="w-16 h-16 rounded-full object-cover"
                   />
                   {index === 0 && (

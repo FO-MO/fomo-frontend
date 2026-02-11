@@ -9,13 +9,13 @@ import { getJobs } from "@/lib/supabase";
 import JobDetailsModal from "@/components/student-section/JobDetailsModal";
 
 interface Job {
-  id: string; // Matches the database type
-  title: string | null;
+  id: string; // Matches the database schema
+  title: string | null; // Matches the database schema
   company: string | null;
   location: string | null;
-  salary: number | null;
+  salary: string | null; // Convert salary to string
   postedDate: string; // Derived from created_at
-  description: string | null;
+  description: string | null; // Added fallback for description
   tags: string[]; // Derived from skill
   deadline: string | null; // Matches date
   skills: string[]; // Derived from skill
@@ -39,7 +39,7 @@ export default function JobsPage() {
               title: "Software Engineer",
               company: "Tech Corp",
               location: "San Francisco, CA",
-              salary: 120000,
+              salary: "120000", // Converted to string
               postedDate: "02/01/2026",
               description: "Develop and maintain web applications.",
               tags: ["JavaScript", "React", "Node.js"],
@@ -48,22 +48,22 @@ export default function JobsPage() {
             },
             {
               id: "2",
-              title: "Data Analyst",
-              company: "Data Insights",
+              title: "Data Scientist",
+              company: "Data Inc",
               location: "New York, NY",
-              salary: 90000,
+              salary: "90000", // Converted to string
               postedDate: "02/05/2026",
-              description: "Analyze and interpret complex data sets.",
-              tags: ["SQL", "Python", "Tableau"],
+              description: "Analyze and interpret complex data.",
+              tags: ["Python", "Machine Learning", "SQL"],
               deadline: "02/25/2026",
-              skills: ["SQL", "Python", "Tableau"],
+              skills: ["Python", "Machine Learning", "SQL"],
             },
             {
               id: "3",
               title: "Product Manager",
               company: "Innovate Inc",
               location: "Austin, TX",
-              salary: 110000,
+              salary: "110000",
               postedDate: "02/07/2026",
               description: "Lead product development teams.",
               tags: ["Leadership", "Agile", "Scrum"],
@@ -75,7 +75,7 @@ export default function JobsPage() {
               title: "UX Designer",
               company: "Creative Studio",
               location: "Seattle, WA",
-              salary: 95000,
+              salary: "95000",
               postedDate: "02/10/2026",
               description: "Design user-friendly interfaces.",
               tags: ["Figma", "Sketch", "UI/UX"],
@@ -87,7 +87,7 @@ export default function JobsPage() {
               title: "DevOps Engineer",
               company: "Cloud Solutions",
               location: "Remote",
-              salary: 115000,
+              salary: "115000",
               postedDate: "02/08/2026",
               description: "Manage cloud infrastructure.",
               tags: ["AWS", "Docker", "Kubernetes"],
@@ -99,41 +99,35 @@ export default function JobsPage() {
               title: "Marketing Specialist",
               company: "Brand Builders",
               location: "Chicago, IL",
-              salary: 70000,
+              salary: "70000",
               postedDate: "02/09/2026",
               description: "Develop marketing strategies.",
               tags: ["SEO", "Content Marketing", "Social Media"],
               deadline: "03/15/2026",
               skills: ["SEO", "Content Marketing", "Social Media"],
-            }
+            },
           ];
 
           setJobs(mockJobs);
           return;
         }
 
-        const fetchedJobs: Job[] = (data || []).map((job) => {
-          const skillArray = Array.isArray(job.skill)
-            ? job.skill.map(String)
-            : typeof job.skill === 'string'
-            ? [job.skill]
-            : [];
-          
-          return {
-            id: job.id,
-            title: job.title || "Unknown Job",
-            company: job.company || "Company Name",
-            location: job.location || "Unknown Location",
-            postedDate: job.created_at
-              ? new Date(job.created_at).toLocaleDateString()
-              : "Recently",
-            description: job.description || "No description",
-            salary: job.salary || null,
-            tags: skillArray,
-            deadline: job.date || null,
-            skills: skillArray,
-          };
-        });
+        const fetchedJobs: Job[] = (data || []).map((job) => ({
+          id: job.id,
+          title: job.title || "Untitled",
+          company: job.company || "Unknown Company",
+          location: job.location || "Unknown Location",
+          salary: job.salary ? job.salary.toString() : "Not specified", // Convert salary to string
+          postedDate: job.created_at || "Unknown Date",
+          description: job.description || "No description available", // Ensure description is always a string
+          tags: Array.isArray(job.skill)
+            ? job.skill.filter((tag) => typeof tag === "string")
+            : [], // Ensure tags is a string[]
+          deadline: job.date || null,
+          skills: Array.isArray(job.skill)
+            ? job.skill.filter((skill) => typeof skill === "string")
+            : [],
+        }));
 
         // Sort jobs: active jobs first (by deadline if available), then expired jobs
         const sortedJobs = fetchedJobs.sort((a, b) => {
@@ -170,8 +164,6 @@ export default function JobsPage() {
 
     fetchJobs();
   }, []);
-
-
 
   const handleJobClick = (job: Job) => {
     setSelectedJob(job);
@@ -323,8 +315,7 @@ export default function JobsPage() {
                           <span className="flex items-center gap-1">
                             <FiMapPin className="w-3 h-3" /> {job.location}
                           </span>
-                          <div className="flex gap-1 flex-wrap">
-                          </div>
+                          <div className="flex gap-1 flex-wrap"></div>
                           {job.deadline && (
                             <span
                               className={`flex items-center gap-1 ${

@@ -44,12 +44,14 @@ export default function StudentsPage() {
             description: project.description || "No description",
             tags: ["Project"],
             creator: {
-              name: project.owner_name || "Unknown Author",
+              name: project.author || "Unknown Author",
               avatarUrl: null,
             },
-            skills: project.technologies || [],
-            membersCount: project.team_size || 0,
-            imageUrl: getMediaUrl(project.image_url),
+            skills: Array.isArray(project.skills)
+              ? project.skills.filter((skill) => typeof skill === "string")
+              : [], // Ensure skills is a string[]
+            membersCount: project.no_members || 0,
+            imageUrl: getMediaUrl(project.image || null),
             actions: [{ label: "Join Project", href: "#" }],
           };
         });
