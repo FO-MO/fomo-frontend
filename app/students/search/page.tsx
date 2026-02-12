@@ -36,8 +36,8 @@ export default function SearchPage() {
 
         const fetchedProfiles: Profile[] = (data || []).map(
           (profile: StudentProfile) => ({
-            id: profile.id || 0,
-            documentId: profile.user_id,
+            id: undefined,
+            documentId: profile.user_id ?? undefined,
             studentId: profile.user_id || "unknown",
             name: profile.name || "Unknown User",
             email: profile.email || "No email",
