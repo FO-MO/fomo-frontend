@@ -2,7 +2,8 @@
  * Supabase Client for client-side usage
  * Use this in React components with 'use client' directive
  */
-import { createBrowserClient, SupabaseClient } from "@supabase/ssr";
+import { createBrowserClient } from "@supabase/ssr";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
 
 let supabaseClient: SupabaseClient<Database> | null = null;

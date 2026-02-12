@@ -134,7 +134,7 @@ export async function signIn({
       .eq("id", data.user.id)
       .single();
 
-    userProfile = (profile as UserProfile) || {
+    userProfile = profile || {
       id: data.user.id,
       email: data.user.email || email,
       username: data.user.user_metadata?.username || email.split("@")[0],
