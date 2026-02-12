@@ -1,28 +1,27 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
 import React, { useState, useEffect } from "react";
 import ClubCard from "@/components/student-section/ClubCard";
 import { Club } from "@/lib/interfaces";
 import { getClubsWithAuthors } from "@/lib/supabase/database";
 import { getMediaUrl } from "@/lib/utils";
+import { Json } from "@/lib/supabase/types";
 
 // Type for the raw club data from database
 interface ClubWithAuthor {
   id: string;
-  title: string;
-  description: string;
-  no_member: number;
-  skills: string[];
-  pic: string;
+  title: string | null;
+  description: string | null;
+  no_member: number | null;
+  skills: Json;
+  pic: string | null;
   authors?: {
     id: string;
-    profile_pic: string;
+    profile_pic: string | null;
     user_profiles?: {
       username: string;
-    };
-  };
+    } | null;
+  } | null;
 }
 
 export default function ClubsPage() {
@@ -49,12 +48,17 @@ export default function ClubsPage() {
               clubData.authors?.user_profiles?.username || "Unknown Author";
             const authorPic = clubData.authors?.profile_pic || null;
 
+            // Parse skills from Json type
+            const skills = Array.isArray(clubData.skills)
+              ? (clubData.skills as string[])
+              : [];
+
             return {
               id: clubData.id,
-              name: clubData.title, // Club interface expects both name and title
-              title: clubData.title,
-              description: clubData.description,
-              tags: Array.isArray(clubData.skills) ? clubData.skills : [],
+              name: clubData.title || "Untitled Club", // Club interface expects both name and title
+              title: clubData.title || "Untitled Club",
+              description: clubData.description || "",
+              tags: skills,
               leader: {
                 name: authorName,
                 avatarUrl: authorPic ? getMediaUrl(authorPic) : null,

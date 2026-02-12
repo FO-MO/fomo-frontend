@@ -1,7 +1,5 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import ProfileProjectCard from "@/components/student-section/ProfileProjectCard";
@@ -196,10 +194,10 @@ export default function ProfilePage() {
     loadProfile();
   }, [loadProfile]);
 
-  const handleSaveProfile = async () => {
-    // The EditProfileModal already handles the save, so we just need to reload
-    await loadProfile();
+  const handleCloseModal = async () => {
     setIsEditModalOpen(false);
+    // Reload profile after closing modal to reflect any changes
+    await loadProfile();
   };
 
   const renderTabContent = () => {
@@ -610,7 +608,7 @@ export default function ProfilePage() {
         {profileData && (
           <EditProfileModal
             isOpen={isEditModalOpen}
-            onClose={() => setIsEditModalOpen(false)}
+            onClose={handleCloseModal}
             currentData={{
               name: profileData.name,
               email: profileData.email,
@@ -624,7 +622,6 @@ export default function ProfilePage() {
               profileImageUrl: profileData.profileImageUrl,
               backgroundImageUrl: profileData.backgroundImageUrl,
             }}
-            onSave={handleSaveProfile}
           />
         )}
       </section>
