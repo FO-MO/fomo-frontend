@@ -1,5 +1,4 @@
 "use client";
-export const dynamic = "force-dynamic";
 
 import { X, Check, Camera, Image as ImageIcon, User } from "lucide-react";
 import { useState } from "react";

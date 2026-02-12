@@ -152,10 +152,10 @@ function ProfilePageContent() {
     loadProfile();
   }, [loadProfile]);
 
-  const handleSaveProfile = async () => {
-    // The EditProfileModal already handles the save, so we just need to reload
-    await loadProfile();
+  const handleCloseModal = async () => {
     setIsEditModalOpen(false);
+    // Reload profile after closing modal to reflect any changes
+    await loadProfile();
   };
 
   const renderTabContent = () => {
@@ -554,7 +554,7 @@ function ProfilePageContent() {
       {profileData && isOwnProfile && (
         <EditProfileModal
           isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
+          onClose={handleCloseModal}
           currentData={{
             name: profileData.name,
             email: profileData.email,
@@ -566,7 +566,6 @@ function ProfilePageContent() {
             skills: profileData.skills,
             interests: profileData.interests,
           }}
-          onSave={handleSaveProfile}
         />
       )}
     </div>

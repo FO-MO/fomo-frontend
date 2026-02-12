@@ -1,7 +1,5 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -20,11 +18,9 @@ import {
   createStudentProfile,
   getCollegeNames,
   checkCollegeCode,
-  getDataSetByName,
   uploadProfilePic,
   uploadBackgroundImage,
 } from "@/lib/supabase";
-import { CreateProfileData } from "@/lib/interfaces";
 import Link from "next/link";
 
 // Predefined options
@@ -270,7 +266,7 @@ export default function SetupProfilePage() {
   const [bio, setBio] = useState("");
   const [institution, setInstitution] = useState("");
   const [colleges, setColleges] = useState<string[]>([]);
-  const [collegeData, setCollegeData] = useState<Record<string, string>>({}); // Store key-value pairs
+  // College data is fetched from the database via getCollegeNames()
   const [verificationCode, setVerificationCode] = useState("");
   const [verification, setVerification] = useState(0); // 0 = not verified, 1 = verified
   const [major, setMajor] = useState("");
@@ -312,12 +308,6 @@ export default function SetupProfilePage() {
         if (collegeNames && collegeNames.length > 0) {
           console.log("Loaded colleges:", collegeNames);
           setColleges(collegeNames);
-        }
-
-        // Also try to get college data with codes for verification
-        const dataSet = await getDataSetByName("colleges");
-        if (dataSet && typeof dataSet === "object") {
-          setCollegeData(dataSet as Record<string, string>);
         }
       } catch (error) {
         console.error("Failed to load initial data:", error);
