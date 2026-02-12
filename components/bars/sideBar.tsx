@@ -58,17 +58,17 @@ const items: Item[] = [
     icon: "/icons/search.svg",
   },
   {
-    key: "copilot",
-    label: "Ask FOOMO AI ",
-    href: "/students/ai",
-    icon: "/icons/ai.svg",
-  },
-  {
     key: "aiInterview",
     label: "AI Interview",
     href: "/students/aiInterview",
     icon: "/icons/ai.svg",
   },
+  // {
+  //   key: "copilot",
+  //   label: "Ask FOOMO AI ",
+  //   href: "/students/ai",
+  //   icon: "/icons/ai.svg",
+  // },
 ];
 
 export default function SideBar({ className = "" }: Omit<Props, "active">) {

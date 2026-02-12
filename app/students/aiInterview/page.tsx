@@ -62,6 +62,7 @@ export default function AIInterviewPage() {
   const [micMeterWidth, setMicMeterWidth] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
   const [interviewLocked, setInterviewLocked] = useState(false);
+  const [currentSection, setCurrentSection] = useState<1 | 2 | 3 | 4>(1);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -71,7 +72,7 @@ export default function AIInterviewPage() {
   const timerExpiredSentRef = useRef(false);
   const stopRequestedRef = useRef(false);
   const camStreamRef = useRef<MediaStream | null>(null);
-  const faceMeshRef = useRef<ReturnType<typeof window.FaceMesh> | null>(null);
+  const faceMeshRef = useRef<InstanceType<typeof window.FaceMesh> | null>(null);
   const gazeMonitorTimerRef = useRef<NodeJS.Timeout | null>(null);
   const gazeLastResultAtRef = useRef(0);
   const gazeIsOnScreenRef = useRef(true);
@@ -235,6 +236,7 @@ export default function AIInterviewPage() {
   };
 
   const stopCameraMonitoring = () => {
+    console.log("Stopping camera monitoring...");
     if (camVideoLoopRafRef.current) {
       cancelAnimationFrame(camVideoLoopRafRef.current);
       camVideoLoopRafRef.current = null;
@@ -280,6 +282,7 @@ export default function AIInterviewPage() {
     lastGazeWarningAtRef.current = now;
     const newWarnings = gazeWarnings + 1;
     setGazeWarnings(newWarnings);
+    console.log(`Gaze warning ${newWarnings}/${MAX_GAZE_WARNINGS} issued`);
     toast(
       `Warning ${newWarnings}/${MAX_GAZE_WARNINGS}: keep your eyes on the screen.`,
     );
@@ -292,7 +295,9 @@ export default function AIInterviewPage() {
   const startGazeViolationMonitor = () => {
     if (gazeMonitorTimerRef.current) {
       clearInterval(gazeMonitorTimerRef.current);
+      gazeMonitorTimerRef.current = null;
     }
+    console.log("Gaze violation monitor started");
     gazeMonitorTimerRef.current = setInterval(() => {
       if (!sessionId || interviewLocked) return;
 
@@ -308,11 +313,14 @@ export default function AIInterviewPage() {
 
       if (!gazeAwaySinceRef.current) {
         gazeAwaySinceRef.current = now;
+        console.log("Candidate looking away - timer started");
         setGazeStatus("Look back at the screen to avoid warning.");
         return;
       }
 
-      if (now - gazeAwaySinceRef.current >= 2500) {
+      const awayDuration = now - gazeAwaySinceRef.current;
+      if (awayDuration >= 2500) {
+        console.log(`Candidate away for ${awayDuration}ms - issuing warning`);
         gazeAwaySinceRef.current = now;
         issueGazeWarning();
       }
@@ -340,12 +348,16 @@ export default function AIInterviewPage() {
         audio: false,
       });
       camStreamRef.current = stream;
+      console.log("Camera stream acquired successfully");
+
       if (gazeVideoRef.current) {
         gazeVideoRef.current.srcObject = stream;
         await gazeVideoRef.current.play();
+        console.log("Video element started playing");
       }
 
       if (!faceMeshRef.current) {
+        console.log("Initializing FaceMesh...");
         faceMeshRef.current = new window.FaceMesh({
           locateFile: (file: string) =>
             `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
@@ -359,10 +371,17 @@ export default function AIInterviewPage() {
         faceMeshRef.current.onResults((results: FaceMeshResults) => {
           gazeLastResultAtRef.current = Date.now();
           const landmarks = results.multiFaceLandmarks?.[0];
-          gazeIsOnScreenRef.current = Boolean(
+          const lookingAtScreen = Boolean(
             landmarks && isLookingAtScreen(landmarks),
           );
+          gazeIsOnScreenRef.current = lookingAtScreen;
+
+          // Debug logging (can be removed in production)
+          if (!lookingAtScreen && landmarks) {
+            console.log("Gaze detection: not looking at screen");
+          }
         });
+        console.log("FaceMesh initialized");
       }
 
       const processFrame = async () => {
@@ -370,8 +389,11 @@ export default function AIInterviewPage() {
         if (!faceMeshBusyRef.current && gazeVideoRef.current.readyState >= 2) {
           try {
             faceMeshBusyRef.current = true;
-            await faceMeshRef.current.send({ image: gazeVideoRef.current });
-          } catch {
+            if (faceMeshRef.current) {
+              await faceMeshRef.current.send({ image: gazeVideoRef.current });
+            }
+          } catch (err) {
+            console.error("FaceMesh processing error:", err);
             gazeIsOnScreenRef.current = false;
           } finally {
             faceMeshBusyRef.current = false;
@@ -379,15 +401,24 @@ export default function AIInterviewPage() {
         }
         camVideoLoopRafRef.current = requestAnimationFrame(processFrame);
       };
-      processFrame();
 
+      // Start processing frames
+      processFrame();
+      console.log("Frame processing started");
+
+      // Initialize gaze monitoring state
       gazeIsOnScreenRef.current = true;
       gazeAwaySinceRef.current = 0;
       lastGazeWarningAtRef.current = 0;
+      gazeLastResultAtRef.current = Date.now();
       setGazeStatus("Camera active: gaze monitor running.");
+
+      // Start the violation monitor
+      console.log("Starting gaze violation monitor...");
       startGazeViolationMonitor();
       return true;
     } catch (err) {
+      console.error("Camera initialization error:", err);
       setGazeStatus(
         `Camera access denied: ${err instanceof Error ? err.message : String(err)}`,
       );
@@ -596,7 +627,7 @@ export default function AIInterviewPage() {
     }
   };
 
-  const startIntro = async () => {
+  const startIntro = async (currentSessionId: string) => {
     const roleNames = roles.map((r) => r.name).join(", ");
     const introText =
       `Hello! I'm your interviewer today. ` +
@@ -605,12 +636,13 @@ export default function AIInterviewPage() {
       `We'll begin in a moment.`;
     speakText(introText);
     toast(
-      "Interviewer introduction in progress. Starting questions in 20 seconds...",
+      "Interviewer introduction in progress. Starting questions in 10 seconds...",
     );
     introTimerRef.current = setTimeout(async () => {
       introTimerRef.current = null;
-      await loadNextQuestion();
-    }, 20000);
+      toast("Loading your first question...");
+      await loadNextQuestion(currentSessionId);
+    }, 10000);
   };
 
   const initMicStream = async () => {
@@ -673,9 +705,12 @@ export default function AIInterviewPage() {
   ) => {
     if (interviewLocked) return;
     if (!data.has_more_questions) {
-      toast("Interview completed. Generate the report.");
+      toast("Interview completed. Generating report...");
       stopAndReleaseStream();
       stopCameraMonitoring();
+      setCurrentSection(4);
+      // Auto-generate report
+      setTimeout(() => handleGenerateReport(), 1000);
       return;
     }
     const immediateNext = Boolean(options.immediateNext);
@@ -750,7 +785,7 @@ export default function AIInterviewPage() {
         );
         return;
       }
-      await startIntro();
+      await startIntro(data.session_id);
     } catch (err) {
       toast(
         `Start failed: ${err instanceof Error ? err.message : String(err)}`,
@@ -758,18 +793,24 @@ export default function AIInterviewPage() {
     }
   };
 
-  const loadNextQuestion = async () => {
-    if (!sessionId || interviewLocked) return;
+  const loadNextQuestion = async (currentSessionId?: string) => {
+    const sid = currentSessionId || sessionId;
+    if (!sid || interviewLocked) {
+      toast("Cannot load question: session not ready");
+      return;
+    }
     try {
-      const data = await apiFetch(`/interview/${sessionId}/question`);
+      const data = await apiFetch(`/interview/${sid}/question`);
       if (!data) {
         setQuestion(null);
         toast("Interview completed.");
         stopAndReleaseStream();
         stopCameraMonitoring();
+        setCurrentSection(4);
         return;
       }
       setQuestion(data);
+      toast("Question loaded. Please answer out loud.");
     } catch (err) {
       toast(
         `Question fetch failed: ${err instanceof Error ? err.message : String(err)}`,
@@ -818,8 +859,19 @@ export default function AIInterviewPage() {
   };
 
   const handleStopAnswer = async () => {
-    if (!sessionId || !question || interviewLocked) return;
-    if (stopRequestedRef.current) return;
+    if (!sessionId || !question || interviewLocked) {
+      console.log("Cannot stop answer:", {
+        sessionId,
+        hasQuestion: !!question,
+        interviewLocked,
+      });
+      return;
+    }
+    if (stopRequestedRef.current) {
+      console.log("Stop already requested");
+      return;
+    }
+    console.log("Stop answer requested");
     stopRequestedRef.current = true;
     if (timerRef.current) clearInterval(timerRef.current);
     clearAutoRecordTimers();
@@ -827,10 +879,12 @@ export default function AIInterviewPage() {
       mediaRecorderRef.current &&
       mediaRecorderRef.current.state !== "inactive"
     ) {
+      console.log("Stopping active recording...");
       setAudioStatus("Stopping and submitting answer...");
       stopRecorderOnly();
       return;
     }
+    console.log("No active recording, submitting without audio...");
     await submitStoppedAnswerWithoutAudio();
     stopRequestedRef.current = false;
   };
@@ -926,12 +980,51 @@ export default function AIInterviewPage() {
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 animate-pulse" />
       </div>
 
-      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+      <main className="relative z-0 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+        <style jsx>{`
+          @keyframes slideInFromRight {
+            from {
+              opacity: 0;
+              transform: translateX(30px);
+            }
+            to {
+              opacity: 1;
+              transform: translateX(0);
+            }
+          }
+          @keyframes slideInFromBottom {
+            from {
+              opacity: 0;
+              transform: translateY(30px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+          @keyframes fadeIn {
+            from {
+              opacity: 0;
+            }
+            to {
+              opacity: 1;
+            }
+          }
+          .animate-slide-in {
+            animation: slideInFromRight 0.5s ease-out;
+          }
+          .animate-slide-up {
+            animation: slideInFromBottom 0.5s ease-out;
+          }
+          .animate-fade-in {
+            animation: fadeIn 0.3s ease-out;
+          }
+        `}</style>
         {/* Header */}
-        <header className="mb-6 sm:mb-8">
+        <header className="mb-8">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold mb-2">
+              <h1 className="text-3xl sm:text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 AI Interview System
               </h1>
               <p className="text-muted-foreground text-sm sm:text-base">
@@ -939,213 +1032,65 @@ export default function AIInterviewPage() {
                 proctoring
               </p>
             </div>
-
-            {/* Session Status Badge */}
-            {sessionId && (
-              <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/30 rounded-full">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-sm font-medium text-primary">
-                  Session Active
-                </span>
-              </div>
-            )}
           </div>
-        </header>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Video and Questions */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Camera Video - Center */}
-            <div className="bg-card border border-border rounded-xl p-6 backdrop-blur-sm shadow-lg">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold flex items-center gap-2">
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                    />
-                  </svg>
-                  Live Camera Proctoring
-                </h3>
-                <span
-                  className={`text-xs px-3 py-1.5 rounded-full font-semibold ${
-                    gazeWarnings >= MAX_GAZE_WARNINGS / 2
-                      ? "bg-destructive/20 text-destructive border border-destructive/30"
-                      : "bg-yellow-500/20 text-yellow-600 border border-yellow-500/30"
+          {/* Progress Steps */}
+          <div className="mt-8 flex items-center justify-center gap-2 sm:gap-4">
+            {[1, 2, 3, 4].map((step) => (
+              <div key={step} className="flex items-center">
+                <div
+                  className={`flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm transition-all duration-300 ${
+                    currentSection === step
+                      ? "bg-primary text-primary-foreground scale-110 shadow-lg"
+                      : currentSection > step
+                        ? "bg-primary/50 text-primary-foreground"
+                        : "bg-muted text-muted-foreground"
                   }`}
                 >
-                  Warnings: {gazeWarnings}/{MAX_GAZE_WARNINGS}
-                </span>
-              </div>
-              <video
-                ref={gazeVideoRef}
-                className="w-full aspect-video rounded-lg bg-muted/50 border border-border object-cover mb-3"
-                autoPlay
-                playsInline
-                muted
-              />
-              <div className="bg-muted/30 border border-border rounded-lg p-3">
-                <p className="text-sm text-muted-foreground">{gazeStatus}</p>
-              </div>
-            </div>
-
-            {/* Question Display - Below Video */}
-            <div className="bg-card border border-border rounded-xl p-6 backdrop-blur-sm shadow-lg">
-              <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`w-3 h-3 rounded-full ${
-                      question ? "bg-green-500 animate-pulse" : "bg-muted"
-                    }`}
-                  ></div>
-                  <h3 className="text-lg font-bold">
-                    {question ? "Current Question" : "Awaiting Question"}
-                  </h3>
-                </div>
-                <div className="flex items-center gap-3 px-4 py-2 bg-primary/10 border border-primary/30 rounded-full">
-                  <svg
-                    className="w-5 h-5 text-primary"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <span className="text-xl font-bold tabular-nums">
-                    {timerRemaining}s
-                  </span>
-                </div>
-              </div>
-
-              {/* Time Progress Bar */}
-              <div className="h-2 bg-muted rounded-full overflow-hidden mb-4">
-                <div
-                  className={`h-full transition-all duration-1000 ${
-                    timerRemaining <= 10
-                      ? "bg-destructive"
-                      : timerRemaining <= 30
-                        ? "bg-yellow-500"
-                        : "bg-primary"
-                  }`}
-                  style={{
-                    width: `${(timerRemaining / (PREP_SECONDS + RECORD_SECONDS)) * 100}%`,
-                  }}
-                />
-              </div>
-
-              <p className="text-lg leading-relaxed mb-4 min-h-[3rem]">
-                {question
-                  ? question.question
-                  : "Upload your resume and start the interview to begin. The system will analyze your background and generate tailored technical questions."}
-              </p>
-
-              {question && (
-                <div className="flex gap-4 text-sm text-muted-foreground">
-                  <span>
-                    Role:{" "}
-                    <span className="font-semibold text-foreground">
-                      {question.role}
-                    </span>
-                  </span>
-                  <span>
-                    Difficulty:{" "}
-                    <span className="font-semibold text-foreground capitalize">
-                      {question.difficulty}
-                    </span>
-                  </span>
-                </div>
-              )}
-
-              {/* Answer Recording */}
-              <div className="mt-6 bg-muted/30 border border-border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-bold flex items-center gap-2">
+                  {currentSection > step ? (
                     <svg
-                      className="w-4 h-4 text-primary"
+                      className="w-5 h-5"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
                       <path
                         fillRule="evenodd"
-                        d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                         clipRule="evenodd"
                       />
                     </svg>
-                    Your Answer
-                  </h4>
-                  <button
-                    onClick={handleStopAnswer}
-                    disabled={!question || !isRecording}
-                    className="bg-destructive/20 text-destructive hover:bg-destructive/30 disabled:opacity-50 disabled:cursor-not-allowed py-2 px-4 rounded-lg font-semibold text-sm transition-colors duration-200"
-                  >
-                    Stop & Submit
-                  </button>
+                  ) : (
+                    step
+                  )}
                 </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    {isRecording ? (
-                      <div className="w-2.5 h-2.5 bg-destructive rounded-full animate-pulse"></div>
-                    ) : (
-                      <div className="w-2.5 h-2.5 bg-muted-foreground rounded-full"></div>
-                    )}
-                    <span className="text-sm">
-                      {isRecording
-                        ? "Recording in progress..."
-                        : "Waiting to record"}
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{audioStatus}</p>
-
-                  {/* Microphone Level Meter */}
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Audio Level</span>
-                      <span>{micMeterWidth}%</span>
-                    </div>
-                    <div className="h-2.5 bg-background border border-border rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-75"
-                        style={{ width: `${micMeterWidth}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <audio
-                  ref={audioPlaybackRef}
-                  controls
-                  className="w-full mt-3"
-                  hidden
-                />
+                {step < 4 && (
+                  <div
+                    className={`hidden sm:block w-12 md:w-24 h-1 mx-2 rounded transition-all duration-300 ${
+                      currentSection > step ? "bg-primary" : "bg-muted"
+                    }`}
+                  />
+                )}
               </div>
-            </div>
+            ))}
+          </div>
+          <div className="mt-4 text-center">
+            <p className="text-sm font-medium text-muted-foreground">
+              {currentSection === 1 && "Step 1: Introduction"}
+              {currentSection === 2 && "Step 2: Upload Resume"}
+              {currentSection === 3 && "Step 3: AI Interview"}
+              {currentSection === 4 && "Step 4: Results"}
+            </p>
+          </div>
+        </header>
 
-            {/* Performance Report - Below Video and Questions */}
-            <div className="bg-card border border-border rounded-xl p-6 backdrop-blur-sm shadow-lg">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold flex items-center gap-2">
+        {/* Section 1: Introduction/Procedure */}
+        {currentSection === 1 && (
+          <div className="animate-fade-in max-w-4xl mx-auto">
+            <div className="bg-card border border-border rounded-2xl p-8 sm:p-12 backdrop-blur-sm shadow-2xl">
+              <div className="text-center mb-8">
+                <div className="w-20 h-20 bg-gradient-to-br from-primary to-accent rounded-2xl mx-auto mb-6 flex items-center justify-center">
                   <svg
-                    className="w-5 h-5 text-primary"
+                    className="w-10 h-10 text-primary-foreground"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1157,28 +1102,517 @@ export default function AIInterviewPage() {
                       d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                     />
                   </svg>
-                  Performance Report
-                </h3>
-                <button
-                  onClick={handleGenerateReport}
-                  disabled={!sessionId}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed py-2 px-4 rounded-lg font-semibold text-sm transition-colors duration-200"
-                >
-                  Generate Report
-                </button>
+                </div>
+                <h2 className="text-3xl font-bold mb-4">
+                  Welcome to AI Interview
+                </h2>
+                <p className="text-muted-foreground text-lg">
+                  Let&apos;s get you ready for your intelligent technical
+                  interview
+                </p>
               </div>
 
-              <div className="bg-muted/30 border border-border rounded-lg p-4 mb-4 min-h-[200px] max-h-[400px] overflow-y-auto">
-                <pre className="whitespace-pre-wrap text-sm leading-relaxed font-mono">
+              <div className="space-y-6 mb-10">
+                <div className="flex gap-4 p-4 bg-muted/30 rounded-xl border border-border">
+                  <div className="flex-shrink-0 w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center text-primary font-bold">
+                    1
+                  </div>
+                  <div>
+                    <h3 className="font-bold mb-1">Upload Your Resume</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Upload your resume in PDF, DOC, or DOCX format. Our AI
+                      will analyze your background and detect relevant roles.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 p-4 bg-muted/30 rounded-xl border border-border">
+                  <div className="flex-shrink-0 w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center text-primary font-bold">
+                    2
+                  </div>
+                  <div>
+                    <h3 className="font-bold mb-1">
+                      Camera & Microphone Setup
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Grant access to your camera and microphone. Live
+                      proctoring ensures interview integrity with gaze tracking.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 p-4 bg-muted/30 rounded-xl border border-border">
+                  <div className="flex-shrink-0 w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center text-primary font-bold">
+                    3
+                  </div>
+                  <div>
+                    <h3 className="font-bold mb-1">Answer Questions</h3>
+                    <p className="text-sm text-muted-foreground">
+                      You&apos;ll have 10 seconds to prepare and 60 seconds to
+                      answer each question. Speak clearly into your microphone.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 p-4 bg-muted/30 rounded-xl border border-border">
+                  <div className="flex-shrink-0 w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center text-primary font-bold">
+                    4
+                  </div>
+                  <div>
+                    <h3 className="font-bold mb-1">Review Your Results</h3>
+                    <p className="text-sm text-muted-foreground">
+                      After completing all questions, receive a detailed
+                      performance report with scores and feedback.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 mb-8">
+                <div className="flex gap-3">
+                  <svg
+                    className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <div>
+                    <h4 className="font-semibold text-yellow-600 dark:text-yellow-500 mb-1">
+                      Important Notes
+                    </h4>
+                    <ul className="text-sm text-muted-foreground space-y-1">
+                      <li>
+                        • Ensure you&apos;re in a quiet, well-lit environment
+                      </li>
+                      <li>
+                        • Keep your eyes on the screen during the interview
+                      </li>
+                      <li>
+                        • You&apos;ll receive warnings if you look away (max 5
+                        warnings)
+                      </li>
+                      <li>• Make sure your internet connection is stable</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setCurrentSection(2)}
+                className="w-full bg-gradient-to-r from-primary to-accent text-primary-foreground hover:opacity-90 py-4 px-6 rounded-xl font-bold text-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                Get Started →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Section 2: Resume Upload */}
+        {currentSection === 2 && (
+          <div className="animate-fade-in max-w-3xl mx-auto">
+            <div className="bg-card border border-border rounded-2xl p-8 sm:p-12 backdrop-blur-sm shadow-2xl">
+              <div className="text-center mb-8">
+                <div className="w-20 h-20 bg-gradient-to-br from-primary to-accent rounded-2xl mx-auto mb-6 flex items-center justify-center">
+                  <svg
+                    className="w-10 h-10 text-primary-foreground"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    />
+                  </svg>
+                </div>
+                <h2 className="text-3xl font-bold mb-4">Upload Your Resume</h2>
+                <p className="text-muted-foreground text-lg">
+                  Our AI will analyze your resume and detect relevant technical
+                  roles
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                <div className="border-2 border-dashed border-border hover:border-primary/50 rounded-xl p-8 text-center transition-colors duration-200">
+                  <input
+                    ref={resumeFileRef}
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    className="block w-full text-sm text-foreground file:mr-4 file:py-3 file:px-6 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-primary file:to-accent file:text-primary-foreground hover:file:opacity-90 cursor-pointer"
+                  />
+                  <p className="text-xs text-muted-foreground mt-3">
+                    Supported formats: PDF, DOC, DOCX (Max 10MB)
+                  </p>
+                </div>
+
+                {resumeMessage && (
+                  <div className="animate-slide-up bg-muted/50 border border-border rounded-xl p-4">
+                    <p className="text-sm">{resumeMessage}</p>
+                  </div>
+                )}
+
+                {roles.length > 0 && (
+                  <div className="animate-slide-up bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 className="font-bold mb-4 flex items-center gap-2">
+                      <svg
+                        className="w-5 h-5 text-primary"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      Detected Roles
+                    </h3>
+                    <div className="flex flex-wrap gap-3">
+                      {roles.map((role, idx) => (
+                        <div
+                          key={idx}
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-primary/20 border border-primary/40 rounded-lg text-sm font-medium"
+                        >
+                          <span>{role.name}</span>
+                          <span className="text-xs bg-primary/30 px-2 py-0.5 rounded-full text-primary">
+                            {(role.confidence * 100).toFixed(0)}%
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => setCurrentSection(1)}
+                    className="flex-1 bg-muted text-foreground hover:bg-muted/80 py-3 px-6 rounded-xl font-semibold transition-colors duration-200"
+                  >
+                    ← Back
+                  </button>
+                  {roles.length === 0 ? (
+                    <button
+                      onClick={handleAnalyzeResume}
+                      className="flex-1 bg-gradient-to-r from-primary to-accent text-primary-foreground hover:opacity-90 py-3 px-6 rounded-xl font-bold transition-all duration-200 shadow-lg hover:shadow-xl"
+                    >
+                      Analyze Resume
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setCurrentSection(3)}
+                      className="flex-1 bg-gradient-to-r from-primary to-accent text-primary-foreground hover:opacity-90 py-3 px-6 rounded-xl font-bold transition-all duration-200 shadow-lg hover:shadow-xl"
+                    >
+                      Next
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Section 3: AI Interview */}
+        {currentSection === 3 && (
+          <div className="animate-fade-in">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left Column - Video */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Camera Video */}
+                <div className="bg-card border border-border rounded-xl p-6 backdrop-blur-sm shadow-lg">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-bold flex items-center gap-2">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                        />
+                      </svg>
+                      Live Camera Proctoring
+                    </h3>
+                    <span
+                      className={`text-xs px-3 py-1.5 rounded-full font-semibold ${
+                        gazeWarnings >= MAX_GAZE_WARNINGS / 2
+                          ? "bg-destructive/20 text-destructive border border-destructive/30"
+                          : "bg-yellow-500/20 text-yellow-600 border border-yellow-500/30"
+                      }`}
+                    >
+                      Warnings: {gazeWarnings}/{MAX_GAZE_WARNINGS}
+                    </span>
+                  </div>
+                  <video
+                    ref={gazeVideoRef}
+                    className="w-full aspect-video rounded-lg bg-muted/50 border border-border object-cover mb-3"
+                    autoPlay
+                    playsInline
+                    muted
+                  />
+                  <div className="bg-muted/30 border border-border rounded-lg p-3">
+                    <p className="text-sm text-muted-foreground">
+                      {gazeStatus}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Answer Recording */}
+                <div className="bg-card border border-border rounded-xl p-6 backdrop-blur-sm shadow-lg">
+                  <div className="flex items-center justify-between mb-5">
+                    <h3 className="text-lg font-bold flex items-center gap-2">
+                      <svg
+                        className="w-5 h-5 text-primary"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      Your Answer
+                    </h3>
+                    <button
+                      onClick={handleStopAnswer}
+                      disabled={!question || interviewLocked}
+                      className="bg-destructive/20 text-destructive hover:bg-destructive/30 disabled:opacity-50 disabled:cursor-not-allowed py-2 px-4 rounded-lg font-semibold text-sm transition-colors duration-200 flex items-center gap-2"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      Stop & Submit
+                    </button>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      {isRecording ? (
+                        <div className="w-2.5 h-2.5 bg-destructive rounded-full animate-pulse"></div>
+                      ) : (
+                        <div className="w-2.5 h-2.5 bg-muted-foreground rounded-full"></div>
+                      )}
+                      <span className="text-sm font-medium">
+                        {isRecording
+                          ? "Recording in progress..."
+                          : "Waiting to record"}
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {audioStatus}
+                    </p>
+
+                    {/* Microphone Level Meter */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>Audio Level</span>
+                        <span>{micMeterWidth}%</span>
+                      </div>
+                      <div className="h-2.5 bg-background border border-border rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-75"
+                          style={{ width: `${micMeterWidth}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <audio
+                    ref={audioPlaybackRef}
+                    controls
+                    className="w-full mt-3"
+                    hidden
+                  />
+                </div>
+              </div>
+
+              {/* Right Column - Question and Controls */}
+              <div className="lg:col-span-1 space-y-6">
+                {/* Timer and Progress */}
+                <div className="bg-card border border-border rounded-xl p-6 backdrop-blur-sm shadow-lg">
+                  <div className="text-center mb-4">
+                    <div className="inline-flex items-center gap-3 px-4 py-2 bg-primary/10 border border-primary/30 rounded-full mb-2">
+                      <svg
+                        className="w-5 h-5 text-primary"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      <span className="text-3xl font-bold tabular-nums">
+                        {timerRemaining}s
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Time Progress Bar */}
+                  <div className="h-3 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className={`h-full transition-all duration-1000 ${
+                        timerRemaining <= 10
+                          ? "bg-destructive"
+                          : timerRemaining <= 30
+                            ? "bg-yellow-500"
+                            : "bg-primary"
+                      }`}
+                      style={{
+                        width: `${(timerRemaining / (PREP_SECONDS + RECORD_SECONDS)) * 100}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Question Display */}
+                <div className="bg-gradient-to-br from-card to-muted/30 border border-border rounded-xl p-6 backdrop-blur-sm shadow-lg">
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div
+                        className={`w-3 h-3 rounded-full ${
+                          question ? "bg-green-500 animate-pulse" : "bg-muted"
+                        }`}
+                      ></div>
+                      <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                        {question ? "Active Question" : "Awaiting Question"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div key={question?.id} className="animate-slide-in">
+                    <p className="text-xl leading-relaxed mb-6 min-h-[6rem]">
+                      {question
+                        ? question.question
+                        : "Waiting for the interview to begin..."}
+                    </p>
+                  </div>
+
+                  {question && (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="text-muted-foreground">Role:</span>
+                        <span className="font-semibold px-3 py-1 bg-primary/10 rounded-lg">
+                          {question.role}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="text-muted-foreground">
+                          Difficulty:
+                        </span>
+                        <span className="font-semibold px-3 py-1 bg-accent/10 rounded-lg capitalize">
+                          {question.difficulty}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Interview Controls */}
+                {!sessionId ? (
+                  <div className="bg-card border border-border rounded-xl p-6 backdrop-blur-sm shadow-lg">
+                    <h3 className="font-bold mb-4">Ready to Begin?</h3>
+                    <button
+                      onClick={handleStartInterview}
+                      disabled={roles.length === 0}
+                      className="w-full bg-gradient-to-r from-primary to-accent text-primary-foreground hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed py-3 px-4 rounded-lg font-bold transition-all duration-200 shadow-lg text-sm"
+                    >
+                      Start Interview
+                    </button>
+                    {sessionMessage && (
+                      <div className="mt-3 bg-muted/50 border border-border rounded-lg p-3">
+                        <p className="text-xs text-muted-foreground">
+                          {sessionMessage}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="bg-card border border-border rounded-xl p-6 backdrop-blur-sm shadow-lg">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                      <span className="text-sm font-semibold text-green-600 dark:text-green-500">
+                        Interview in Progress
+                      </span>
+                    </div>
+                    <button
+                      onClick={handleEndSession}
+                      className="w-full bg-destructive/20 text-destructive border border-destructive/30 hover:bg-destructive/30 py-2.5 px-4 rounded-lg font-semibold transition-colors duration-200 text-sm"
+                    >
+                      End Session
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Section 4: Results */}
+        {currentSection === 4 && (
+          <div className="animate-fade-in max-w-5xl mx-auto">
+            <div className="bg-card border border-border rounded-xl p-8 sm:p-12 backdrop-blur-sm shadow-2xl">
+              <div className="text-center mb-8">
+                <div className="w-20 h-20 bg-gradient-to-br from-primary to-accent rounded-2xl mx-auto mb-6 flex items-center justify-center">
+                  <svg
+                    className="w-10 h-10 text-primary-foreground"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <h2 className="text-3xl font-bold mb-4">Interview Complete!</h2>
+                <p className="text-muted-foreground text-lg">
+                  Here&apos;s your performance report
+                </p>
+              </div>
+
+              <div className="bg-muted/30 border border-border rounded-lg p-6 mb-6 min-h-[300px] max-h-[500px] overflow-y-auto">
+                <pre className="whitespace-pre-wrap text-sm leading-relaxed">
                   {reportOutput}
                 </pre>
               </div>
 
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-4 justify-center">
                 <button
                   onClick={handleDownloadAnswers}
                   disabled={!reportData}
-                  className="flex items-center gap-2 bg-muted text-foreground hover:bg-muted/80 disabled:opacity-50 disabled:cursor-not-allowed py-2.5 px-4 rounded-lg font-semibold text-sm transition-colors duration-200"
+                  className="flex items-center gap-2 bg-muted text-foreground hover:bg-muted/80 disabled:opacity-50 disabled:cursor-not-allowed py-3 px-6 rounded-lg font-semibold transition-colors duration-200"
                 >
                   <svg
                     className="w-4 h-4"
@@ -1198,7 +1632,7 @@ export default function AIInterviewPage() {
                 <button
                   onClick={handleDownloadReport}
                   disabled={!reportData}
-                  className="flex items-center gap-2 bg-muted text-foreground hover:bg-muted/80 disabled:opacity-50 disabled:cursor-not-allowed py-2.5 px-4 rounded-lg font-semibold text-sm transition-colors duration-200"
+                  className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed py-3 px-6 rounded-lg font-semibold transition-colors duration-200 shadow-lg"
                 >
                   <svg
                     className="w-4 h-4"
@@ -1216,92 +1650,23 @@ export default function AIInterviewPage() {
                   Download Report
                 </button>
               </div>
-            </div>
-          </div>
 
-          {/* Right Column - Upload Resume and Controls */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Upload Resume */}
-            <div className="bg-card border border-border rounded-xl p-6 backdrop-blur-sm shadow-lg">
-              <h3 className="text-base font-bold mb-4">Upload Resume</h3>
-              <div className="space-y-3">
-                <input
-                  ref={resumeFileRef}
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  className="block w-full text-sm text-foreground file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 cursor-pointer"
-                />
+              <div className="mt-8 text-center">
                 <button
-                  onClick={handleAnalyzeResume}
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 py-2.5 px-4 rounded-lg font-semibold transition-colors duration-200 shadow-md hover:shadow-lg"
+                  onClick={() => {
+                    setCurrentSection(1);
+                    setRoles([]);
+                    setReportData(null);
+                    setReportOutput("No report generated yet.");
+                  }}
+                  className="bg-muted text-foreground hover:bg-muted/80 py-3 px-8 rounded-xl font-semibold transition-colors duration-200"
                 >
-                  Analyze Resume
+                  Start New Interview
                 </button>
-                {resumeMessage && (
-                  <div className="bg-muted/50 border border-border rounded-lg p-3">
-                    <p className="text-xs text-muted-foreground">
-                      {resumeMessage}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Detected Roles */}
-            <div className="bg-card border border-border rounded-xl p-6 backdrop-blur-sm shadow-lg">
-              <h3 className="text-base font-bold mb-4">Detected Roles</h3>
-              {roles.length === 0 ? (
-                <div className="bg-muted/30 border border-dashed border-border rounded-lg p-4 text-center">
-                  <p className="text-sm text-muted-foreground">
-                    No roles detected yet
-                  </p>
-                </div>
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  {roles.map((role, idx) => (
-                    <div
-                      key={idx}
-                      className="inline-flex items-center gap-2 px-3 py-2 bg-primary/10 border border-primary/30 rounded-lg text-sm font-medium"
-                    >
-                      <span>{role.name}</span>
-                      <span className="text-xs bg-primary/20 px-2 py-0.5 rounded-full text-primary">
-                        {(role.confidence * 100).toFixed(0)}%
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Interview Controls */}
-            <div className="bg-card border border-border rounded-xl p-6 backdrop-blur-sm shadow-lg">
-              <h3 className="text-base font-bold mb-4">Interview Session</h3>
-              <div className="space-y-3">
-                <button
-                  onClick={handleStartInterview}
-                  disabled={roles.length === 0 || !!sessionId}
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed py-3 px-4 rounded-lg font-bold transition-colors duration-200 shadow-lg text-sm"
-                >
-                  {sessionId ? "Interview Running" : "Start Interview"}
-                </button>
-                <button
-                  onClick={handleEndSession}
-                  disabled={!sessionId}
-                  className="w-full bg-destructive/20 text-destructive border border-destructive/30 hover:bg-destructive/30 disabled:opacity-50 disabled:cursor-not-allowed py-2.5 px-4 rounded-lg font-semibold transition-colors duration-200 text-sm"
-                >
-                  End Session
-                </button>
-                {sessionMessage && (
-                  <div className="bg-muted/50 border border-border rounded-lg p-3">
-                    <p className="text-xs text-muted-foreground">
-                      {sessionMessage}
-                    </p>
-                  </div>
-                )}
               </div>
             </div>
           </div>
-        </div>
+        )}
       </main>
     </div>
   );

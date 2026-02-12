@@ -50,11 +50,11 @@ export default function Home() {
   return (
     <>
       <TopBar theme="home" user={parsedUser} />
-      <Hero1 />
+      <Hero1 user={parsedUser} />
       <Hero2 />
       <Hero3 />
       <Hero4 />
-      <Hero5 />
+      <Hero5 user={parsedUser} />
       <Footer />
     </>
   );
