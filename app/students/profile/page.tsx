@@ -610,7 +610,10 @@ export default function ProfilePage() {
         {profileData && (
           <EditProfileModal
             isOpen={isEditModalOpen}
-            onClose={() => setIsEditModalOpen(false)}
+            onClose={() => {
+              setIsEditModalOpen(false);
+              loadProfile();
+            }}
             currentData={{
               name: profileData.name,
               email: profileData.email,
@@ -624,7 +627,6 @@ export default function ProfilePage() {
               profileImageUrl: profileData.profileImageUrl,
               backgroundImageUrl: profileData.backgroundImageUrl,
             }}
-            onSave={handleSaveProfile}
           />
         )}
       </section>

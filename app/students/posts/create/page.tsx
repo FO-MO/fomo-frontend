@@ -25,13 +25,15 @@ export default function CreatePostPage() {
   // Get user info from cookies
   const [userName, setUserName] = useState("User");
   const [userInitials, setUserInitials] = useState("U");
+  const [userAvatarUrl, setUserAvatarUrl] = useState<string | null>(null);
 
   React.useEffect(() => {
     const fetchUser = async () => {
       try {
         const { user } = await getCurrentUser();
         if (user) {
-          const name = user.username || user.email || "User";
+          const profile = await getStudentProfile(user.id);
+          const name = profile?.name || user.username || user.email || "User";
           setUserName(name);
           setUserInitials(
             name
@@ -41,6 +43,7 @@ export default function CreatePostPage() {
               .toUpperCase()
               .slice(0, 2),
           );
+          setUserAvatarUrl(profile?.profile_pic || null);
         }
       } catch (err) {
         console.error("Failed to get user data:", err);
@@ -230,9 +233,18 @@ export default function CreatePostPage() {
             {/* Author Info */}
             <div className="p-6 border-b border-gray-100">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-semibold text-lg">
-                  {userInitials}
-                </div>
+                {userAvatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={userAvatarUrl}
+                    alt={userName}
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-semibold text-lg">
+                    {userInitials}
+                  </div>
+                )}
                 <div>
                   <p className="font-semibold text-gray-900">{userName}</p>
                   <p className="text-sm text-gray-500">Posting to everyone</p>

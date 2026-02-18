@@ -148,19 +148,19 @@ const UserAvatar = ({
   user,
 }: {
   user: { avatarUrl?: string | null; name: string; initials: string };
-}) => (
-  // user.avatarUrl ? (
-  //   <img
-  //     src={user.avatarUrl}
-  //     alt={user.name}
-  //     className='w-10 h-10 rounded-full object-cover'
-  //   />
-  // ) : (
-  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-sm font-bold text-white shadow-md flex-shrink-0">
-    {user.initials.toUpperCase()}
-  </div>
-);
-// )
+}) =>
+  user.avatarUrl ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={user.avatarUrl}
+      alt={user.name}
+      className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+    />
+  ) : (
+    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-sm font-bold text-white shadow-md flex-shrink-0">
+      {user.initials.toUpperCase()}
+    </div>
+  );
 
 // --- MAIN COMPONENT ---
 

@@ -69,9 +69,6 @@ export default function SearchCard({ profile, onFollowToggle }: Props) {
                 <h3 className='text-base font-semibold text-gray-900 truncate hover:text-teal-700 cursor-pointer'>
                   {profile.name}
                 </h3>
-                <p className='text-gray-600 text-xs truncate'>
-                  {profile.email}
-                </p>
               </div>
 
               {/* Follow Button */}
