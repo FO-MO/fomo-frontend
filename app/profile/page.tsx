@@ -329,9 +329,9 @@ function ProfilePageContent() {
               <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
                 {profileData.name}
               </h1>
-              <p className="text-gray-600 text-base mb-3">
+              {/* <p className="text-gray-600 text-base mb-3">
                 @{profileData.email.split("@")[0]}
-              </p>
+              </p> */}
               <div className="flex flex-wrap gap-3">
                 <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200">
                   <span className="text-sm text-gray-600">Followers</span>
