@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
-const BACKEND = process.env.NEXT_PUBLIC_BACKEND_ORIGIN;
+const BACKEND =
+  process.env.NEXT_PUBLIC_BACKEND_ORIGIN ||
+  "http://backend.fxcybqfhhqbfavdv.centralindia.azurecontainer.io";
 
 const nextConfig: NextConfig = {
   async rewrites() {
