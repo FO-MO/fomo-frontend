@@ -117,9 +117,7 @@ export default function AIInterviewPage() {
   /*  State                                                            */
   /* ---------------------------------------------------------------- */
 
-  const [apiBase] = useState(
-    process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000",
-  );
+  const [apiBase] = useState("/api/backend");
   const [section, setSection] = useState<1 | 2 | 3 | 4>(1);
 
   // session
