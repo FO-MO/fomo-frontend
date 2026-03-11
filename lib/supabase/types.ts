@@ -921,6 +921,44 @@ export interface Database {
           published_at?: string | null;
         };
       };
+      ai_interview_results: {
+        Row: {
+          id: string;
+          user_id: string;
+          session_id: string | null;
+          detected_roles: Json | null;
+          total_raw_score: number | null;
+          max_possible: number | null;
+          total_questions: number | null;
+          role_scores: Json | null;
+          final_summary: string | null;
+          full_report: Json | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          session_id?: string | null;
+          detected_roles?: Json | null;
+          total_raw_score?: number | null;
+          max_possible?: number | null;
+          total_questions?: number | null;
+          role_scores?: Json | null;
+          final_summary?: string | null;
+          full_report?: Json | null;
+          created_at?: string;
+        };
+        Update: {
+          session_id?: string | null;
+          detected_roles?: Json | null;
+          total_raw_score?: number | null;
+          max_possible?: number | null;
+          total_questions?: number | null;
+          role_scores?: Json | null;
+          final_summary?: string | null;
+          full_report?: Json | null;
+        };
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -956,3 +994,4 @@ export type Job = Tables<"jobs">;
 export type GlobalJobPosting = Tables<"global_job_postings">;
 export type CollegeSet = Tables<"college_sets">;
 export type Certificate = Tables<"certificates">;
+export type AiInterviewResult = Tables<"ai_interview_results">;

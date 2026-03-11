@@ -19,6 +19,7 @@ import type {
   GlobalJobPosting,
   CollegeSet,
   Certificate,
+  AiInterviewResult,
   InsertTables,
   UpdateTables,
   Json,
@@ -1450,4 +1451,77 @@ export async function putData<T>(
   }
 
   return result as T;
+}
+
+// ============================================
+// AI INTERVIEW RESULTS
+// ============================================
+
+export interface SaveInterviewResultPayload {
+  userId: string;
+  sessionId: string | null;
+  detectedRoles: Json;
+  totalRawScore: number | null;
+  maxPossible: number | null;
+  totalQuestions: number | null;
+  roleScores: Json | null;
+  finalSummary: string | null;
+  fullReport: Json;
+}
+
+/**
+ * Save AI interview result linked to a user
+ */
+export async function saveAiInterviewResult(
+  payload: SaveInterviewResultPayload,
+): Promise<AiInterviewResult | null> {
+  const supabase = getSupabaseClient();
+
+  const insertData: InsertTables<"ai_interview_results"> = {
+    user_id: payload.userId,
+    session_id: payload.sessionId,
+    detected_roles: payload.detectedRoles,
+    total_raw_score: payload.totalRawScore,
+    max_possible: payload.maxPossible,
+    total_questions: payload.totalQuestions,
+    role_scores: payload.roleScores,
+    final_summary: payload.finalSummary,
+    full_report: payload.fullReport,
+  };
+
+  const { data, error } = await supabase
+    .from("ai_interview_results")
+    // @ts-ignore Supabase type inference issue with newly added table
+    .insert(insertData as any)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Failed to save AI interview result:", error);
+    return null;
+  }
+
+  return data;
+}
+
+/**
+ * Get all AI interview results for a user, newest first
+ */
+export async function getAiInterviewResults(
+  userId: string,
+): Promise<AiInterviewResult[]> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from("ai_interview_results")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Failed to fetch AI interview results:", error);
+    return [];
+  }
+
+  return data ?? [];
 }

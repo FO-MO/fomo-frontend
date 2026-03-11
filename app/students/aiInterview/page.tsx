@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
+import { getSupabaseClient } from "@/lib/supabase/client";
+import { saveAiInterviewResult } from "@/lib/supabase/database";
+import type { Json } from "@/lib/supabase/types";
 
 /* ================================================================== */
 /*  Type declarations                                                  */
@@ -119,6 +122,7 @@ export default function AIInterviewPage() {
 
   const [apiBase] = useState("/api/backend");
   const [section, setSection] = useState<1 | 2 | 3 | 4>(1);
+  const [userId, setUserId] = useState<string | null>(null);
 
   // session
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -196,6 +200,9 @@ export default function AIInterviewPage() {
   const lockedRef = useRef(false);
   const codingSubRef = useRef(false);
   const qNumRef = useRef(0);
+  const saveResultsToDbRef = useRef<
+    ((rpt: ReportData) => Promise<void>) | null
+  >(null);
 
   // DOM refs
   const gazeVideoRef = useRef<HTMLVideoElement>(null);
@@ -240,6 +247,34 @@ export default function AIInterviewPage() {
 
   const toast = useCallback((m: string) => setSessionMsg(m), []);
   const resumeToast = useCallback((m: string) => setResumeMsg(m), []);
+
+  const saveResultsToDb = useCallback(
+    async (rpt: ReportData) => {
+      const uid = userId;
+      if (!uid) return; // not logged in – skip silently
+      try {
+        await saveAiInterviewResult({
+          userId: uid,
+          sessionId: sessionIdRef.current,
+          detectedRoles: roles as unknown as Json,
+          totalRawScore: rpt.total_raw_score ?? null,
+          maxPossible: rpt.max_possible ?? null,
+          totalQuestions: rpt.total_questions ?? null,
+          roleScores: (rpt.roles ?? null) as unknown as Json | null,
+          finalSummary: rpt.final_summary ?? null,
+          fullReport: rpt as unknown as Json,
+        });
+      } catch (e) {
+        console.error("Failed to save interview result:", e);
+      }
+    },
+    [userId, roles],
+  );
+
+  // keep ref in sync so handlePostAnswer can call the latest version
+  useEffect(() => {
+    saveResultsToDbRef.current = saveResultsToDb;
+  }, [saveResultsToDb]);
 
   const downloadJSON = useCallback((data: unknown, filename: string) => {
     const blob = new Blob([JSON.stringify(data, null, 2)], {
@@ -537,6 +572,15 @@ export default function AIInterviewPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Fetch the logged-in user's ID once on mount
+  useEffect(() => {
+    getSupabaseClient()
+      .auth.getUser()
+      .then(({ data }) => {
+        if (data.user) setUserId(data.user.id);
+      });
+  }, []);
+
   /* ================================================================ */
   /*  Post-answer flow                                                 */
   /* ================================================================ */
@@ -575,6 +619,7 @@ export default function AIInterviewPage() {
           try {
             const rpt = await apiFetch(`/interview/${sid}/report`);
             setReportData(rpt);
+            saveResultsToDbRef.current?.(rpt);
             setSessionMsg("Report generated.");
           } catch (e) {
             setSessionMsg(
@@ -1125,11 +1170,12 @@ export default function AIInterviewPage() {
     try {
       const data = await apiFetch(`/interview/${sid}/report`);
       setReportData(data);
+      saveResultsToDb(data);
       toast("Report generated.");
     } catch (e) {
       toast(`Report failed: ${e instanceof Error ? e.message : String(e)}`);
     }
-  }, [apiFetch, toast]);
+  }, [apiFetch, saveResultsToDb, toast]);
 
   const handleDownloadReport = useCallback(() => {
     if (!reportData) return;
