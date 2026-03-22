@@ -1,8 +1,12 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { getSupabaseClient } from "@/lib/supabase/client";
-import { saveAiInterviewResult } from "@/lib/supabase/database";
+import {
+  saveAiInterviewResult,
+  updateApplicationInterview,
+} from "@/lib/supabase/database";
 import type { Json } from "@/lib/supabase/types";
 
 /* ================================================================== */
@@ -123,6 +127,18 @@ export default function AIInterviewPage() {
   const [apiBase] = useState("/api/backend");
   const [section, setSection] = useState<1 | 2 | 3 | 4>(1);
   const [userId, setUserId] = useState<string | null>(null);
+
+  // Job application context (from URL params)
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [jobContext, setJobContext] = useState<{
+    jobId: string;
+    applicationId: string;
+    jobTitle: string;
+    company: string;
+    jobSkills: string[];
+    required: boolean;
+  } | null>(null);
 
   // session
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -264,11 +280,21 @@ export default function AIInterviewPage() {
           finalSummary: rpt.final_summary ?? null,
           fullReport: rpt as unknown as Json,
         });
+
+        // If this interview is for a job application, update the application record
+        if (jobContext && sessionIdRef.current) {
+          await updateApplicationInterview(
+            jobContext.applicationId,
+            sessionIdRef.current,
+            true,
+          );
+          toast("Interview completed! Your application is now complete.");
+        }
       } catch (e) {
         console.error("Failed to save interview result:", e);
       }
     },
-    [userId, roles],
+    [userId, roles, jobContext, toast],
   );
 
   // keep ref in sync so handlePostAnswer can call the latest version
@@ -580,6 +606,27 @@ export default function AIInterviewPage() {
         if (data.user) setUserId(data.user.id);
       });
   }, []);
+
+  // Parse job context from URL params
+  useEffect(() => {
+    const jobId = searchParams.get("jobId");
+    const applicationId = searchParams.get("applicationId");
+    const jobTitle = searchParams.get("jobTitle");
+    const company = searchParams.get("company");
+    const jobSkillsStr = searchParams.get("jobSkills");
+    const required = searchParams.get("required");
+
+    if (jobId && applicationId && jobTitle && company) {
+      setJobContext({
+        jobId,
+        applicationId,
+        jobTitle,
+        company,
+        jobSkills: jobSkillsStr ? JSON.parse(jobSkillsStr) : [],
+        required: required === "true",
+      });
+    }
+  }, [searchParams]);
 
   /* ================================================================ */
   /*  Post-answer flow                                                 */
@@ -1098,13 +1145,32 @@ export default function AIInterviewPage() {
       setLastFeedback(null);
       setQuestionNumber(0);
 
-      const payload = {
+      const payload: {
+        roles: Array<{ name: string; confidence: number; rationale: string }>;
+        job_context?: {
+          job_id: string;
+          job_title: string;
+          company: string;
+          required_skills: string[];
+        };
+      } = {
         roles: roles.map((r) => ({
           name: r.name,
           confidence: r.confidence,
           rationale: r.rationale || "",
         })),
       };
+
+      // Include job context if this is for a job application
+      if (jobContext) {
+        payload.job_context = {
+          job_id: jobContext.jobId,
+          job_title: jobContext.jobTitle,
+          company: jobContext.company,
+          required_skills: jobContext.jobSkills,
+        };
+      }
+
       const data = await apiFetch("/interview/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1143,6 +1209,7 @@ export default function AIInterviewPage() {
     startIntro,
     stopCamera,
     toast,
+    jobContext,
   ]);
 
   const handleStop = useCallback(async () => {
@@ -1522,11 +1589,67 @@ export default function AIInterviewPage() {
                     />
                   </svg>
                 </div>
-                <h2 className="text-2xl font-bold mb-2">Upload Resume</h2>
+                <h2 className="text-2xl font-bold mb-2">
+                  {jobContext
+                    ? `Interview for ${jobContext.jobTitle}`
+                    : "Upload Resume"}
+                </h2>
                 <p className="text-muted-foreground text-sm">
-                  PDF, DOC, or DOCX — we&apos;ll detect your technical roles
+                  {jobContext
+                    ? `${jobContext.company} — ${jobContext.required ? "Required" : "Optional"} Interview`
+                    : "PDF, DOC, or DOCX — we'll detect your technical roles"}
                 </p>
               </div>
+
+              {/* Job Context Info */}
+              {jobContext && (
+                <div className="mb-6 rounded-xl border-2 border-purple-500/30 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 p-5">
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex-shrink-0">
+                      <svg
+                        className="h-6 w-6 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-base font-bold text-foreground mb-1">
+                        Job Application Interview
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        This interview is tailored to assess your fit for the
+                        position. Questions will focus on the required skills
+                        and role requirements.
+                      </p>
+                    </div>
+                  </div>
+                  {jobContext.jobSkills.length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-purple-500/20">
+                      <p className="text-xs text-muted-foreground mb-2">
+                        Required Skills:
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {jobContext.jobSkills.map((skill, idx) => (
+                          <span
+                            key={idx}
+                            className="px-2 py-1 bg-purple-500/20 text-purple-700 dark:text-purple-300 rounded text-xs font-medium"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="space-y-5">
                 {/* File input */}
@@ -2227,7 +2350,16 @@ export default function AIInterviewPage() {
               </ActionBtn>
             </div>
 
-            <div className="text-center">
+            {/* Navigation buttons */}
+            <div className="flex flex-col gap-3 items-center">
+              {jobContext && (
+                <button
+                  onClick={() => router.push("/students/jobs")}
+                  className="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white py-3 px-8 rounded-xl font-bold text-sm transition-all shadow-lg"
+                >
+                  Back to Job Listings
+                </button>
+              )}
               <button
                 onClick={resetAll}
                 className="bg-muted hover:bg-muted/80 text-foreground py-3 px-8 rounded-xl font-semibold text-sm transition-colors"

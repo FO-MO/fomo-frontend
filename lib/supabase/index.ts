@@ -77,6 +77,12 @@ export {
   getJobs,
   getJob,
   createJob,
+  // Job Applications
+  createJobApplication,
+  getStudentApplications,
+  getApplicationByJobAndStudent,
+  updateApplicationInterview,
+  getJobApplications,
   // Global Job Postings
   getGlobalJobPostings,
   getEmployerGlobalJobPostings,

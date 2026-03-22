@@ -9,6 +9,8 @@ import { useRouter } from "next/navigation";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import type { StudentProfile } from "@/lib/supabase/types";
 
+const PAGE_SIZE = 20;
+
 export default function SearchPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
@@ -17,26 +19,49 @@ export default function SearchPage() {
   >("all");
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalProfiles, setTotalProfiles] = useState(0);
+  const [refreshNonce, setRefreshNonce] = useState(0);
 
   useEffect(() => {
     const fetchProfiles = async () => {
       try {
         setLoading(true);
+        setErrorMessage(null);
         const supabase = getSupabaseClient();
+        const from = (currentPage - 1) * PAGE_SIZE;
+        const to = from + PAGE_SIZE - 1;
 
-        const { data, error } = await supabase
+        // Prevent the page from getting stuck forever if the network call hangs.
+        const queryPromise = supabase
           .from("student_profiles")
-          .select("*");
+          .select("*", { count: "exact" })
+          .order("created_at", { ascending: false })
+          .range(from, to);
+
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => {
+            reject(new Error("Request timed out"));
+          }, 15000);
+        });
+
+        const { data, error, count } = await Promise.race([
+          queryPromise,
+          timeoutPromise,
+        ]);
 
         if (error) {
           console.error("Error fetching profiles:", error);
           setProfiles([]);
+          setTotalProfiles(0);
+          setErrorMessage("Could not load candidates. Please try again.");
           return;
         }
 
         const fetchedProfiles: Profile[] = (data || []).map(
           (profile: StudentProfile) => ({
-            id: undefined,
+            id: profile.id,
             documentId: profile.user_id ?? undefined,
             studentId: profile.user_id || "unknown",
             name: profile.name || "Unknown User",
@@ -50,16 +75,21 @@ export default function SearchPage() {
         );
 
         setProfiles(fetchedProfiles);
+        setTotalProfiles(typeof count === "number" ? count : 0);
       } catch (error) {
         console.error("Error fetching profiles:", error);
         setProfiles([]);
+        setTotalProfiles(0);
+        setErrorMessage(
+          "Loading candidates took too long. Please try again.",
+        );
       } finally {
         setLoading(false);
       }
     };
 
     fetchProfiles();
-  }, []);
+  }, [currentPage, refreshNonce]);
 
   // Filter profiles based on search query and following filter
   const filteredProfiles = useMemo(() => {
@@ -92,10 +122,29 @@ export default function SearchPage() {
     setSearchQuery("");
   };
 
+  const handleClearFilters = () => {
+    setSearchQuery("");
+    setFollowingFilter("all");
+    setCurrentPage(1);
+  };
+
+  const hasActiveFilters = searchQuery.trim().length > 0 || followingFilter !== "all";
+
   const handleProfileClick = (profile: Profile) => {
     if (profile.documentId) {
       router.push(`/profile?userId=${profile.studentId}`);
     }
+  };
+
+  const totalPages = Math.max(1, Math.ceil(totalProfiles / PAGE_SIZE));
+
+  const goToPage = (page: number) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+  };
+
+  const handleRetry = () => {
+    setRefreshNonce((prev) => prev + 1);
   };
 
   return (
@@ -172,6 +221,13 @@ export default function SearchPage() {
               >
                 New ({profiles.filter((p: Profile) => !p.isFollowing).length})
               </button>
+              <button
+                onClick={handleClearFilters}
+                disabled={!hasActiveFilters}
+                className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-lg text-xs sm:text-sm font-medium transition-colors border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Clear filters
+              </button>
             </div>
           </div>
 
@@ -197,6 +253,16 @@ export default function SearchPage() {
             <div className="col-span-full text-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto"></div>
               <p className="text-gray-500 mt-4">Loading profiles...</p>
+            </div>
+          ) : errorMessage ? (
+            <div className="col-span-full text-center py-12">
+              <p className="text-red-600 font-medium">{errorMessage}</p>
+              <button
+                onClick={handleRetry}
+                className="mt-4 px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-100"
+              >
+                Retry
+              </button>
             </div>
           ) : filteredProfiles.length > 0 ? (
             filteredProfiles.map((profile: Profile) => (
@@ -229,6 +295,34 @@ export default function SearchPage() {
             </div>
           )}
         </div>
+
+        {!loading && totalProfiles > 0 && (
+          <div className="mt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <p className="text-sm text-gray-600">
+              Showing page <span className="font-semibold">{currentPage}</span>
+              {" "}of <span className="font-semibold">{totalPages}</span>
+              {" "}({totalProfiles} students)
+            </p>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+
+              <button
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </section>
     </div>
   );

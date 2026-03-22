@@ -15,6 +15,7 @@ interface Job {
   tags: string[];
   deadline: string | null;
   skills: string[];
+  requires_interview?: boolean; // New field for interview requirement
 }
 
 interface JobDetailsModalProps {
@@ -96,6 +97,39 @@ export default function JobDetailsModal({
                 Application Deadline
               </h3>
               <p className="text-red-800 font-medium">{job.deadline}</p>
+            </div>
+          )}
+
+          {/* Interview Required Badge */}
+          {job.requires_interview && (
+            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border-2 border-purple-300 rounded-xl p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex-shrink-0">
+                  <svg
+                    className="h-6 w-6 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+                    />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-purple-900 mb-1">
+                    AI Interview Required
+                  </h3>
+                  <p className="text-sm text-purple-800">
+                    After applying, you'll be directed to complete an AI
+                    interview tailored to this position. This helps the employer
+                    assess your skills and fit for the role.
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 

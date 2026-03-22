@@ -5,7 +5,7 @@ import React from "react";
 
 export type Profile = {
   documentId?: string;
-  id?: number;
+  id?: string | number;
   studentId: string;
   name: string;
   email?: string;

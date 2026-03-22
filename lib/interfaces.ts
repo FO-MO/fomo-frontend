@@ -182,6 +182,23 @@ export interface GlobalJob {
   createdAt?: string;
 }
 
+export interface JobApplicationWithDetails {
+  id: string;
+  jobId: string;
+  studentId: string;
+  appliedAt: string;
+  status: "pending" | "reviewing" | "accepted" | "rejected";
+  interviewSessionId: string | null;
+  interviewCompleted: boolean;
+  interviewRequired: boolean;
+  job?: {
+    title: string;
+    company: string;
+    location: string;
+    deadline: string | null;
+  };
+}
+
 export type PostAuthor = {
   name: string;
   initials: string;

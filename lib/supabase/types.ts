@@ -336,6 +336,7 @@ export interface Database {
           skill: Json | null;
           image: string | null;
           employer_data_id: string | null;
+          requires_interview: boolean;
           created_at: string;
           updated_at: string;
           published_at: string | null;
@@ -351,6 +352,7 @@ export interface Database {
           skill?: Json | null;
           image?: string | null;
           employer_data_id?: string | null;
+          requires_interview?: boolean;
           created_at?: string;
           updated_at?: string;
           published_at?: string | null;
@@ -365,6 +367,7 @@ export interface Database {
           skill?: Json | null;
           image?: string | null;
           employer_data_id?: string | null;
+          requires_interview?: boolean;
           updated_at?: string;
           published_at?: string | null;
         };
@@ -959,6 +962,42 @@ export interface Database {
           full_report?: Json | null;
         };
       };
+      job_applications: {
+        Row: {
+          id: string;
+          job_id: string;
+          student_id: string;
+          applied_at: string;
+          status: string;
+          interview_session_id: string | null;
+          interview_completed: boolean;
+          interview_required: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          job_id: string;
+          student_id: string;
+          applied_at?: string;
+          status?: string;
+          interview_session_id?: string | null;
+          interview_completed?: boolean;
+          interview_required?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          job_id?: string;
+          student_id?: string;
+          applied_at?: string;
+          status?: string;
+          interview_session_id?: string | null;
+          interview_completed?: boolean;
+          interview_required?: boolean;
+          updated_at?: string;
+        };
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -995,3 +1034,4 @@ export type GlobalJobPosting = Tables<"global_job_postings">;
 export type CollegeSet = Tables<"college_sets">;
 export type Certificate = Tables<"certificates">;
 export type AiInterviewResult = Tables<"ai_interview_results">;
+export type JobApplication = Tables<"job_applications">;

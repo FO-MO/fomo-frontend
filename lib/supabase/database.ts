@@ -20,6 +20,7 @@ import type {
   CollegeSet,
   Certificate,
   AiInterviewResult,
+  JobApplication,
   InsertTables,
   UpdateTables,
   Json,
@@ -1106,6 +1107,153 @@ export async function createJob(
   }
 
   return job;
+}
+
+// ============================================
+// JOB APPLICATIONS
+// ============================================
+
+/**
+ * Create a job application
+ * @param jobId - The job being applied to
+ * @param studentId - The student applying (auth user ID)
+ * @param interviewRequired - Whether the job requires an AI interview
+ */
+export async function createJobApplication(
+  jobId: string,
+  studentId: string,
+  interviewRequired: boolean,
+): Promise<JobApplication | null> {
+  const supabase = getSupabaseClient();
+
+  const insertData: InsertTables<"job_applications"> = {
+    job_id: jobId,
+    student_id: studentId,
+    interview_required: interviewRequired,
+    status: "pending",
+    interview_completed: false,
+  };
+
+  const { data, error } = await supabase
+    .from("job_applications")
+    // @ts-ignore Supabase type inference issue with newly added table
+    .insert(insertData as any)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Failed to create job application:", error);
+    return null;
+  }
+
+  return data;
+}
+
+/**
+ * Get all applications for a student
+ * @param studentId - The student's auth user ID
+ */
+export async function getStudentApplications(
+  studentId: string,
+): Promise<JobApplication[]> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from("job_applications")
+    .select("*")
+    .eq("student_id", studentId)
+    .order("applied_at", { ascending: false });
+
+  if (error) {
+    console.error("Failed to fetch student applications:", error);
+    return [];
+  }
+
+  return data || [];
+}
+
+/**
+ * Check if a student has already applied to a specific job
+ * @param jobId - The job ID
+ * @param studentId - The student's auth user ID
+ * @returns The existing application or null if not found
+ */
+export async function getApplicationByJobAndStudent(
+  jobId: string,
+  studentId: string,
+): Promise<JobApplication | null> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from("job_applications")
+    .select("*")
+    .eq("job_id", jobId)
+    .eq("student_id", studentId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Failed to check existing application:", error);
+    return null;
+  }
+
+  return data;
+}
+
+/**
+ * Update application with interview information
+ * @param applicationId - The application ID
+ * @param sessionId - The AI interview session ID
+ * @param completed - Whether the interview was completed
+ */
+export async function updateApplicationInterview(
+  applicationId: string,
+  sessionId: string,
+  completed: boolean,
+): Promise<JobApplication | null> {
+  const supabase = getSupabaseClient();
+
+  const updateData: UpdateTables<"job_applications"> = {
+    interview_session_id: sessionId,
+    interview_completed: completed,
+  };
+
+  const { data, error } = await supabase
+    .from("job_applications")
+    // @ts-ignore Supabase type inference issue
+    .update(updateData as any)
+    .eq("id", applicationId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Failed to update application interview:", error);
+    return null;
+  }
+
+  return data;
+}
+
+/**
+ * Get all applications for a specific job
+ * @param jobId - The job ID
+ */
+export async function getJobApplications(
+  jobId: string,
+): Promise<JobApplication[]> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from("job_applications")
+    .select("*")
+    .eq("job_id", jobId)
+    .order("applied_at", { ascending: false });
+
+  if (error) {
+    console.error("Failed to fetch job applications:", error);
+    return [];
+  }
+
+  return data || [];
 }
 
 // ============================================

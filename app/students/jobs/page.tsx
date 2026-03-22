@@ -5,8 +5,14 @@ export const dynamic = "force-dynamic";
 import React, { useState, useEffect } from "react";
 import { HiOutlineBuildingOffice2 } from "react-icons/hi2";
 import { FiMapPin, FiCalendar } from "react-icons/fi";
-import { getJobs } from "@/lib/supabase";
+import {
+  getJobs,
+  createJobApplication,
+  getApplicationByJobAndStudent,
+} from "@/lib/supabase";
+import { useAuth } from "@/lib/useAuth";
 import JobDetailsModal from "@/components/student-section/JobDetailsModal";
+import ApplicationSuccessModal from "@/components/student-section/ApplicationSuccessModal";
 
 interface Job {
   id: string; // Matches the database schema
@@ -19,6 +25,7 @@ interface Job {
   tags: string[]; // Derived from skill
   deadline: string | null; // Matches date
   skills: string[]; // Derived from skill
+  requires_interview?: boolean; // New field for interview requirement
 }
 
 export default function JobsPage() {
@@ -26,6 +33,12 @@ export default function JobsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [currentApplicationId, setCurrentApplicationId] = useState<
+    string | null
+  >(null);
+
+  const { user } = useAuth() as { user: { id: string } | null };
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -127,6 +140,7 @@ export default function JobsPage() {
           skills: Array.isArray(job.skill)
             ? job.skill.filter((skill) => typeof skill === "string")
             : [],
+          requires_interview: job.requires_interview || false, // New field
         }));
 
         // Sort jobs: active jobs first (by deadline if available), then expired jobs
@@ -175,11 +189,50 @@ export default function JobsPage() {
     setSelectedJob(null);
   };
 
-  const handleApply = () => {
-    alert(
-      `Application submitted for ${selectedJob?.title} at ${selectedJob?.company}!`,
-    );
-    handleCloseModal();
+  const handleApply = async () => {
+    if (!user?.id) {
+      alert("Please log in to apply for jobs.");
+      return;
+    }
+
+    if (!selectedJob) return;
+
+    try {
+      // Check if already applied
+      const existingApplication = await getApplicationByJobAndStudent(
+        selectedJob.id,
+        user.id,
+      );
+
+      if (existingApplication) {
+        alert(
+          `You have already applied to this position on ${new Date(existingApplication.applied_at).toLocaleDateString()}.`,
+        );
+        return;
+      }
+
+      // Create the application
+      const application = await createJobApplication(
+        selectedJob.id,
+        user.id,
+        selectedJob.requires_interview || false,
+      );
+
+      if (!application) {
+        alert("Failed to submit application. Please try again.");
+        return;
+      }
+
+      // Store application ID and show success modal
+      setCurrentApplicationId(application.id);
+      handleCloseModal();
+      setIsSuccessModalOpen(true);
+    } catch (error) {
+      console.error("Error applying to job:", error);
+      alert(
+        "An error occurred while submitting your application. Please try again.",
+      );
+    }
   };
 
   const isJobExpired = (job: Job) => {
@@ -383,6 +436,23 @@ export default function JobsPage() {
           onClose={handleCloseModal}
           onApply={handleApply}
         />
+
+        {/* Application Success Modal */}
+        {selectedJob && currentApplicationId && (
+          <ApplicationSuccessModal
+            isOpen={isSuccessModalOpen}
+            onClose={() => {
+              setIsSuccessModalOpen(false);
+              setCurrentApplicationId(null);
+            }}
+            jobTitle={selectedJob.title || ""}
+            company={selectedJob.company || ""}
+            interviewRequired={selectedJob.requires_interview || false}
+            applicationId={currentApplicationId}
+            jobId={selectedJob.id}
+            jobSkills={selectedJob.skills}
+          />
+        )}
       </section>
     </div>
   );
