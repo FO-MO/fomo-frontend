@@ -124,7 +124,7 @@ export default function JobDetailsModal({
                     AI Interview Required
                   </h3>
                   <p className="text-sm text-purple-800">
-                    After applying, you'll be directed to complete an AI
+                    After applying, you&apos;ll be directed to complete an AI
                     interview tailored to this position. This helps the employer
                     assess your skills and fit for the role.
                   </p>
